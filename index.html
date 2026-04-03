@@ -9,18 +9,16 @@
 body{background:#0e0e0e;color:#fff;font-family:Arial;padding:20px;margin:0}
 .wrap{max-width:760px;margin:auto}
 .card{background:#1b1b1b;padding:20px;border-radius:12px;margin-top:20px}
-input,button,select{width:100%;padding:12px;margin-top:10px;border-radius:8px;box-sizing:border-box}
+input,button,select{width:100%;padding:12px;margin-top:10px;border-radius:8px}
 input,select{background:#111;color:#fff;border:1px solid #333}
-button{background:#c1121f;color:#fff;border:none;font-weight:700;cursor:pointer}
+button{background:#c1121f;color:#fff;border:none;font-weight:700}
 .hidden{display:none}
-.tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;margin-top:10px}
 .tabs button{flex:1;background:#333}
 .tabs .active{background:#c1121f}
-.item{padding:10px 0;border-bottom:1px solid #333}
-.small{color:#bbb}
-.kpi{background:#111;padding:12px;border-radius:10px;margin-top:10px}
-.ok{color:#4ade80}
-.bad{color:#f87171}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #333}
+.done{text-decoration:line-through;opacity:0.5}
+.del{background:#333;padding:6px 10px;border-radius:6px;font-size:12px}
 </style>
 
 </head>
@@ -35,6 +33,134 @@ button{background:#c1121f;color:#fff;border:none;font-weight:700;cursor:pointer}
 <button onclick="signUp()">Sign Up</button>
 <button onclick="signIn()">Sign In</button>
 <p id="msg"></p>
+</div>
+
+<div id="appBox" class="hidden">
+
+<div class="card">
+<button onclick="logout()">Log out</button>
+
+<div class="tabs">
+<button class="active" onclick="showTab('life',this)">Life</button>
+<button onclick="showTab('finance',this)">Finance</button>
+<button onclick="showTab('attendance',this)">Attendance</button>
+<button onclick="showTab('bookings',this)">Bookings</button>
+</div>
+</div>
+
+<!-- LIFE -->
+<div id="life" class="card tab">
+<h3>To Do</h3>
+<input id="taskInput" placeholder="Add task">
+<button onclick="addTask()">Add Task</button>
+<div id="taskList"></div>
+</div>
+
+</div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  "https://grgagroautlpphjsjpjh.supabase.co",
+  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn"
+);
+
+/* AUTO LOGIN */
+async function checkUser(){
+  const { data } = await supabase.auth.getSession();
+  if(data.session){
+    authBox.classList.add("hidden");
+    appBox.classList.remove("hidden");
+    loadTasks();
+  }
+}
+checkUser();
+
+/* AUTH */
+window.signUp=async()=>{
+  const {error}=await supabase.auth.signUp({
+    email:email.value,
+    password:password.value
+  });
+  msg.innerText=error?error.message:"Signed up";
+};
+
+window.signIn=async()=>{
+  const {error}=await supabase.auth.signInWithPassword({
+    email:email.value,
+    password:password.value
+  });
+  if(error){msg.innerText=error.message;return;}
+  location.reload();
+};
+
+window.logout=async()=>{
+  await supabase.auth.signOut();
+  location.reload();
+};
+
+/* TASKS */
+window.addTask = async () => {
+  const user = (await supabase.auth.getUser()).data.user;
+
+  if(!taskInput.value) return;
+
+  await supabase.from("tasks").insert([{
+    user_id: user.id,
+    title: taskInput.value,
+    status: "open"
+  }]);
+
+  taskInput.value="";
+  loadTasks();
+};
+
+window.toggleTask = async (id, status) => {
+  const newStatus = status==="done" ? "open" : "done";
+
+  await supabase.from("tasks")
+    .update({status:newStatus})
+    .eq("id",id);
+
+  loadTasks();
+};
+
+window.deleteTask = async (id) => {
+  await supabase.from("tasks")
+    .delete()
+    .eq("id",id);
+
+  loadTasks();
+};
+
+async function loadTasks(){
+  const user = (await supabase.auth.getUser()).data.user;
+
+  const {data}=await supabase
+    .from("tasks")
+    .select("*")
+    .eq("user_id",user.id)
+    .order("created_at",{ascending:false});
+
+  taskList.innerHTML = data.map(t => `
+    <div class="item">
+      <div>
+        <input type="checkbox" ${t.status==="done"?"checked":""}
+        onchange="toggleTask('${t.id}','${t.status}')">
+        <span class="${t.status==="done"?"done":""}">
+          ${t.title}
+        </span>
+      </div>
+      <button class="del" onclick="deleteTask('${t.id}')">Delete</button>
+    </div>
+  `).join("");
+}
+</script>
+
+</body>
+</html><p id="msg"></p>
 </div>
 
 <div id="appBox" class="hidden">
