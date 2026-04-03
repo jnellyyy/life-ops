@@ -166,7 +166,7 @@ async function loadAll(){
   loadBookings();
 }
 
-/* TASKS */
+/* TASKS (WITH CHECKBOX) */
 window.addTask = async () => {
   const user = (await supabase.auth.getUser()).data.user;
   const value = taskInput.value.trim();
@@ -181,9 +181,6 @@ window.addTask = async () => {
     .insert([{
       user_id: user.id,
       title: value,
-      area: "life",
-      category: "General",
-      priority: "medium",
       status: "open"
     }]);
 
@@ -193,14 +190,32 @@ window.addTask = async () => {
   }
 
   taskInput.value = "";
-  taskMsg.innerText = "Saved";
+  loadTasks();
+};
+
+window.toggleTask = async (id, currentStatus) => {
+  const newStatus = currentStatus === "done" ? "open" : "done";
+
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status: newStatus })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   loadTasks();
 };
 
 async function loadTasks() {
+  const user = (await supabase.auth.getUser()).data.user;
+
   const { data, error } = await supabase
     .from("tasks")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -208,11 +223,20 @@ async function loadTasks() {
     return;
   }
 
-  taskList.innerHTML =
-    data.map(t => `<div class="item">${t.title}</div>`).join("");
+  taskList.innerHTML = data.map(t => `
+    <div class="item">
+      <label style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" ${t.status === "done" ? "checked" : ""} 
+        onchange="toggleTask('${t.id}','${t.status}')">
+        <span style="${t.status === "done" ? "text-decoration:line-through;opacity:0.6;" : ""}">
+          ${t.title}
+        </span>
+      </label>
+    </div>
+  `).join("");
 }
 
-/* FINANCE CONTROL MODE */
+/* FINANCE */
 let currentBudget = 0;
 
 window.saveBudget = async () => {
@@ -238,29 +262,20 @@ window.saveBudget = async () => {
     return;
   }
 
-  budgetMsg.innerText = "Budget saved";
   budgetInput.value = "";
   loadFinance();
 };
 
 window.addFinance = async () => {
   const user = (await supabase.auth.getUser()).data.user;
-  const amountValue = Number(amount.value || 0);
-  const categoryValue = category.value.trim() || "General";
-  const noteValue = financeNote.value.trim();
-
-  if (!amountValue) {
-    financeMsg.innerText = "Enter an amount";
-    return;
-  }
 
   const { error } = await supabase
     .from("finance")
     .insert([{
       user_id: user.id,
-      amount: amountValue,
-      category: categoryValue,
-      note: noteValue
+      amount: amount.value,
+      category: category.value,
+      note: financeNote.value
     }]);
 
   if (error) {
@@ -268,99 +283,104 @@ window.addFinance = async () => {
     return;
   }
 
-  amount.value = "";
-  category.value = "";
-  financeNote.value = "";
-  financeMsg.innerText = "Saved";
+  amount.value="";
+  category.value="";
+  financeNote.value="";
   loadFinance();
 };
 
 async function loadFinance(){
   const user = (await supabase.auth.getUser()).data.user;
-  const { data, error } = await supabase
+
+  const { data } = await supabase
     .from('finance')
     .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending:false });
-
-  if(error){
-    financeMsg.innerText = error.message;
-    return;
-  }
+    .eq('user_id', user.id);
 
   const now = new Date();
   const month = now.getMonth();
   const year = now.getFullYear();
 
-  const monthRows = data.filter(f => {
-    const d = new Date(f.created_at);
-    return d.getMonth() === month && d.getFullYear() === year;
+  const monthRows = data.filter(f=>{
+    const d=new Date(f.created_at);
+    return d.getMonth()===month && d.getFullYear()===year;
   });
 
-  const budgetRows = monthRows.filter(f => f.category === "BUDGET");
-  const spendRows = monthRows.filter(f => f.category !== "BUDGET");
+  const budgetRow = monthRows.find(f=>f.category==="BUDGET");
+  const budget = budgetRow ? Number(budgetRow.note) : 0;
 
-  currentBudget = budgetRows.length ? Number(budgetRows[0].note || 0) : 0;
-  const spent = spendRows.reduce((sum, f) => sum + Number(f.amount || 0), 0);
-  const left = currentBudget - spent;
+  const spent = monthRows
+    .filter(f=>f.category!=="BUDGET")
+    .reduce((sum,f)=>sum+Number(f.amount||0),0);
 
-  document.getElementById("monthSpent").innerText = spent.toFixed(2);
-  document.getElementById("monthBudget").innerText = currentBudget.toFixed(2);
-  document.getElementById("moneyLeft").innerText = left.toFixed(2);
+  const left = budget - spent;
 
-  const statusEl = document.getElementById("budgetStatus");
-  if(!currentBudget){
-    statusEl.innerText = "No budget set";
-    statusEl.className = "";
-  } else if(left >= 0){
-    statusEl.innerText = "On track";
-    statusEl.className = "ok";
+  monthSpent.innerText = spent.toFixed(2);
+  monthBudget.innerText = budget.toFixed(2);
+  moneyLeft.innerText = left.toFixed(2);
+
+  if(!budget){
+    budgetStatus.innerText="No budget";
+  } else if(left>=0){
+    budgetStatus.innerText="On track";
+    budgetStatus.className="ok";
   } else {
-    statusEl.innerText = "Over budget";
-    statusEl.className = "bad";
+    budgetStatus.innerText="Over budget";
+    budgetStatus.className="bad";
   }
 
-  financeList.innerHTML = spendRows.map(f =>
-    `<div class="item">£${Number(f.amount).toFixed(2)} - ${f.category}${f.note ? " - " + f.note : ""}</div>`
-  ).join("");
+  financeList.innerHTML = monthRows
+    .filter(f=>f.category!=="BUDGET")
+    .map(f=>`<div class="item">£${f.amount} - ${f.category}</div>`)
+    .join("");
 }
 
 /* ATTENDANCE */
 window.addAttendance=async()=>{
   const user=(await supabase.auth.getUser()).data.user;
-  const { error } = await supabase.from('attendance').insert([{
+
+  await supabase.from('attendance').insert([{
     user_id:user.id,
     date:attDate.value,
     status:attStatus.value
   }]);
-  if(error){ alert(error.message); return; }
+
   loadAttendance();
 };
 
 async function loadAttendance(){
   const user=(await supabase.auth.getUser()).data.user;
-  const {data,error}=await supabase.from('attendance').select('*').eq('user_id', user.id);
-  if(error){ alert(error.message); return; }
-  attList.innerHTML=data.map(a=>`<div class="item">${a.date} - ${a.status}</div>`).join("");
+
+  const {data}=await supabase
+    .from('attendance')
+    .select('*')
+    .eq('user_id', user.id);
+
+  attList.innerHTML=data.map(a=>`<div>${a.date} - ${a.status}</div>`).join("");
 }
 
 /* BOOKINGS */
 window.addBooking=async()=>{
   const user=(await supabase.auth.getUser()).data.user;
-  const { error } = await supabase.from('bookings').insert([{
+
+  await supabase.from('bookings').insert([{
     user_id:user.id,
     name:client.value,
     status:status.value
   }]);
-  if(error){ alert(error.message); return; }
+
   loadBookings();
 };
 
 async function loadBookings(){
   const user=(await supabase.auth.getUser()).data.user;
-  const {data,error}=await supabase.from('bookings').select('*').eq('user_id', user.id);
-  if(error){ alert(error.message); return; }
-  bookList.innerHTML=data.map(b=>`<div class="item">${b.name} - ${b.status}</div>`).join("");
+
+  const {data}=await supabase
+    .from('bookings')
+    .select('*')
+    .eq('user_id', user.id);
+
+  bookList.innerHTML=data.map(b=>`<div>${b.name} - ${b.status}</div>`).join("");
 }
 </script>
 
