@@ -14,8 +14,12 @@
   --muted:#a1a1aa;
   --accent:#d41425;
   --accent2:#2a2a32;
-  --ok:#22c55e;
+  --good:#22c55e;
   --bad:#ef4444;
+  --office:#16a34a;
+  --home:#2563eb;
+  --sick:#f59e0b;
+  --holiday:#8b5cf6;
 }
 *{box-sizing:border-box}
 body{
@@ -25,7 +29,7 @@ body{
   font-family:Arial,sans-serif;
   padding:20px;
 }
-.wrap{max-width:960px;margin:0 auto}
+.wrap{max-width:1100px;margin:0 auto}
 .card{
   background:var(--card);
   border:1px solid var(--line);
@@ -93,6 +97,11 @@ h1,h2,h3,p{margin-top:0}
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
+.row-3{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
 .row-item{
   display:flex;
   justify-content:space-between;
@@ -116,16 +125,9 @@ h1,h2,h3,p{margin-top:0}
   height:20px;
   margin:0;
 }
-.title{
-  font-size:16px;
-}
 .title.done{
   text-decoration:line-through;
   opacity:.55;
-}
-.small{
-  font-size:13px;
-  color:var(--muted);
 }
 .mini{
   width:auto;
@@ -139,6 +141,7 @@ h1,h2,h3,p{margin-top:0}
   font-size:13px;
   font-weight:700;
 }
+.mini.delete{background:#4a1f28}
 .kpis{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -160,11 +163,11 @@ h1,h2,h3,p{margin-top:0}
   font-size:20px;
   font-weight:700;
 }
-.good{color:var(--ok)}
+.good{color:var(--good)}
 .bad{color:var(--bad)}
 @media (max-width:760px){
   .tabs{grid-template-columns:repeat(2,1fr)}
-  .row{grid-template-columns:1fr}
+  .row,.row-3{grid-template-columns:1fr}
   .kpis{grid-template-columns:repeat(2,1fr)}
 }
 </style>
@@ -174,7 +177,7 @@ h1,h2,h3,p{margin-top:0}
 
   <div id="authBox" class="card">
     <h1>Life Ops</h1>
-    <p class="sub">Sign in once, then use the tabs.</p>
+    <p class="sub">Sign in once. The session should keep you in.</p>
     <input id="email" class="input" type="email" placeholder="Email">
     <input id="password" class="input" type="password" placeholder="Password">
     <button id="signUpBtn" class="button" type="button">Sign Up</button>
@@ -212,7 +215,6 @@ h1,h2,h3,p{margin-top:0}
 
     <div id="finance" class="card tab-panel">
       <h2>Finance</h2>
-
       <div class="row">
         <input id="budgetInput" class="input" type="number" placeholder="Monthly budget">
         <button id="saveBudgetBtn" class="button" type="button">Save budget</button>
@@ -373,10 +375,12 @@ async function showAppForSession(){
 signUpBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
+
   if(!email || !password){
     setAuthMessage("Enter email and password.");
     return;
   }
+
   const { error } = await supabase.auth.signUp({ email, password });
   setAuthMessage(error ? error.message : "Signed up. Now sign in.");
 });
@@ -384,26 +388,39 @@ signUpBtn.addEventListener("click", async () => {
 signInBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
+
   if(!email || !password){
     setAuthMessage("Enter email and password.");
     return;
   }
+
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
   if(error){
     setAuthMessage(error.message || "Sign in failed.");
     return;
   }
+
   if(!data.session){
     setAuthMessage("No session returned.");
     return;
   }
+
   setAuthMessage("");
   await showAppForSession();
 });
 
 logoutBtn.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  location.reload();
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    setAuthMessage(error.message);
+    return;
+  }
+  authBox.classList.remove("hidden");
+  appBox.classList.add("hidden");
+  emailInput.value = "";
+  passwordInput.value = "";
+  setAuthMessage("Signed out.");
 });
 
 /* TASKS */
