@@ -6,43 +6,59 @@
   <title>Bookings</title>
   <style>
     :root {
-      --bg:#111;
-      --card:#1b1b1b;
-      --line:#333;
-      --text:#fff;
-      --muted:#aaa;
+      --bg1:#0f1115;
+      --bg2:#171a20;
+      --panel:rgba(255,255,255,0.06);
+      --panel-strong:rgba(255,255,255,0.08);
+      --line:rgba(255,255,255,0.10);
+      --text:#f5f7fb;
+      --muted:#a7afbe;
 
-      --enquiry:#666;
-      --pending:#ca8a04;
-      --booked:#16a34a;
-      --completed:#065f46;
-      --cancelled:#dc2626;
-      --lost:#555;
+      --accent:#ff3b30;
+      --enquiry:#6b7280;
+      --pending:#f59e0b;
+      --booked:#22c55e;
+      --completed:#0f766e;
+      --cancelled:#ef4444;
+      --lost:#4b5563;
       --overdue:#b91c1c;
-      --coming:#2563eb;
+      --coming:#60a5fa;
+
+      --shadow:0 20px 50px rgba(0,0,0,0.35);
+      --blur:18px;
+      --radius:22px;
     }
 
     * { box-sizing: border-box; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      margin: 0;
+      margin:0;
+      padding:18px;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
+        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
     }
 
     .wrap {
-      max-width: 1100px;
+      max-width: 1160px;
       margin: 0 auto;
     }
 
+    .glass {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      backdrop-filter:blur(var(--blur));
+      -webkit-backdrop-filter:blur(var(--blur));
+      box-shadow:var(--shadow);
+    }
+
     .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      margin-top: 16px;
+      padding:18px;
+      margin-top:16px;
     }
 
     .topbar {
@@ -51,14 +67,14 @@
       align-items:flex-start;
       gap:12px;
       flex-wrap:wrap;
-      margin-bottom:16px;
+      margin-bottom:14px;
     }
 
     .back-btn {
       width:auto;
       padding:10px 14px;
-      border-radius:12px;
-      background:#333;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
       color:#fff;
       border:none;
       font-weight:700;
@@ -67,48 +83,54 @@
       display:inline-block;
     }
 
-    .muted { color: #aaa; }
+    .muted { color:var(--muted); }
     .notice { color: #bbb; margin-top: 10px; white-space: pre-wrap; }
 
     .kpi {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
       margin-top: 14px;
     }
 
     .kpi-box {
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 10px 14px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 12px 14px;
       min-width: 130px;
     }
 
     .kpi-title {
       font-size: 12px;
-      color: #aaa;
+      color: var(--muted);
     }
 
     .kpi-value {
       font-size: 18px;
       font-weight: 700;
+      margin-top:4px;
     }
 
     input, select, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 10px;
-      background: #0f0f0f;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
       color: #fff;
-      border: 1px solid #333;
+      border: 1px solid rgba(255,255,255,0.10);
       box-sizing: border-box;
       font: inherit;
     }
 
+    input::placeholder,
+    textarea::placeholder {
+      color:#9da6b5;
+    }
+
     textarea {
-      min-height: 80px;
+      min-height: 88px;
       resize: vertical;
     }
 
@@ -127,8 +149,8 @@
     button {
       margin-top: 10px;
       padding: 12px;
-      border-radius: 10px;
-      background: #d41425;
+      border-radius: 14px;
+      background: var(--accent);
       color: #fff;
       border: none;
       font-weight: 700;
@@ -140,12 +162,12 @@
       width: auto;
       margin-top: 8px;
       padding: 8px 10px;
-      background: #333;
+      background: rgba(255,255,255,0.10);
       font-size: 13px;
     }
 
     .warn-btn {
-      background: var(--overdue);
+      background: rgba(185,28,28,0.85);
     }
 
     .section {
@@ -156,13 +178,14 @@
       font-weight: 700;
       margin-bottom: 10px;
       font-size: 18px;
+      letter-spacing:-0.02em;
     }
 
     .booking {
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 14px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
       margin-top: 10px;
     }
 
@@ -181,27 +204,27 @@
 
     .meta {
       font-size: 13px;
-      color: #bbb;
+      color: var(--muted);
       line-height: 1.45;
     }
 
     .money-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 12px;
     }
 
     .money-box {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 8px 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 10px 12px;
     }
 
     .money-label {
       font-size: 11px;
-      color: #888;
+      color: var(--muted);
     }
 
     .money-value {
@@ -237,7 +260,7 @@
     .delete {
       background: none;
       border: none;
-      color: #888;
+      color: #aab2c0;
       font-size: 20px;
       cursor: pointer;
       padding: 0;
@@ -251,13 +274,13 @@
     }
 
     .empty {
-      color: #666;
+      color: var(--muted);
       font-size: 14px;
     }
 
     .payments {
-      margin-top: 12px;
-      border-top: 1px solid #333;
+      margin-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
       padding-top: 12px;
     }
 
@@ -266,9 +289,9 @@
       justify-content: space-between;
       gap: 10px;
       font-size: 13px;
-      color: #ccc;
-      padding: 6px 0;
-      border-bottom: 1px solid #2b2b2b;
+      color: #d7dbe3;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
     .payment-row:last-child {
@@ -278,13 +301,13 @@
     .payment-form {
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px dashed #333;
+      border-top: 1px dashed rgba(255,255,255,0.12);
     }
 
     .edit-form {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px dashed #333;
+      border-top: 1px dashed rgba(255,255,255,0.12);
     }
 
     .move-row {
@@ -308,10 +331,10 @@
     }
 
     .coming-card {
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 12px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 14px;
     }
 
     .enquiry { background: var(--enquiry); }
@@ -321,8 +344,18 @@
     .cancelled { background: var(--cancelled); }
     .lost { background: var(--lost); }
 
+    @media (max-width: 980px) {
+      .kpi {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 760px) {
-      .row, .row-3, .money-grid {
+      body{
+        padding:14px;
+      }
+
+      .row, .row-3, .money-grid, .kpi {
         grid-template-columns: 1fr;
       }
     }
@@ -332,7 +365,7 @@
 <body>
 <div class="wrap">
 
-  <div class="card">
+  <div class="glass card">
     <div class="topbar">
       <div>
         <h2 style="margin:0;">Bookings</h2>
@@ -344,13 +377,13 @@
     <div class="kpi" id="kpi"></div>
   </div>
 
-  <div class="card">
+  <div class="glass card">
     <h2 style="margin-bottom:8px;">Coming Up</h2>
     <p class="notice" style="margin-top:0;">Nearest upcoming jobs first.</p>
     <div id="comingUp"></div>
   </div>
 
-  <div class="card">
+  <div class="glass card">
     <input id="clientName" placeholder="Client / couple name" />
 
     <div class="row-3">
