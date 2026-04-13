@@ -19,11 +19,10 @@
       --completed:#065f46;
       --cancelled:#dc2626;
       --lost:#555;
+      --overdue:#b91c1c;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background: var(--bg);
@@ -126,6 +125,10 @@
       font-size: 13px;
     }
 
+    .warn-btn {
+      background: var(--overdue);
+    }
+
     .section {
       margin-top: 24px;
     }
@@ -190,6 +193,10 @@
 
     .badge-row {
       margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
     .badge {
@@ -198,6 +205,10 @@
       padding: 4px 8px;
       border-radius: 999px;
       color: #fff;
+    }
+
+    .overdue-badge {
+      background: var(--overdue);
     }
 
     .delete {
@@ -247,6 +258,12 @@
       border-top: 1px dashed #333;
     }
 
+    .edit-form {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #333;
+    }
+
     .enquiry { background: var(--enquiry); }
     .will { background: var(--will); }
     .pending { background: var(--pending); }
@@ -268,7 +285,7 @@
 
   <div class="card">
     <h2 style="margin:0 0 6px 0;">Bookings</h2>
-    <p class="notice" style="margin:0;">Track enquiries, jobs, deposits and balances.</p>
+    <p class="notice" style="margin:0;">Track enquiries, jobs, deposits, balances and due dates.</p>
 
     <div class="kpi" id="kpi"></div>
   </div>
@@ -282,15 +299,18 @@
       <input id="price" type="number" placeholder="Total price" />
     </div>
 
-    <select id="bookingStatus">
-      <option>Enquiry</option>
-      <option>Said they will book</option>
-      <option>Pending deposit</option>
-      <option>Booked</option>
-      <option>Completed</option>
-      <option>Cancelled</option>
-      <option>Lost lead</option>
-    </select>
+    <div class="row">
+      <select id="bookingStatus">
+        <option>Enquiry</option>
+        <option>Said they will book</option>
+        <option>Pending deposit</option>
+        <option>Booked</option>
+        <option>Completed</option>
+        <option>Cancelled</option>
+        <option>Lost lead</option>
+      </select>
+      <input id="dueDate" type="date" />
+    </div>
 
     <textarea id="bookingNote" placeholder="Notes"></textarea>
 
@@ -322,6 +342,7 @@
   const eventDateEl = document.getElementById("eventDate");
   const priceEl = document.getElementById("price");
   const bookingStatusEl = document.getElementById("bookingStatus");
+  const dueDateEl = document.getElementById("dueDate");
   const bookingNoteEl = document.getElementById("bookingNote");
   const saveBtn = document.getElementById("saveBtn");
   const sectionsEl = document.getElementById("sections");
@@ -369,8 +390,33 @@
     return `£${Number(value || 0).toFixed(0)}`;
   }
 
-  function safeJobName(row) {
-    return row.note_job_name || row.job_name || "Untitled job";
+  function extractJobName(note) {
+    if (!note) return "Untitled job";
+    const match = note.match(/^\[JOB:(.*?)\]/);
+    return match ? match[1].trim() : "Untitled job";
+  }
+
+  function extractPlainNote(note) {
+    if (!note) return "";
+    return note.replace(/^\[JOB:.*?\]\s*/, "");
+  }
+
+  function jobNoteWithName(jobName, plainNote) {
+    const trimmed = (plainNote || "").trim();
+    return trimmed ? `[JOB:${jobName}] ${trimmed}` : `[JOB:${jobName}]`;
+  }
+
+  function isOverdue(booking, paid) {
+    if (!booking.due_date) return false;
+    const remaining = Number(booking.price || 0) - paid;
+    if (remaining <= 0) return false;
+
+    const today = new Date();
+    const due = new Date(booking.due_date + "T00:00:00");
+    due.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    return due < today;
   }
 
   async function addBooking() {
@@ -386,6 +432,7 @@
     const eventDate = eventDateEl.value || null;
     const price = Number(priceEl.value || 0);
     const status = bookingStatusEl.value;
+    const dueDate = dueDateEl.value || null;
     const note = bookingNoteEl.value.trim();
 
     if (!clientName) {
@@ -398,7 +445,7 @@
       return;
     }
 
-    const combinedNote = note ? `[JOB:${jobName}] ${note}` : `[JOB:${jobName}]`;
+    const combinedNote = jobNoteWithName(jobName, note);
 
     const { error } = await supabase.from("bookings").insert([{
       user_id: user.id,
@@ -406,6 +453,7 @@
       event_date: eventDate,
       price: price,
       status: status,
+      due_date: dueDate,
       note: combinedNote
     }]);
 
@@ -419,6 +467,7 @@
     eventDateEl.value = "";
     priceEl.value = "";
     bookingStatusEl.value = "Enquiry";
+    dueDateEl.value = "";
     bookingNoteEl.value = "";
     setMsg("Booking saved.");
 
@@ -426,17 +475,6 @@
   }
 
   saveBtn.addEventListener("click", addBooking);
-
-  function extractJobName(note) {
-    if (!note) return "Untitled job";
-    const match = note.match(/^\[JOB:(.*?)\]/);
-    return match ? match[1].trim() : "Untitled job";
-  }
-
-  function extractPlainNote(note) {
-    if (!note) return "";
-    return note.replace(/^\[JOB:.*?\]\s*/, "");
-  }
 
   async function getPaymentsMap(bookings) {
     const ids = bookings.map(b => b.id);
@@ -515,6 +553,52 @@
     await load();
   };
 
+  window.toggleEdit = function(id) {
+    const block = document.getElementById(`edit-${id}`);
+    if (!block) return;
+    block.style.display = block.style.display === "none" ? "block" : "none";
+  };
+
+  window.updateBooking = async function(id) {
+    const clientName = document.getElementById(`edit-client-${id}`).value.trim();
+    const jobName = document.getElementById(`edit-job-${id}`).value.trim();
+    const eventDate = document.getElementById(`edit-event-${id}`).value || null;
+    const price = Number(document.getElementById(`edit-price-${id}`).value || 0);
+    const status = document.getElementById(`edit-status-${id}`).value;
+    const dueDate = document.getElementById(`edit-due-${id}`).value || null;
+    const note = document.getElementById(`edit-note-${id}`).value.trim();
+
+    if (!clientName) {
+      setMsg("Client name is required.");
+      return;
+    }
+
+    if (!jobName) {
+      setMsg("Job name is required.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("bookings")
+      .update({
+        client_name: clientName,
+        event_date: eventDate,
+        price: price,
+        status: status,
+        due_date: dueDate,
+        note: jobNoteWithName(jobName, note)
+      })
+      .eq("id", id);
+
+    if (error) {
+      setMsg(error.message);
+      return;
+    }
+
+    setMsg("Booking updated.");
+    await load();
+  };
+
   async function load() {
     const user = await getUser();
 
@@ -549,6 +633,7 @@
     const totalContractValue = bookings.reduce((sum, b) => sum + Number(b.price || 0), 0);
     const totalPaid = bookings.reduce((sum, b) => sum + getPaidTotal(paymentsMap[b.id]), 0);
     const totalOutstanding = totalContractValue - totalPaid;
+    const overdueCount = bookings.filter(b => isOverdue(b, getPaidTotal(paymentsMap[b.id]))).length;
 
     kpiEl.innerHTML = `
       <div class="kpi-box">
@@ -564,16 +649,16 @@
         <div class="kpi-value">${completed}</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">Contracted £</div>
-        <div class="kpi-value">${formatMoney(totalContractValue)}</div>
-      </div>
-      <div class="kpi-box">
         <div class="kpi-title">Received £</div>
         <div class="kpi-value">${formatMoney(totalPaid)}</div>
       </div>
       <div class="kpi-box">
         <div class="kpi-title">Outstanding £</div>
         <div class="kpi-value">${formatMoney(totalOutstanding)}</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">Overdue</div>
+        <div class="kpi-value">${overdueCount}</div>
       </div>
     `;
 
@@ -590,6 +675,7 @@
                   const payments = paymentsMap[b.id] || [];
                   const paid = getPaidTotal(payments);
                   const remaining = Math.max(Number(b.price || 0) - paid, 0);
+                  const overdue = isOverdue(b, paid);
 
                   return `
                     <div class="booking">
@@ -597,7 +683,7 @@
                         <div>
                           <div class="name">${b.client_name || ""} — ${b.job_name}</div>
                           <div class="meta">
-                            ${formatDate(b.event_date)} • ${formatMoney(b.price)}
+                            Event: ${formatDate(b.event_date)} • Due: ${formatDate(b.due_date)} • Total: ${formatMoney(b.price)}
                           </div>
                         </div>
 
@@ -606,6 +692,7 @@
 
                       <div class="badge-row">
                         <span class="badge ${badgeClass(b.status)}">${b.status}</span>
+                        ${overdue ? `<span class="badge overdue-badge">Overdue</span>` : ``}
                       </div>
 
                       <div class="money-grid">
@@ -625,6 +712,36 @@
 
                       ${b.plain_note ? `<div class="meta" style="margin-top:10px;">${b.plain_note}</div>` : ""}
 
+                      <div class="mini-actions">
+                        <button class="small-btn" type="button" onclick="toggleEdit('${b.id}')">Edit</button>
+                      </div>
+
+                      <div id="edit-${b.id}" class="edit-form" style="display:none;">
+                        <div class="row">
+                          <input id="edit-client-${b.id}" value="${(b.client_name || "").replace(/"/g, '&quot;')}" placeholder="Client name" />
+                          <input id="edit-job-${b.id}" value="${(b.job_name || "").replace(/"/g, '&quot;')}" placeholder="Job name" />
+                        </div>
+
+                        <div class="row-3">
+                          <input id="edit-event-${b.id}" type="date" value="${b.event_date || ""}" />
+                          <input id="edit-price-${b.id}" type="number" value="${Number(b.price || 0)}" />
+                          <input id="edit-due-${b.id}" type="date" value="${b.due_date || ""}" />
+                        </div>
+
+                        <select id="edit-status-${b.id}">
+                          <option ${b.status==="Enquiry"?"selected":""}>Enquiry</option>
+                          <option ${b.status==="Said they will book"?"selected":""}>Said they will book</option>
+                          <option ${b.status==="Pending deposit"?"selected":""}>Pending deposit</option>
+                          <option ${b.status==="Booked"?"selected":""}>Booked</option>
+                          <option ${b.status==="Completed"?"selected":""}>Completed</option>
+                          <option ${b.status==="Cancelled"?"selected":""}>Cancelled</option>
+                          <option ${b.status==="Lost lead"?"selected":""}>Lost lead</option>
+                        </select>
+
+                        <textarea id="edit-note-${b.id}" placeholder="Notes">${b.plain_note || ""}</textarea>
+                        <button class="small-btn" type="button" onclick="updateBooking('${b.id}')">Save changes</button>
+                      </div>
+
                       <div class="payments">
                         <div class="meta" style="font-weight:700; margin-bottom:6px;">Payments</div>
 
@@ -633,7 +750,7 @@
                             ? `<div class="empty">No payments yet</div>`
                             : payments.map(p => `
                               <div class="payment-row">
-                                <div>${p.payment_type || "Payment"} • ${formatDate(p.payment_date)}</div>
+                                <div>${p.payment_type || "Payment"} • ${formatDate(p.payment_date)}${p.note ? ` • ${p.note}` : ""}</div>
                                 <div>${formatMoney(p.amount)}</div>
                               </div>
                             `).join("")
@@ -655,6 +772,8 @@
                           <input id="payment-note-${b.id}" placeholder="Payment note" />
                           <button class="small-btn" type="button" onclick="savePayment('${b.id}')">Add payment</button>
                         </div>
+
+                        ${overdue ? `<button class="small-btn warn-btn" type="button">Chase payment</button>` : ``}
                       </div>
                     </div>
                   `;
