@@ -479,7 +479,8 @@
         auth: {
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: true
+          detectSessionInUrl: true,
+          storage: localStorage
         }
       }
     );
@@ -588,6 +589,13 @@
       }
     }
 
+    async function resetBrokenSessionIfNeeded() {
+      const { data } = await supabase.auth.getSession();
+      if (!data?.session) {
+        await supabase.auth.signOut();
+      }
+    }
+
     signInBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim();
       const password = passwordEl.value;
@@ -599,23 +607,34 @@
 
       setAuthMsg("Signing in...");
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out after 15 seconds.")), 15000)
+        );
 
-      if (error) {
-        setAuthMsg(`Sign in error: ${error.message}`);
-        return;
+        const signInPromise = supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        const result = await Promise.race([signInPromise, timeoutPromise]);
+        const { data, error } = result;
+
+        if (error) {
+          setAuthMsg(`Sign in error: ${error.message}`);
+          return;
+        }
+
+        if (!data || !data.session) {
+          setAuthMsg("Sign in failed: no session returned.");
+          return;
+        }
+
+        setAuthMsg("Signed in.");
+        await renderAuthState();
+      } catch (err) {
+        setAuthMsg(`Sign in error: ${err.message}`);
       }
-
-      if (!data.session) {
-        setAuthMsg("Sign in failed: no session returned.");
-        return;
-      }
-
-      setAuthMsg("Signed in.");
-      await renderAuthState();
     });
 
     signUpBtn.addEventListener("click", async () => {
@@ -681,6 +700,7 @@
 
     window.openSectionByKey = openSectionByKey;
 
+    await resetBrokenSessionIfNeeded();
     await renderAuthState();
   </script>
 </body>
