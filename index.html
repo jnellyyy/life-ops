@@ -1,251 +1,779 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Life Ops</title>
-<style>
-body{
-  background:#111;
-  color:#fff;
-  font-family:Arial,sans-serif;
-  padding:24px;
-  margin:0;
-}
-.wrap{
-  max-width:700px;
-  margin:0 auto;
-}
-.card{
-  background:#1b1b1b;
-  border:1px solid #333;
-  border-radius:16px;
-  padding:20px;
-  margin-top:16px;
-}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  font:inherit;
-  box-sizing:border-box;
-}
-input{
-  background:#0f0f0f;
-  color:#fff;
-  border:1px solid #333;
-}
-button{
-  background:#d41425;
-  color:#fff;
-  border:none;
-  font-weight:700;
-  cursor:pointer;
-}
-.secondary{
-  background:#333;
-}
-.notice{
-  color:#bbb;
-  white-space:pre-wrap;
-}
-.hidden{
-  display:none !important;
-}
-.tabs{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-top:16px;
-}
-.tab-btn{
-  background:#333;
-  color:#fff;
-  border:none;
-  padding:12px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-}
-.tab-btn.active{
-  background:#d41425;
-}
-.tab-panel{
-  display:none;
-}
-.tab-panel.active{
-  display:block;
-}
-@media (max-width:700px){
-  .tabs{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Ops</title>
+  <style>
+    :root{
+      --bg1:#0f1115;
+      --bg2:#171a20;
+      --panel:rgba(255,255,255,0.06);
+      --panel-strong:rgba(255,255,255,0.10);
+      --line:rgba(255,255,255,0.10);
+      --text:#f5f7fb;
+      --muted:#a7afbe;
+      --accent:#ff3b30;
+      --accent-soft:rgba(255,59,48,0.14);
+      --shadow:0 20px 50px rgba(0,0,0,0.35);
+      --blur:18px;
+      --radius:22px;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
+        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    body{
+      padding:20px;
+    }
+
+    .shell{
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    .glass{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      backdrop-filter:blur(var(--blur));
+      -webkit-backdrop-filter:blur(var(--blur));
+      box-shadow:var(--shadow);
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .auth-wrap{
+      min-height:calc(100vh - 40px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .auth-card{
+      width:100%;
+      max-width:440px;
+      padding:28px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand-icon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+      border:1px solid rgba(255,255,255,0.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .brand h1{
+      font-size:28px;
+      margin:0;
+      letter-spacing:-0.03em;
+    }
+
+    .sub{
+      margin:0 0 18px 0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .field{
+      width:100%;
+      margin-top:10px;
+      padding:14px 15px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.05);
+      color:var(--text);
+      outline:none;
+      font:inherit;
+    }
+
+    .field::placeholder{
+      color:#97a0af;
+    }
+
+    .field:focus{
+      border-color:rgba(255,255,255,0.20);
+      background:rgba(255,255,255,0.07);
+    }
+
+    .btn-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      font:inherit;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .15s ease, opacity .15s ease, background .15s ease;
+    }
+
+    .btn:active{
+      transform:scale(0.98);
+    }
+
+    .btn.primary{
+      background:var(--accent);
+      color:#fff;
+    }
+
+    .btn.secondary{
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+
+    .auth-msg{
+      color:var(--muted);
+      white-space:pre-wrap;
+      margin-top:14px;
+      min-height:20px;
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:16px;
+      min-height:calc(100vh - 40px);
+    }
+
+    .sidebar{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .sidebar-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .sidebar h2{
+      margin:0;
+      font-size:22px;
+      letter-spacing:-0.03em;
+    }
+
+    .sidebar p{
+      margin:6px 0 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .logout-btn{
+      width:auto;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      margin:0;
+    }
+
+    .user-pill{
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      font-size:13px;
+      word-break:break-word;
+    }
+
+    .nav{
+      display:grid;
+      gap:10px;
+    }
+
+    .nav-card{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      cursor:pointer;
+      transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .nav-card:hover{
+      background:rgba(255,255,255,0.07);
+      border-color:rgba(255,255,255,0.14);
+      transform:translateY(-1px);
+    }
+
+    .nav-card.active{
+      background:var(--accent-soft);
+      border-color:rgba(255,59,48,0.22);
+    }
+
+    .nav-icon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,0.08);
+      font-size:20px;
+      flex:0 0 auto;
+    }
+
+    .nav-copy{
+      min-width:0;
+    }
+
+    .nav-title{
+      font-weight:700;
+      font-size:15px;
+      margin-bottom:2px;
+    }
+
+    .nav-desc{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .hero{
+      padding:18px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+
+    .hero h3{
+      margin:0;
+      font-size:26px;
+      letter-spacing:-0.03em;
+    }
+
+    .hero p{
+      margin:8px 0 0 0;
+      color:var(--muted);
+      line-height:1.45;
+      max-width:680px;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .hero-btn{
+      width:auto;
+      padding:11px 14px;
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+
+    .hero-btn.primary{
+      background:var(--accent);
+    }
+
+    .apps-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+    }
+
+    .app-tile{
+      padding:18px;
+      min-height:160px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      cursor:pointer;
+      transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .app-tile:hover{
+      transform:translateY(-2px);
+      background:var(--panel-strong);
+    }
+
+    .tile-icon{
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,0.08);
+      font-size:24px;
+    }
+
+    .tile-title{
+      font-size:18px;
+      font-weight:700;
+      margin-top:16px;
+      letter-spacing:-0.02em;
+    }
+
+    .tile-desc{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      margin-top:6px;
+    }
+
+    .workspace{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      min-height:580px;
+    }
+
+    .workspace-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .workspace-title{
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+    }
+
+    .workspace-meta{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .workspace-frame{
+      width:100%;
+      min-height:560px;
+      border:none;
+      border-radius:18px;
+      background:#0c0d11;
+    }
+
+    .workspace-empty{
+      min-height:560px;
+      border-radius:18px;
+      background:rgba(255,255,255,0.03);
+      border:1px dashed rgba(255,255,255,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    @media (max-width:1100px){
+      .apps-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+
+    @media (max-width:920px){
+      .app{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        order:2;
+      }
+
+      .main{
+        order:1;
+      }
+
+      .workspace{
+        padding:0;
+        background:none;
+        border:none;
+        box-shadow:none;
+        backdrop-filter:none;
+        -webkit-backdrop-filter:none;
+      }
+
+      .workspace-frame{
+        display:none;
+      }
+
+      .workspace-empty{
+        min-height:180px;
+      }
+    }
+
+    @media (max-width:640px){
+      body{
+        padding:14px;
+      }
+
+      .auth-wrap{
+        min-height:calc(100vh - 28px);
+      }
+
+      .auth-card{
+        padding:20px;
+      }
+
+      .btn-row{
+        grid-template-columns:1fr;
+      }
+
+      .apps-grid{
+        grid-template-columns:1fr;
+      }
+
+      .hero h3{
+        font-size:22px;
+      }
+
+      .nav-card,
+      .app-tile{
+        border-radius:20px;
+      }
+
+      .workspace-empty{
+        min-height:140px;
+        font-size:14px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
+  <div class="shell">
+    <div id="authWrap" class="auth-wrap">
+      <div class="auth-card glass">
+        <div class="brand">
+          <div class="brand-icon">◉</div>
+          <div>
+            <h1>Life Ops</h1>
+            <p class="sub">Sign in once, then open your trackers from the dashboard.</p>
+          </div>
+        </div>
 
-  <div id="authBox" class="card">
-    <h1>Life Ops</h1>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button id="signUpBtn" type="button">Sign Up</button>
-    <button id="signInBtn" class="secondary" type="button">Sign In</button>
-    <p id="msg" class="notice"></p>
+        <input id="email" class="field" type="email" placeholder="Email" />
+        <input id="password" class="field" type="password" placeholder="Password" />
+
+        <div class="btn-row">
+          <button id="signInBtn" class="btn primary" type="button">Sign in</button>
+          <button id="signUpBtn" class="btn secondary" type="button">Sign up</button>
+        </div>
+
+        <p id="authMsg" class="auth-msg"></p>
+      </div>
+    </div>
+
+    <div id="appWrap" class="app hidden">
+      <aside class="sidebar glass">
+        <div class="sidebar-top">
+          <div>
+            <h2>Life Ops</h2>
+            <p>Your dashboard</p>
+          </div>
+          <button id="logoutBtn" class="logout-btn" type="button">Log out</button>
+        </div>
+
+        <div id="userPill" class="user-pill">Signed in</div>
+
+        <div class="nav" id="nav"></div>
+      </aside>
+
+      <main class="main">
+        <section class="hero glass">
+          <div>
+            <h3>One place for everything</h3>
+            <p>Open your productivity sections from here. On desktop, they load in the workspace below. On mobile, they open full screen.</p>
+          </div>
+
+          <div class="hero-actions">
+            <button class="hero-btn primary" type="button" onclick="openSectionByKey('todo')">Open to do</button>
+            <button class="hero-btn" type="button" onclick="openSectionByKey('attendance')">Open attendance</button>
+          </div>
+        </section>
+
+        <section class="apps-grid" id="appsGrid"></section>
+
+        <section class="workspace glass">
+          <div class="workspace-top">
+            <div>
+              <div id="workspaceTitle" class="workspace-title">Workspace</div>
+              <div id="workspaceMeta" class="workspace-meta">Choose a section</div>
+            </div>
+          </div>
+
+          <iframe id="workspaceFrame" class="workspace-frame hidden" title="Life Ops section"></iframe>
+
+          <div id="workspaceEmpty" class="workspace-empty">
+            Tap a section to open it. On mobile it opens as a full page. On desktop it opens here.
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
-  <div id="appBox" class="card hidden">
-    <h2>Life Ops</h2>
-    <p id="sessionText" class="notice"></p>
-    <button id="signOutBtn" class="secondary" type="button">Log Out</button>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    <div class="tabs">
-      <button class="tab-btn active" type="button" data-tab="life">Life</button>
-      <button class="tab-btn" type="button" data-tab="finance">Finance</button>
-      <button class="tab-btn" type="button" data-tab="attendance">Attendance</button>
-      <button class="tab-btn" type="button" data-tab="bookings">Bookings</button>
-    </div>
+    const supabase = createClient(
+      "https://grgagroautlpphjsjpjh.supabase.co",
+      "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    );
 
-    <div id="life" class="tab-panel active">
-      <p>Life tab ready.</p>
-    </div>
+    const sections = [
+      {
+        key: "todo",
+        title: "Ultimate To Do",
+        desc: "Life, house, money, business, work",
+        icon: "✓",
+        file: "life-test.html"
+      },
+      {
+        key: "attendance",
+        title: "Attendance",
+        desc: "Track office days and policy progress",
+        icon: "◫",
+        file: "attendance-test.html"
+      },
+      {
+        key: "bookings",
+        title: "Bookings",
+        desc: "Jobs, payments, balances, due dates",
+        icon: "◌",
+        file: "bookings-test.html"
+      },
+      {
+        key: "finance",
+        title: "Finance",
+        desc: "Life, bills, business, combined totals",
+        icon: "◍",
+        file: "finance-test.html"
+      }
+    ];
 
-    <div id="finance" class="tab-panel">
-      <p>Finance tab ready.</p>
-    </div>
+    const authWrap = document.getElementById("authWrap");
+    const appWrap = document.getElementById("appWrap");
+    const authMsg = document.getElementById("authMsg");
+    const emailEl = document.getElementById("email");
+    const passwordEl = document.getElementById("password");
+    const userPill = document.getElementById("userPill");
+    const navEl = document.getElementById("nav");
+    const appsGridEl = document.getElementById("appsGrid");
+    const workspaceTitle = document.getElementById("workspaceTitle");
+    const workspaceMeta = document.getElementById("workspaceMeta");
+    const workspaceFrame = document.getElementById("workspaceFrame");
+    const workspaceEmpty = document.getElementById("workspaceEmpty");
 
-    <div id="attendance" class="tab-panel">
-      <p>Attendance tab ready.</p>
-    </div>
+    let activeKey = null;
 
-    <div id="bookings" class="tab-panel">
-      <p>Bookings tab ready.</p>
-    </div>
-  </div>
-
-</div>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const supabase = createClient(
-  "https://grgagroautlpphjsjpjh.supabase.co",
-  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+    function setAuthMsg(text) {
+      authMsg.textContent = text;
     }
-  }
-);
 
-const emailEl = document.getElementById("email");
-const passwordEl = document.getElementById("password");
-const msgEl = document.getElementById("msg");
-const authBox = document.getElementById("authBox");
-const appBox = document.getElementById("appBox");
-const sessionText = document.getElementById("sessionText");
+    function isMobileView() {
+      return window.innerWidth <= 920;
+    }
 
-function setMsg(text){
-  msgEl.textContent = text;
-}
+    function renderDashboardCards() {
+      navEl.innerHTML = sections.map(section => `
+        <div class="nav-card ${activeKey === section.key ? "active" : ""}" data-key="${section.key}">
+          <div class="nav-icon">${section.icon}</div>
+          <div class="nav-copy">
+            <div class="nav-title">${section.title}</div>
+            <div class="nav-desc">${section.desc}</div>
+          </div>
+        </div>
+      `).join("");
 
-function showTab(tabName){
-  document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      appsGridEl.innerHTML = sections.map(section => `
+        <div class="app-tile glass" data-key="${section.key}">
+          <div>
+            <div class="tile-icon">${section.icon}</div>
+            <div class="tile-title">${section.title}</div>
+            <div class="tile-desc">${section.desc}</div>
+          </div>
+        </div>
+      `).join("");
 
-  const panel = document.getElementById(tabName);
-  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+      [...navEl.querySelectorAll("[data-key]"), ...appsGridEl.querySelectorAll("[data-key]")].forEach(el => {
+        el.addEventListener("click", () => openSectionByKey(el.dataset.key));
+      });
+    }
 
-  if(panel) panel.classList.add("active");
-  if(btn) btn.classList.add("active");
-}
+    function sectionByKey(key) {
+      return sections.find(s => s.key === key);
+    }
 
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => showTab(btn.dataset.tab));
-});
+    window.openSectionByKey = function(key) {
+      const section = sectionByKey(key);
+      if (!section) return;
 
-async function refreshSessionUI(){
-  const { data: sessionData } = await supabase.auth.getSession();
-  const session = sessionData?.session || null;
+      activeKey = key;
+      renderDashboardCards();
 
-  if (session) {
-    authBox.classList.add("hidden");
-    appBox.classList.remove("hidden");
-    sessionText.textContent =
-      `User: ${session.user.email}\n` +
-      `Session present: yes`;
-  } else {
-    authBox.classList.remove("hidden");
-    appBox.classList.add("hidden");
-    sessionText.textContent = "";
-  }
-}
+      workspaceTitle.textContent = section.title;
+      workspaceMeta.textContent = section.desc;
 
-document.getElementById("signUpBtn").addEventListener("click", async () => {
-  const email = emailEl.value.trim();
-  const password = passwordEl.value;
+      if (isMobileView()) {
+        window.location.href = section.file;
+        return;
+      }
 
-  if (!email || !password) {
-    setMsg("Enter email and password.");
-    return;
-  }
+      workspaceFrame.src = section.file;
+      workspaceFrame.classList.remove("hidden");
+      workspaceEmpty.classList.add("hidden");
+    };
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+    async function showApp() {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
 
-  if (error) {
-    setMsg(`Sign up error: ${error.message}`);
-    return;
-  }
+      if (session) {
+        authWrap.classList.add("hidden");
+        appWrap.classList.remove("hidden");
+        userPill.textContent = session.user?.email || "Signed in";
+        renderDashboardCards();
+      } else {
+        appWrap.classList.add("hidden");
+        authWrap.classList.remove("hidden");
+      }
+    }
 
-  setMsg(
-    `Sign up ok.\n` +
-    `User created: ${data.user ? "yes" : "no"}\n` +
-    `Session returned: ${data.session ? "yes" : "no"}`
-  );
+    document.getElementById("signInBtn").addEventListener("click", async () => {
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
 
-  await refreshSessionUI();
-});
+      if (!email || !password) {
+        setAuthMsg("Enter email and password.");
+        return;
+      }
 
-document.getElementById("signInBtn").addEventListener("click", async () => {
-  const email = emailEl.value.trim();
-  const password = passwordEl.value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (!email || !password) {
-    setMsg("Enter email and password.");
-    return;
-  }
+      if (error) {
+        setAuthMsg(error.message);
+        return;
+      }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!data.session) {
+        setAuthMsg("No session returned.");
+        return;
+      }
 
-  if (error) {
-    setMsg(`Sign in error: ${error.message}`);
-    return;
-  }
+      setAuthMsg("");
+      await showApp();
+    });
 
-  setMsg(
-    `Sign in ok.\n` +
-    `Session returned: ${data.session ? "yes" : "no"}\n` +
-    `User returned: ${data.user ? "yes" : "no"}`
-  );
+    document.getElementById("signUpBtn").addEventListener("click", async () => {
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
 
-  await refreshSessionUI();
-});
+      if (!email || !password) {
+        setAuthMsg("Enter email and password.");
+        return;
+      }
 
-document.getElementById("signOutBtn").addEventListener("click", async () => {
-  const { error } = await supabase.auth.signOut();
-  setMsg(error ? `Sign out error: ${error.message}` : "Signed out.");
-  await refreshSessionUI();
-});
+      const { error } = await supabase.auth.signUp({ email, password });
+      setAuthMsg(error ? error.message : "Sign up complete. Now sign in.");
+    });
 
-supabase.auth.onAuthStateChange(async () => {
-  await refreshSessionUI();
-});
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setAuthMsg(error.message);
+        return;
+      }
 
-await refreshSessionUI();
-</script>
+      activeKey = null;
+      workspaceFrame.src = "";
+      workspaceFrame.classList.add("hidden");
+      workspaceEmpty.classList.remove("hidden");
+      await showApp();
+    });
+
+    supabase.auth.onAuthStateChange(async () => {
+      await showApp();
+    });
+
+    window.addEventListener("resize", () => {
+      renderDashboardCards();
+
+      if (!activeKey) return;
+
+      if (isMobileView()) {
+        workspaceFrame.classList.add("hidden");
+        workspaceEmpty.classList.remove("hidden");
+      } else {
+        const section = sectionByKey(activeKey);
+        if (section) {
+          workspaceFrame.src = section.file;
+          workspaceFrame.classList.remove("hidden");
+          workspaceEmpty.classList.add("hidden");
+        }
+      }
+    });
+
+    await showApp();
+  </script>
 </body>
 </html>
