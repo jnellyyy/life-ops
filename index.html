@@ -14,12 +14,6 @@
   --muted:#a1a1aa;
   --accent:#d41425;
   --accent2:#2a2a32;
-  --good:#22c55e;
-  --bad:#ef4444;
-  --office:#16a34a;
-  --home:#2563eb;
-  --sick:#f59e0b;
-  --holiday:#8b5cf6;
 }
 *{box-sizing:border-box}
 body{
@@ -29,7 +23,7 @@ body{
   font-family:Arial,sans-serif;
   padding:20px;
 }
-.wrap{max-width:1100px;margin:0 auto}
+.wrap{max-width:1000px;margin:0 auto}
 .card{
   background:var(--card);
   border:1px solid var(--line);
@@ -43,6 +37,7 @@ h1,h2,h3,p{margin-top:0}
   width:100%;
   font:inherit;
   border-radius:12px;
+  box-sizing:border-box;
 }
 .input,.select{
   background:#101015;
@@ -97,11 +92,6 @@ h1,h2,h3,p{margin-top:0}
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
-.row-3{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px;
-}
 .row-item{
   display:flex;
   justify-content:space-between;
@@ -125,6 +115,10 @@ h1,h2,h3,p{margin-top:0}
   height:20px;
   margin:0;
 }
+.title{
+  font-size:16px;
+  word-break:break-word;
+}
 .title.done{
   text-decoration:line-through;
   opacity:.55;
@@ -141,34 +135,9 @@ h1,h2,h3,p{margin-top:0}
   font-size:13px;
   font-weight:700;
 }
-.mini.delete{background:#4a1f28}
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-top:12px;
-}
-.kpi{
-  background:var(--card2);
-  border:1px solid #31313a;
-  border-radius:14px;
-  padding:14px;
-}
-.kpi-label{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:6px;
-}
-.kpi-value{
-  font-size:20px;
-  font-weight:700;
-}
-.good{color:var(--good)}
-.bad{color:var(--bad)}
 @media (max-width:760px){
   .tabs{grid-template-columns:repeat(2,1fr)}
-  .row,.row-3{grid-template-columns:1fr}
-  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -177,11 +146,14 @@ h1,h2,h3,p{margin-top:0}
 
   <div id="authBox" class="card">
     <h1>Life Ops</h1>
-    <p class="sub">Sign in once. The session should keep you in.</p>
+    <p class="sub">Sign in once, then use the tabs.</p>
+
     <input id="email" class="input" type="email" placeholder="Email">
     <input id="password" class="input" type="password" placeholder="Password">
+
     <button id="signUpBtn" class="button" type="button">Sign Up</button>
     <button id="signInBtn" class="button secondary" type="button">Sign In</button>
+
     <p id="msg" class="notice"></p>
   </div>
 
@@ -215,31 +187,6 @@ h1,h2,h3,p{margin-top:0}
 
     <div id="finance" class="card tab-panel">
       <h2>Finance</h2>
-      <div class="row">
-        <input id="budgetInput" class="input" type="number" placeholder="Monthly budget">
-        <button id="saveBudgetBtn" class="button" type="button">Save budget</button>
-      </div>
-      <p id="budgetMsg" class="notice"></p>
-
-      <div class="kpis">
-        <div class="kpi">
-          <div class="kpi-label">This month spent</div>
-          <div class="kpi-value">£<span id="monthSpent">0.00</span></div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">Budget</div>
-          <div class="kpi-value">£<span id="monthBudget">0.00</span></div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">Money left</div>
-          <div class="kpi-value">£<span id="moneyLeft">0.00</span></div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">Status</div>
-          <div class="kpi-value" id="budgetStatus">No budget</div>
-        </div>
-      </div>
-
       <div class="row">
         <input id="amount" class="input" type="number" placeholder="Amount">
         <input id="financeNote" class="input" placeholder="Note">
@@ -314,18 +261,11 @@ const addTaskBtn = document.getElementById("addTaskBtn");
 const taskMsg = document.getElementById("taskMsg");
 const taskList = document.getElementById("taskList");
 
-const budgetInput = document.getElementById("budgetInput");
-const saveBudgetBtn = document.getElementById("saveBudgetBtn");
-const budgetMsg = document.getElementById("budgetMsg");
+const amountInput = document.getElementById("amount");
+const financeNoteInput = document.getElementById("financeNote");
 const addFinanceBtn = document.getElementById("addFinanceBtn");
 const financeMsg = document.getElementById("financeMsg");
 const financeList = document.getElementById("financeList");
-const amountInput = document.getElementById("amount");
-const financeNoteInput = document.getElementById("financeNote");
-const monthSpentEl = document.getElementById("monthSpent");
-const monthBudgetEl = document.getElementById("monthBudget");
-const moneyLeftEl = document.getElementById("moneyLeft");
-const budgetStatusEl = document.getElementById("budgetStatus");
 
 const attDate = document.getElementById("attDate");
 const attStatus = document.getElementById("attStatus");
@@ -339,7 +279,9 @@ const addBookingBtn = document.getElementById("addBookingBtn");
 const bookMsg = document.getElementById("bookMsg");
 const bookList = document.getElementById("bookList");
 
-function setAuthMessage(text){ msg.textContent = text; }
+function setAuthMessage(text){
+  msg.textContent = text;
+}
 
 async function getCurrentUser(){
   const { data } = await supabase.auth.getUser();
@@ -412,14 +354,12 @@ signInBtn.addEventListener("click", async () => {
 
 logoutBtn.addEventListener("click", async () => {
   const { error } = await supabase.auth.signOut();
-  if (error) {
+  if(error){
     setAuthMessage(error.message);
     return;
   }
   authBox.classList.remove("hidden");
   appBox.classList.add("hidden");
-  emailInput.value = "";
-  passwordInput.value = "";
   setAuthMessage("Signed out.");
 });
 
@@ -507,35 +447,6 @@ async function loadTasks(){
 }
 
 /* FINANCE */
-saveBudgetBtn.addEventListener("click", async () => {
-  const user = await getCurrentUser();
-  const budgetValue = Number(budgetInput.value || 0);
-
-  if(!user){
-    budgetMsg.textContent = "You are not signed in.";
-    return;
-  }
-  if(!budgetValue){
-    budgetMsg.textContent = "Enter a budget amount.";
-    return;
-  }
-
-  const { error } = await supabase.from("finance").insert([{
-    user_id: user.id,
-    amount: 0,
-    note: `BUDGET:${budgetValue}`
-  }]);
-
-  if(error){
-    budgetMsg.textContent = error.message;
-    return;
-  }
-
-  budgetInput.value = "";
-  budgetMsg.textContent = "";
-  await loadFinance();
-});
-
 addFinanceBtn.addEventListener("click", async () => {
   const user = await getCurrentUser();
   const amountValue = Number(amountInput.value || 0);
@@ -585,34 +496,12 @@ async function loadFinance(){
     return;
   }
 
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
-
-  const monthRows = (data || []).filter(row => {
-    const d = new Date(row.created_at);
-    return d.getMonth() === month && d.getFullYear() === year;
-  });
-
-  const budgetRow = monthRows.find(row => String(row.note || "").startsWith("BUDGET:"));
-  const budget = budgetRow ? Number(String(budgetRow.note).replace("BUDGET:","")) : 0;
-
-  const spendRows = monthRows.filter(row => !String(row.note || "").startsWith("BUDGET:"));
-  const spent = spendRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
-  const left = budget - spent;
-
-  monthSpentEl.textContent = spent.toFixed(2);
-  monthBudgetEl.textContent = budget.toFixed(2);
-  moneyLeftEl.textContent = left.toFixed(2);
-
-  budgetStatusEl.textContent = !budget ? "No budget" : left >= 0 ? "On track" : "Over budget";
-
-  if(!spendRows.length){
+  if(!data || data.length === 0){
     financeList.innerHTML = `<div class="empty">No finance entries yet.</div>`;
     return;
   }
 
-  financeList.innerHTML = spendRows.map(row => `
+  financeList.innerHTML = data.map(row => `
     <div class="row-item">
       <div class="left">
         <div>${Number(row.amount || 0).toFixed(2)} · ${row.note || ""}</div>
@@ -662,7 +551,7 @@ async function loadAttendance(){
     return;
   }
 
-  if(!data || !data.length){
+  if(!data || data.length === 0){
     attList.innerHTML = `<div class="empty">No attendance saved yet.</div>`;
     return;
   }
@@ -724,7 +613,7 @@ async function loadBookings(){
     return;
   }
 
-  if(!data || !data.length){
+  if(!data || data.length === 0){
     bookList.innerHTML = `<div class="empty">No bookings yet.</div>`;
     return;
   }
