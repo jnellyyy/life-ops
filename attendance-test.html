@@ -16,6 +16,7 @@
   --sick:#dc2626;
   --holiday:#ca8a04;
   --bank:#7c3aed;
+  --weekend:#555;
 }
 
 * { box-sizing: border-box; }
@@ -120,10 +121,20 @@ button.secondary {
 .day.wfh { border-color: var(--wfh); }
 .day.sick { border-color: var(--sick); }
 .day.holiday { border-color: var(--holiday); }
+
 .day.bank-holiday {
   border-color: var(--bank);
   box-shadow: inset 0 0 0 1px var(--bank);
   cursor: not-allowed;
+  background: #201a2f;
+}
+
+.day.weekend {
+  border-color: var(--weekend);
+  background: #181818;
+  color: #777;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .day-number { font-weight: 700; }
@@ -232,6 +243,7 @@ button.secondary {
       <div class="legend-item"><span class="dot" style="background:#dc2626;"></span> Sick</div>
       <div class="legend-item"><span class="dot" style="background:#ca8a04;"></span> Holiday</div>
       <div class="legend-item"><span class="dot" style="background:#7c3aed;"></span> Bank holiday</div>
+      <div class="legend-item"><span class="dot" style="background:#555;"></span> Weekend</div>
     </div>
 
     <div class="calendar" id="calendar"></div>
@@ -301,6 +313,8 @@ let currentDate = new Date();
 let attendanceMap = {};
 
 const order = ["blank", "Office", "WFH", "Sick", "Holiday"];
+const OFFICE_TARGET_RATIO = 0.6;
+const POLICY_CHANGE_DATE = new Date("2026-03-01");
 
 function formatDate(d) {
   const year = d.getFullYear();
@@ -390,12 +404,10 @@ function countEligibleDays(start, end) {
 
 function getViewedPeriod() {
   const { start, end } = getViewedMonthBounds();
-  const policyChange = new Date("2026-03-01");
+  const eligibleDays = countEligibleDays(start, end);
+  const target = Math.ceil(eligibleDays * OFFICE_TARGET_RATIO);
 
-  if (start < policyChange) {
-    const eligibleDays = countEligibleDays(start, end);
-    const target = Math.ceil((eligibleDays / 5) * 3);
-
+  if (start < POLICY_CHANGE_DATE) {
     return {
       type: "month",
       start,
@@ -405,9 +417,6 @@ function getViewedPeriod() {
       label: formatMonthLabel(start)
     };
   }
-
-  const eligibleDays = countEligibleDays(start, end);
-  const target = 12;
 
   return {
     type: "rolling",
@@ -535,15 +544,23 @@ function renderCalendar() {
     const status = attendanceMap[key] || "blank";
     const bankHolidayTitle = getBankHolidayTitle(date);
     const bankHoliday = !!bankHolidayTitle;
+    const weekend = isWeekend(date);
 
     const cell = document.createElement("div");
-    cell.className = bankHoliday ? "day bank-holiday" : "day " + status.toLowerCase();
 
-    if (!bankHoliday) {
+    if (weekend) {
+      cell.className = "day weekend";
+    } else if (bankHoliday) {
+      cell.className = "day bank-holiday";
+    } else {
+      cell.className = "day " + status.toLowerCase();
       cell.onclick = () => cycle(key, status);
     }
 
-    const label = bankHoliday ? bankHolidayTitle : (status === "blank" ? "" : status);
+    let label = "";
+    if (weekend) label = "Weekend";
+    else if (bankHoliday) label = bankHolidayTitle;
+    else if (status !== "blank") label = status;
 
     cell.innerHTML = `
       <div class="day-number">${d}</div>
