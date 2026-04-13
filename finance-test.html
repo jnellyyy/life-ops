@@ -104,6 +104,14 @@
       cursor:pointer;
     }
 
+    .small-btn{
+      width:auto;
+      margin:0;
+      padding:6px 10px;
+      background:#333;
+      font-size:13px;
+    }
+
     .budget-box{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -162,7 +170,6 @@
   <div class="card">
     <h2 style="margin-bottom:6px;">Finance</h2>
     <p class="muted">Life and business split clearly, with combined totals at the top.</p>
-
     <div class="kpis" id="combinedKpis"></div>
   </div>
 
@@ -204,7 +211,12 @@
       </div>
 
       <div class="card" style="background:#171717;margin-top:14px;">
-        <h3 style="margin-bottom:6px;">Fixed life bills</h3>
+        <h3 style="margin-bottom:6px;">Main bills summary</h3>
+        <div id="mainBillsSummary"></div>
+      </div>
+
+      <div class="card" style="background:#171717;margin-top:14px;">
+        <h3 style="margin-bottom:6px;">Fixed bills list</h3>
         <div id="fixedList"></div>
       </div>
 
@@ -260,7 +272,7 @@
 
   <div class="card">
     <h3 style="margin-bottom:6px;">Budget snapshot</h3>
-    <p class="muted" style="margin-bottom:0;">Based on your monthly pay and active fixed bills.</p>
+    <p class="muted" style="margin-bottom:0;">Based on your pay, main bills, and active fixed bills.</p>
     <div class="budget-box" id="budgetBox"></div>
     <p id="msg" class="notice"></p>
   </div>
@@ -284,12 +296,15 @@ const supabase = createClient(
 
 const MONTHLY_PAY = 1854.09;
 
+const MAIN_BILLS = [
+  { name: "Rent", amount: 740 },
+  { name: "Utilities/Bills", amount: 429.01 },
+  { name: "Loan", amount: 200 }
+];
+
 const DEFAULT_FIXED_EXPENSES = [
-  { name: "Rent", amount: 740, bucket: "bills" },
   { name: "Zable", amount: 60, bucket: "bills" },
-  { name: "Utilities/Bills", amount: 429.01, bucket: "bills" },
   { name: "Capital One", amount: 20, bucket: "bills" },
-  { name: "Loan", amount: 200, bucket: "bills" },
   { name: "Waggel", amount: 4.48, bucket: "bills" },
   { name: "Credit Spring", amount: 60, bucket: "bills" },
   { name: "Rotherham CT", amount: 112, bucket: "bills" },
@@ -301,6 +316,7 @@ const DEFAULT_FIXED_EXPENSES = [
 const combinedKpisEl = document.getElementById("combinedKpis");
 const lifeKpisEl = document.getElementById("lifeKpis");
 const businessKpisEl = document.getElementById("businessKpis");
+const mainBillsSummaryEl = document.getElementById("mainBillsSummary");
 const fixedListEl = document.getElementById("fixedList");
 const lifeListEl = document.getElementById("lifeList");
 const businessListEl = document.getElementById("businessList");
@@ -360,6 +376,8 @@ async function seedFixedExpenses(userId){
 }
 
 function groupFigures(){
+  const mainBillsTotal = MAIN_BILLS.reduce((sum, item) => sum + item.amount, 0);
+
   const lifeIncome = transactions
     .filter(t => t.bucket === "life" && t.type === "income")
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
@@ -383,10 +401,11 @@ function groupFigures(){
   const businessBookingIncome = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
   const businessIncome = businessManualIncome + businessBookingIncome;
-  const lifeOut = lifeExpense + billsExpense;
+  const lifeOut = lifeExpense + billsExpense + mainBillsTotal;
   const businessOut = businessManualExpense;
 
   return {
+    mainBillsTotal,
     lifeIncome,
     lifeExpense,
     billsExpense,
@@ -450,10 +469,34 @@ function renderKpis(){
   `;
 }
 
+function renderMainBillsSummary(){
+  const total = MAIN_BILLS.reduce((sum, item) => sum + item.amount, 0);
+
+  mainBillsSummaryEl.innerHTML = `
+    ${MAIN_BILLS.map(item => `
+      <div class="item">
+        <div>
+          <div class="item-title">${item.name}</div>
+        </div>
+        <div class="money">${money(item.amount)}</div>
+      </div>
+    `).join("")}
+
+    <div class="item">
+      <div>
+        <div class="item-title">Total main bills</div>
+      </div>
+      <div class="money bad">${money(total)}</div>
+    </div>
+  `;
+}
+
 function renderBudgetSnapshot(){
   const activeFixed = fixedExpenses.filter(x => x.is_active);
   const fixedTotal = activeFixed.reduce((sum, x) => sum + Number(x.amount || 0), 0);
-  const remaining = MONTHLY_PAY - fixedTotal;
+  const mainBillsTotal = MAIN_BILLS.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  const totalBills = mainBillsTotal + fixedTotal;
+  const remaining = MONTHLY_PAY - totalBills;
 
   budgetBoxEl.innerHTML = `
     <div class="budget-card">
@@ -461,16 +504,16 @@ function renderBudgetSnapshot(){
       <div class="kpi-value">${money(MONTHLY_PAY)}</div>
     </div>
     <div class="budget-card">
-      <div class="kpi-title">Active fixed bills</div>
+      <div class="kpi-title">Main bills</div>
+      <div class="kpi-value bad">${money(mainBillsTotal)}</div>
+    </div>
+    <div class="budget-card">
+      <div class="kpi-title">Fixed bills</div>
       <div class="kpi-value bad">${money(fixedTotal)}</div>
     </div>
     <div class="budget-card">
       <div class="kpi-title">Remaining from pay</div>
       <div class="kpi-value ${remaining >= 0 ? "good" : "bad"}">${money(remaining)}</div>
-    </div>
-    <div class="budget-card">
-      <div class="kpi-title">Active bills count</div>
-      <div class="kpi-value">${activeFixed.length}</div>
     </div>
   `;
 }
@@ -622,11 +665,16 @@ async function load(){
     supabase.from("fixed_expenses").select("*").eq("user_id", user.id).order("created_at", { ascending: true })
   ]);
 
+  if (txRes.error) return setMsg(txRes.error.message);
+  if (payRes.error) return setMsg(payRes.error.message);
+  if (fixedRes.error) return setMsg(fixedRes.error.message);
+
   transactions = txRes.data || [];
   payments = payRes.data || [];
   fixedExpenses = fixedRes.data || [];
 
   renderKpis();
+  renderMainBillsSummary();
   renderBudgetSnapshot();
   renderFixedExpenses();
   renderTransactions();
