@@ -260,18 +260,37 @@ function isWeekend(date) {
   return day === 0 || day === 6;
 }
 
-function countEligibleWorkingDays(start, end) {
+function countBaseWorkingDays(start, end) {
   let count = 0;
   const d = new Date(start);
 
   while (d <= end) {
-    if (!isWeekend(d)) {
-      count++;
-    }
+    if (!isWeekend(d)) count++;
     d.setDate(d.getDate() + 1);
   }
 
   return count;
+}
+
+function countExcludedWeekdays(start, end) {
+  let count = 0;
+
+  for (const key in attendanceMap) {
+    const date = new Date(key + "T00:00:00");
+    const status = attendanceMap[key];
+
+    if (date >= start && date <= end && !isWeekend(date) && (status === "Sick" || status === "Holiday")) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function countEligibleDays(start, end) {
+  const baseWorkingDays = countBaseWorkingDays(start, end);
+  const excludedDays = countExcludedWeekdays(start, end);
+  return Math.max(baseWorkingDays - excludedDays, 0);
 }
 
 function getViewedPeriod() {
@@ -279,7 +298,7 @@ function getViewedPeriod() {
   const policyChange = new Date("2026-03-01");
 
   if (start < policyChange) {
-    const eligibleDays = countEligibleWorkingDays(start, end);
+    const eligibleDays = countEligibleDays(start, end);
     const target = Math.ceil((eligibleDays / 5) * 3);
 
     return {
@@ -296,7 +315,7 @@ function getViewedPeriod() {
     type: "rolling",
     start,
     end,
-    eligibleDays: countEligibleWorkingDays(start, end),
+    eligibleDays: countEligibleDays(start, end),
     target: 12,
     label: `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`
   };
@@ -306,9 +325,9 @@ function countOfficeInViewedPeriod() {
   let count = 0;
   const { start, end } = getViewedPeriod();
 
-  for (const d in attendanceMap) {
-    const date = new Date(d + "T00:00:00");
-    if (date >= start && date <= end && attendanceMap[d] === "Office") {
+  for (const key in attendanceMap) {
+    const date = new Date(key + "T00:00:00");
+    if (date >= start && date <= end && attendanceMap[key] === "Office") {
       count++;
     }
   }
@@ -335,12 +354,11 @@ function renderStats() {
   const progress = progressPercent(actual, target);
 
   const title = type === "month" ? "Month Status" : "28 Day Status";
-  const periodTitle = "Period Used";
 
   stats.innerHTML = `
     <div class="stats-box">
       <div class="stat">
-        <div class="stat-title">${periodTitle}</div>
+        <div class="stat-title">Period Used</div>
         <div class="stat-value">${label}</div>
       </div>
 
