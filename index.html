@@ -6,60 +6,43 @@
   <title>Life Ops</title>
   <style>
     :root{
-      --bg1:#0f1115;
-      --bg2:#171a20;
-      --panel:rgba(255,255,255,0.06);
-      --line:rgba(255,255,255,0.10);
+      --bg:#111214;
+      --card:#1b1d22;
+      --line:#2c3138;
       --text:#f5f7fb;
       --muted:#a7afbe;
       --accent:#ff3b30;
-      --accent-soft:rgba(255,59,48,0.14);
-      --shadow:0 20px 50px rgba(0,0,0,0.35);
-      --blur:18px;
-      --radius:22px;
     }
 
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    html,body{
-      margin:0;
-      padding:0;
-      min-height:100%;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-    }
+    *{box-sizing:border-box}
 
     body{
-      padding:20px;
+      margin:0;
+      padding:18px;
+      background:linear-gradient(180deg,#0e1014,#171b22);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
     }
 
-    .shell{
-      max-width:1280px;
+    .wrap{
+      max-width:980px;
       margin:0 auto;
     }
 
-    .glass{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      backdrop-filter:blur(var(--blur));
-      -webkit-backdrop-filter:blur(var(--blur));
-      box-shadow:var(--shadow);
+    .card{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:22px;
+      padding:20px;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 18px 40px rgba(0,0,0,0.28);
     }
 
-    .hidden{
-      display:none !important;
-    }
+    .hidden{display:none !important}
 
     .auth-wrap{
-      min-height:calc(100vh - 40px);
+      min-height:calc(100vh - 36px);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -67,68 +50,56 @@
 
     .auth-card{
       width:100%;
-      max-width:440px;
-      padding:28px;
+      max-width:420px;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:14px;
-      margin-bottom:18px;
+      gap:12px;
+      margin-bottom:14px;
     }
 
-    .brand-icon{
-      width:52px;
-      height:52px;
+    .icon{
+      width:48px;
+      height:48px;
       border-radius:16px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
-      border:1px solid rgba(255,255,255,0.10);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:22px;
+      background:rgba(255,255,255,0.08);
+      font-size:20px;
     }
 
-    .brand h1{
-      font-size:28px;
-      margin:0;
-      letter-spacing:-0.03em;
-    }
-
-    .sub{
-      margin:0 0 18px 0;
-      color:var(--muted);
-      line-height:1.45;
-    }
+    h1,h2,h3,p{margin-top:0}
+    h1{margin-bottom:4px}
+    .muted{color:var(--muted)}
 
     .field{
       width:100%;
       margin-top:10px;
-      padding:14px 15px;
+      padding:14px;
       border-radius:16px;
       border:1px solid rgba(255,255,255,0.10);
       background:rgba(255,255,255,0.05);
       color:var(--text);
-      outline:none;
       font:inherit;
+      outline:none;
     }
 
-    .field::placeholder{
-      color:#97a0af;
-    }
+    .field::placeholder{color:#97a0af}
 
     .btn-row{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
-      margin-top:14px;
+      margin-top:12px;
     }
 
     .btn{
       border:none;
       border-radius:16px;
-      padding:14px 16px;
+      padding:14px;
       font:inherit;
       font-weight:700;
       cursor:pointer;
@@ -144,276 +115,98 @@
       color:#fff;
     }
 
-    .auth-msg{
+    .msg{
+      min-height:22px;
+      margin-top:12px;
       color:var(--muted);
       white-space:pre-wrap;
-      margin-top:14px;
-      min-height:20px;
     }
 
-    .app{
-      display:grid;
-      grid-template-columns:280px 1fr;
-      gap:16px;
-      min-height:calc(100vh - 40px);
-    }
-
-    .sidebar{
-      padding:18px;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
-    .sidebar-top{
+    .topbar{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
-      gap:10px;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
     }
 
-    .sidebar h2{
-      margin:0;
-      font-size:22px;
-    }
-
-    .sidebar p{
-      margin:6px 0 0 0;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .logout-btn{
+    .logout{
       width:auto;
-      padding:10px 12px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      border:none;
-      cursor:pointer;
-      font-weight:700;
+      padding:10px 14px;
       margin:0;
     }
 
     .user-pill{
-      padding:10px 12px;
-      border-radius:14px;
+      color:var(--muted);
       background:rgba(255,255,255,0.05);
       border:1px solid rgba(255,255,255,0.08);
-      color:var(--muted);
-      font-size:13px;
+      border-radius:14px;
+      padding:10px 12px;
+      margin-bottom:14px;
       word-break:break-word;
     }
 
-    .nav{
+    .grid{
       display:grid;
-      gap:10px;
-    }
-
-    .nav-card{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      cursor:pointer;
-    }
-
-    .nav-card.active{
-      background:var(--accent-soft);
-      border-color:rgba(255,59,48,0.22);
-    }
-
-    .nav-icon{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(255,255,255,0.08);
-      font-size:20px;
-      flex:0 0 auto;
-    }
-
-    .nav-title{
-      font-weight:700;
-      font-size:15px;
-      margin-bottom:2px;
-    }
-
-    .nav-desc{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
-
-    .main{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
-    .hero{
-      padding:18px;
-    }
-
-    .hero h3{
-      margin:0;
-      font-size:26px;
-    }
-
-    .hero p{
-      margin:8px 0 0 0;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .apps-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
+      grid-template-columns:repeat(2,1fr);
       gap:14px;
     }
 
-    .app-tile{
+    .tile{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:20px;
       padding:18px;
-      min-height:160px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      cursor:pointer;
+      min-height:150px;
     }
 
     .tile-icon{
-      width:54px;
-      height:54px;
+      width:52px;
+      height:52px;
       border-radius:18px;
       display:flex;
       align-items:center;
       justify-content:center;
       background:rgba(255,255,255,0.08);
-      font-size:24px;
+      font-size:22px;
+      margin-bottom:16px;
     }
 
     .tile-title{
       font-size:18px;
       font-weight:700;
-      margin-top:16px;
+      margin-bottom:6px;
     }
 
     .tile-desc{
       color:var(--muted);
-      font-size:13px;
-      line-height:1.45;
-      margin-top:6px;
-    }
-
-    .workspace{
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      min-height:580px;
-    }
-
-    .workspace-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-
-    .workspace-title{
-      font-size:18px;
-      font-weight:700;
-    }
-
-    .workspace-meta{
-      color:var(--muted);
+      line-height:1.4;
       font-size:13px;
     }
 
-    .workspace-frame{
-      width:100%;
-      min-height:560px;
-      border:none;
-      border-radius:18px;
-      background:#0c0d11;
-    }
-
-    .workspace-empty{
-      min-height:560px;
-      border-radius:18px;
-      background:rgba(255,255,255,0.03);
-      border:1px dashed rgba(255,255,255,0.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:28px;
-      text-align:center;
-      color:var(--muted);
-      line-height:1.5;
-    }
-
-    @media (max-width:1100px){
-      .apps-grid{
-        grid-template-columns:repeat(2,1fr);
-      }
-    }
-
-    @media (max-width:920px){
-      .app{
+    @media (max-width:700px){
+      .btn-row,
+      .grid{
         grid-template-columns:1fr;
       }
 
-      .apps-grid{
-        grid-template-columns:1fr;
-      }
-
-      .workspace-frame{
-        display:none;
-      }
-
-      .workspace-empty{
-        min-height:160px;
-      }
-    }
-
-    @media (max-width:640px){
-      body{
-        padding:14px;
-      }
-
-      .auth-wrap{
-        min-height:calc(100vh - 28px);
-      }
-
-      .auth-card{
-        padding:20px;
-      }
-
-      .btn-row{
-        grid-template-columns:1fr;
-      }
-
-      .hero h3{
-        font-size:22px;
-      }
+      body{padding:14px}
     }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="wrap">
     <div id="authWrap" class="auth-wrap">
-      <div class="auth-card glass">
+      <div class="auth-card card">
         <div class="brand">
-          <div class="brand-icon">◉</div>
+          <div class="icon">◉</div>
           <div>
             <h1>Life Ops</h1>
-            <p class="sub">Sign in once, then open your trackers from the dashboard.</p>
+            <p class="muted">Sign in, then open your trackers.</p>
           </div>
         </div>
 
@@ -425,47 +218,48 @@
           <button id="signUpBtn" class="btn secondary" type="button">Sign up</button>
         </div>
 
-        <p id="authMsg" class="auth-msg"></p>
+        <p id="authMsg" class="msg"></p>
       </div>
     </div>
 
-    <div id="appWrap" class="app hidden">
-      <aside class="sidebar glass">
-        <div class="sidebar-top">
+    <div id="appWrap" class="hidden">
+      <div class="card">
+        <div class="topbar">
           <div>
-            <h2>Life Ops</h2>
-            <p>Your dashboard</p>
+            <h2 style="margin-bottom:4px;">Life Ops</h2>
+            <p class="muted" style="margin:0;">Dashboard</p>
           </div>
-          <button id="logoutBtn" class="logout-btn" type="button">Log out</button>
+          <button id="logoutBtn" class="btn secondary logout" type="button">Log out</button>
         </div>
 
-        <div id="userPill" class="user-pill">Signed in</div>
-        <div class="nav" id="nav"></div>
-      </aside>
+        <div id="userPill" class="user-pill"></div>
 
-      <main class="main">
-        <section class="hero glass">
-          <h3>One place for everything</h3>
-          <p>Open your productivity sections from here. On desktop, they load below. On mobile, they open full screen.</p>
-        </section>
+        <div class="grid">
+          <a class="tile" href="life-test.html">
+            <div class="tile-icon">✓</div>
+            <div class="tile-title">Ultimate To Do</div>
+            <div class="tile-desc">Life, house, money, business and work tasks.</div>
+          </a>
 
-        <section class="apps-grid" id="appsGrid"></section>
+          <a class="tile" href="attendance-test.html">
+            <div class="tile-icon">◫</div>
+            <div class="tile-title">Attendance</div>
+            <div class="tile-desc">Office days, policy tracking and monthly view.</div>
+          </a>
 
-        <section class="workspace glass">
-          <div class="workspace-top">
-            <div>
-              <div id="workspaceTitle" class="workspace-title">Workspace</div>
-              <div id="workspaceMeta" class="workspace-meta">Choose a section</div>
-            </div>
-          </div>
+          <a class="tile" href="bookings-test.html">
+            <div class="tile-icon">◌</div>
+            <div class="tile-title">Bookings</div>
+            <div class="tile-desc">Jobs, payments, balances, due dates and overdue items.</div>
+          </a>
 
-          <iframe id="workspaceFrame" class="workspace-frame hidden" title="Life Ops section"></iframe>
-
-          <div id="workspaceEmpty" class="workspace-empty">
-            Tap a section to open it. On mobile it opens as a full page. On desktop it opens here.
-          </div>
-        </section>
-      </main>
+          <a class="tile" href="finance-test.html">
+            <div class="tile-icon">◍</div>
+            <div class="tile-title">Finance</div>
+            <div class="tile-desc">Life, business and combined money tracking.</div>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -485,13 +279,6 @@
       }
     );
 
-    const sections = [
-      { key: "todo", title: "Ultimate To Do", desc: "Life, house, money, business, work", icon: "✓", file: "life-test.html" },
-      { key: "attendance", title: "Attendance", desc: "Track office days and policy progress", icon: "◫", file: "attendance-test.html" },
-      { key: "bookings", title: "Bookings", desc: "Jobs, payments, balances, due dates", icon: "◌", file: "bookings-test.html" },
-      { key: "finance", title: "Finance", desc: "Life, bills, business, combined totals", icon: "◍", file: "finance-test.html" }
-    ];
-
     const authWrap = document.getElementById("authWrap");
     const appWrap = document.getElementById("appWrap");
     const authMsg = document.getElementById("authMsg");
@@ -501,71 +288,9 @@
     const signUpBtn = document.getElementById("signUpBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const userPill = document.getElementById("userPill");
-    const navEl = document.getElementById("nav");
-    const appsGridEl = document.getElementById("appsGrid");
-    const workspaceTitle = document.getElementById("workspaceTitle");
-    const workspaceMeta = document.getElementById("workspaceMeta");
-    const workspaceFrame = document.getElementById("workspaceFrame");
-    const workspaceEmpty = document.getElementById("workspaceEmpty");
-
-    let activeKey = null;
 
     function setAuthMsg(text) {
       authMsg.textContent = text;
-    }
-
-    function isMobileView() {
-      return window.innerWidth <= 920;
-    }
-
-    function sectionByKey(key) {
-      return sections.find(s => s.key === key);
-    }
-
-    function renderDashboardCards() {
-      navEl.innerHTML = sections.map(section => `
-        <div class="nav-card ${activeKey === section.key ? "active" : ""}" data-key="${section.key}">
-          <div class="nav-icon">${section.icon}</div>
-          <div>
-            <div class="nav-title">${section.title}</div>
-            <div class="nav-desc">${section.desc}</div>
-          </div>
-        </div>
-      `).join("");
-
-      appsGridEl.innerHTML = sections.map(section => `
-        <div class="app-tile glass" data-key="${section.key}">
-          <div>
-            <div class="tile-icon">${section.icon}</div>
-            <div class="tile-title">${section.title}</div>
-            <div class="tile-desc">${section.desc}</div>
-          </div>
-        </div>
-      `).join("");
-
-      [...navEl.querySelectorAll("[data-key]"), ...appsGridEl.querySelectorAll("[data-key]")].forEach(el => {
-        el.addEventListener("click", () => openSectionByKey(el.dataset.key));
-      });
-    }
-
-    function openSectionByKey(key) {
-      const section = sectionByKey(key);
-      if (!section) return;
-
-      activeKey = key;
-      renderDashboardCards();
-
-      workspaceTitle.textContent = section.title;
-      workspaceMeta.textContent = section.desc;
-
-      if (isMobileView()) {
-        window.location.href = section.file;
-        return;
-      }
-
-      workspaceFrame.src = section.file;
-      workspaceFrame.classList.remove("hidden");
-      workspaceEmpty.classList.add("hidden");
     }
 
     async function renderAuthState() {
@@ -582,17 +307,9 @@
         authWrap.classList.add("hidden");
         appWrap.classList.remove("hidden");
         userPill.textContent = session.user?.email || "Signed in";
-        renderDashboardCards();
       } else {
         appWrap.classList.add("hidden");
         authWrap.classList.remove("hidden");
-      }
-    }
-
-    async function resetBrokenSessionIfNeeded() {
-      const { data } = await supabase.auth.getSession();
-      if (!data?.session) {
-        await supabase.auth.signOut();
       }
     }
 
@@ -608,24 +325,17 @@
       setAuthMsg("Signing in...");
 
       try {
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Request timed out after 15 seconds.")), 15000)
-        );
-
-        const signInPromise = supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
         });
-
-        const result = await Promise.race([signInPromise, timeoutPromise]);
-        const { data, error } = result;
 
         if (error) {
           setAuthMsg(`Sign in error: ${error.message}`);
           return;
         }
 
-        if (!data || !data.session) {
+        if (!data?.session) {
           setAuthMsg("Sign in failed: no session returned.");
           return;
         }
@@ -648,17 +358,21 @@
 
       setAuthMsg("Creating account...");
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password
-      });
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password
+        });
 
-      if (error) {
-        setAuthMsg(`Sign up error: ${error.message}`);
-        return;
+        if (error) {
+          setAuthMsg(`Sign up error: ${error.message}`);
+          return;
+        }
+
+        setAuthMsg("Sign up complete. Now sign in.");
+      } catch (err) {
+        setAuthMsg(`Sign up error: ${err.message}`);
       }
-
-      setAuthMsg("Sign up complete. Now sign in.");
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -669,10 +383,6 @@
         return;
       }
 
-      activeKey = null;
-      workspaceFrame.src = "";
-      workspaceFrame.classList.add("hidden");
-      workspaceEmpty.classList.remove("hidden");
       await renderAuthState();
     });
 
@@ -680,27 +390,6 @@
       await renderAuthState();
     });
 
-    window.addEventListener("resize", () => {
-      renderDashboardCards();
-
-      if (!activeKey) return;
-
-      const section = sectionByKey(activeKey);
-      if (!section) return;
-
-      if (isMobileView()) {
-        workspaceFrame.classList.add("hidden");
-        workspaceEmpty.classList.remove("hidden");
-      } else {
-        workspaceFrame.src = section.file;
-        workspaceFrame.classList.remove("hidden");
-        workspaceEmpty.classList.add("hidden");
-      }
-    });
-
-    window.openSectionByKey = openSectionByKey;
-
-    await resetBrokenSessionIfNeeded();
     await renderAuthState();
   </script>
 </body>
