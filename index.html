@@ -9,7 +9,6 @@
       --bg1:#0f1115;
       --bg2:#171a20;
       --panel:rgba(255,255,255,0.06);
-      --panel-strong:rgba(255,255,255,0.10);
       --line:rgba(255,255,255,0.10);
       --text:#f5f7fb;
       --muted:#a7afbe;
@@ -89,7 +88,6 @@
       align-items:center;
       justify-content:center;
       font-size:22px;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
     .brand h1{
@@ -120,11 +118,6 @@
       color:#97a0af;
     }
 
-    .field:focus{
-      border-color:rgba(255,255,255,0.20);
-      background:rgba(255,255,255,0.07);
-    }
-
     .btn-row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -139,11 +132,6 @@
       font:inherit;
       font-weight:700;
       cursor:pointer;
-      transition:transform .15s ease, opacity .15s ease, background .15s ease;
-    }
-
-    .btn:active{
-      transform:scale(0.98);
     }
 
     .btn.primary{
@@ -187,14 +175,12 @@
     .sidebar h2{
       margin:0;
       font-size:22px;
-      letter-spacing:-0.03em;
     }
 
     .sidebar p{
       margin:6px 0 0 0;
       color:var(--muted);
       font-size:14px;
-      line-height:1.4;
     }
 
     .logout-btn{
@@ -233,13 +219,6 @@
       background:rgba(255,255,255,0.04);
       border:1px solid rgba(255,255,255,0.08);
       cursor:pointer;
-      transition:transform .15s ease, background .15s ease, border-color .15s ease;
-    }
-
-    .nav-card:hover{
-      background:rgba(255,255,255,0.07);
-      border-color:rgba(255,255,255,0.14);
-      transform:translateY(-1px);
     }
 
     .nav-card.active{
@@ -257,10 +236,6 @@
       background:rgba(255,255,255,0.08);
       font-size:20px;
       flex:0 0 auto;
-    }
-
-    .nav-copy{
-      min-width:0;
     }
 
     .nav-title{
@@ -283,45 +258,17 @@
 
     .hero{
       padding:18px;
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
-      flex-wrap:wrap;
     }
 
     .hero h3{
       margin:0;
       font-size:26px;
-      letter-spacing:-0.03em;
     }
 
     .hero p{
       margin:8px 0 0 0;
       color:var(--muted);
       line-height:1.45;
-      max-width:680px;
-    }
-
-    .hero-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .hero-btn{
-      width:auto;
-      padding:11px 14px;
-      border-radius:14px;
-      border:none;
-      cursor:pointer;
-      font-weight:700;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-    }
-
-    .hero-btn.primary{
-      background:var(--accent);
     }
 
     .apps-grid{
@@ -337,12 +284,6 @@
       flex-direction:column;
       justify-content:space-between;
       cursor:pointer;
-      transition:transform .15s ease, background .15s ease, border-color .15s ease;
-    }
-
-    .app-tile:hover{
-      transform:translateY(-2px);
-      background:var(--panel-strong);
     }
 
     .tile-icon{
@@ -360,7 +301,6 @@
       font-size:18px;
       font-weight:700;
       margin-top:16px;
-      letter-spacing:-0.02em;
     }
 
     .tile-desc{
@@ -389,7 +329,6 @@
     .workspace-title{
       font-size:18px;
       font-weight:700;
-      letter-spacing:-0.02em;
     }
 
     .workspace-meta{
@@ -430,21 +369,8 @@
         grid-template-columns:1fr;
       }
 
-      .sidebar{
-        order:2;
-      }
-
-      .main{
-        order:1;
-      }
-
-      .workspace{
-        padding:0;
-        background:none;
-        border:none;
-        box-shadow:none;
-        backdrop-filter:none;
-        -webkit-backdrop-filter:none;
+      .apps-grid{
+        grid-template-columns:1fr;
       }
 
       .workspace-frame{
@@ -452,7 +378,7 @@
       }
 
       .workspace-empty{
-        min-height:180px;
+        min-height:160px;
       }
     }
 
@@ -473,22 +399,8 @@
         grid-template-columns:1fr;
       }
 
-      .apps-grid{
-        grid-template-columns:1fr;
-      }
-
       .hero h3{
         font-size:22px;
-      }
-
-      .nav-card,
-      .app-tile{
-        border-radius:20px;
-      }
-
-      .workspace-empty{
-        min-height:140px;
-        font-size:14px;
       }
     }
   </style>
@@ -528,21 +440,13 @@
         </div>
 
         <div id="userPill" class="user-pill">Signed in</div>
-
         <div class="nav" id="nav"></div>
       </aside>
 
       <main class="main">
         <section class="hero glass">
-          <div>
-            <h3>One place for everything</h3>
-            <p>Open your productivity sections from here. On desktop, they load in the workspace below. On mobile, they open full screen.</p>
-          </div>
-
-          <div class="hero-actions">
-            <button class="hero-btn primary" type="button" onclick="openSectionByKey('todo')">Open to do</button>
-            <button class="hero-btn" type="button" onclick="openSectionByKey('attendance')">Open attendance</button>
-          </div>
+          <h3>One place for everything</h3>
+          <p>Open your productivity sections from here. On desktop, they load below. On mobile, they open full screen.</p>
         </section>
 
         <section class="apps-grid" id="appsGrid"></section>
@@ -581,34 +485,10 @@
     );
 
     const sections = [
-      {
-        key: "todo",
-        title: "Ultimate To Do",
-        desc: "Life, house, money, business, work",
-        icon: "✓",
-        file: "life-test.html"
-      },
-      {
-        key: "attendance",
-        title: "Attendance",
-        desc: "Track office days and policy progress",
-        icon: "◫",
-        file: "attendance-test.html"
-      },
-      {
-        key: "bookings",
-        title: "Bookings",
-        desc: "Jobs, payments, balances, due dates",
-        icon: "◌",
-        file: "bookings-test.html"
-      },
-      {
-        key: "finance",
-        title: "Finance",
-        desc: "Life, bills, business, combined totals",
-        icon: "◍",
-        file: "finance-test.html"
-      }
+      { key: "todo", title: "Ultimate To Do", desc: "Life, house, money, business, work", icon: "✓", file: "life-test.html" },
+      { key: "attendance", title: "Attendance", desc: "Track office days and policy progress", icon: "◫", file: "attendance-test.html" },
+      { key: "bookings", title: "Bookings", desc: "Jobs, payments, balances, due dates", icon: "◌", file: "bookings-test.html" },
+      { key: "finance", title: "Finance", desc: "Life, bills, business, combined totals", icon: "◍", file: "finance-test.html" }
     ];
 
     const authWrap = document.getElementById("authWrap");
@@ -616,6 +496,9 @@
     const authMsg = document.getElementById("authMsg");
     const emailEl = document.getElementById("email");
     const passwordEl = document.getElementById("password");
+    const signInBtn = document.getElementById("signInBtn");
+    const signUpBtn = document.getElementById("signUpBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
     const userPill = document.getElementById("userPill");
     const navEl = document.getElementById("nav");
     const appsGridEl = document.getElementById("appsGrid");
@@ -634,11 +517,15 @@
       return window.innerWidth <= 920;
     }
 
+    function sectionByKey(key) {
+      return sections.find(s => s.key === key);
+    }
+
     function renderDashboardCards() {
       navEl.innerHTML = sections.map(section => `
         <div class="nav-card ${activeKey === section.key ? "active" : ""}" data-key="${section.key}">
           <div class="nav-icon">${section.icon}</div>
-          <div class="nav-copy">
+          <div>
             <div class="nav-title">${section.title}</div>
             <div class="nav-desc">${section.desc}</div>
           </div>
@@ -660,11 +547,7 @@
       });
     }
 
-    function sectionByKey(key) {
-      return sections.find(s => s.key === key);
-    }
-
-    window.openSectionByKey = function(key) {
+    function openSectionByKey(key) {
       const section = sectionByKey(key);
       if (!section) return;
 
@@ -682,10 +565,16 @@
       workspaceFrame.src = section.file;
       workspaceFrame.classList.remove("hidden");
       workspaceEmpty.classList.add("hidden");
-    };
+    }
 
-    async function showApp() {
-      const { data } = await supabase.auth.getSession();
+    async function renderAuthState() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        setAuthMsg(error.message);
+        return;
+      }
+
       const session = data.session;
 
       if (session) {
@@ -699,7 +588,7 @@
       }
     }
 
-    document.getElementById("signInBtn").addEventListener("click", async () => {
+    signInBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim();
       const password = passwordEl.value;
 
@@ -708,23 +597,28 @@
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      setAuthMsg("Signing in...");
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
       if (error) {
-        setAuthMsg(error.message);
+        setAuthMsg(`Sign in error: ${error.message}`);
         return;
       }
 
       if (!data.session) {
-        setAuthMsg("No session returned.");
+        setAuthMsg("Sign in failed: no session returned.");
         return;
       }
 
-      setAuthMsg("");
-      await showApp();
+      setAuthMsg("Signed in.");
+      await renderAuthState();
     });
 
-    document.getElementById("signUpBtn").addEventListener("click", async () => {
+    signUpBtn.addEventListener("click", async () => {
       const email = emailEl.value.trim();
       const password = passwordEl.value;
 
@@ -733,12 +627,24 @@
         return;
       }
 
-      const { error } = await supabase.auth.signUp({ email, password });
-      setAuthMsg(error ? error.message : "Sign up complete. Now sign in.");
+      setAuthMsg("Creating account...");
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) {
+        setAuthMsg(`Sign up error: ${error.message}`);
+        return;
+      }
+
+      setAuthMsg("Sign up complete. Now sign in.");
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
+    logoutBtn.addEventListener("click", async () => {
       const { error } = await supabase.auth.signOut();
+
       if (error) {
         setAuthMsg(error.message);
         return;
@@ -748,11 +654,11 @@
       workspaceFrame.src = "";
       workspaceFrame.classList.add("hidden");
       workspaceEmpty.classList.remove("hidden");
-      await showApp();
+      await renderAuthState();
     });
 
     supabase.auth.onAuthStateChange(async () => {
-      await showApp();
+      await renderAuthState();
     });
 
     window.addEventListener("resize", () => {
@@ -760,20 +666,22 @@
 
       if (!activeKey) return;
 
+      const section = sectionByKey(activeKey);
+      if (!section) return;
+
       if (isMobileView()) {
         workspaceFrame.classList.add("hidden");
         workspaceEmpty.classList.remove("hidden");
       } else {
-        const section = sectionByKey(activeKey);
-        if (section) {
-          workspaceFrame.src = section.file;
-          workspaceFrame.classList.remove("hidden");
-          workspaceEmpty.classList.add("hidden");
-        }
+        workspaceFrame.src = section.file;
+        workspaceFrame.classList.remove("hidden");
+        workspaceEmpty.classList.add("hidden");
       }
     });
 
-    await showApp();
+    window.openSectionByKey = openSectionByKey;
+
+    await renderAuthState();
   </script>
 </body>
 </html>
