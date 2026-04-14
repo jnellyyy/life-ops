@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="site.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-32.png">
-<meta name="theme-color" content="#0f1115">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finance</title>
+  <title>Pace Finance</title>
+  <link rel="manifest" href="/Pace/site.webmanifest">
+  <link rel="apple-touch-icon" href="/Pace/icon-180.png">
+  <link rel="icon" href="/Pace/icon-32.png">
+  <meta name="theme-color" content="#0f1115">
   <style>
     :root{
       --bg1:#0f1115;
@@ -24,7 +24,7 @@
       --amber:#f59e0b;
       --shadow:0 20px 50px rgba(0,0,0,0.35);
       --blur:18px;
-      --radius:22px;
+      --radius:24px;
     }
 
     *{box-sizing:border-box}
@@ -36,7 +36,7 @@
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
       background:
         radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,59,48,0.08), transparent 28%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
     }
 
@@ -159,6 +159,13 @@
       gap:10px;
     }
 
+    .settings-row{
+      display:grid;
+      grid-template-columns:1fr 200px;
+      gap:10px;
+      align-items:end;
+    }
+
     input,select,button{
       width:100%;
       padding:12px;
@@ -179,6 +186,16 @@
       border:none;
       font-weight:700;
       cursor:pointer;
+      transition:transform .12s ease, opacity .12s ease, background .12s ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    button:active{
+      transform:translateY(0);
+      opacity:0.9;
     }
 
     .small-btn{
@@ -198,11 +215,19 @@
       background:rgba(239,68,68,0.18);
     }
 
+    .save-btn{
+      background:rgba(34,197,94,0.22);
+    }
+
     .notice{
       color:#bbb;
       white-space:pre-wrap;
       margin-top:10px;
       min-height:18px;
+    }
+
+    .success{
+      color:#8ff0b2;
     }
 
     .item{
@@ -255,6 +280,7 @@
     .pill-income{background:rgba(34,197,94,0.85)}
     .pill-expense{background:rgba(239,68,68,0.85)}
     .pill-off{background:rgba(107,114,128,0.85)}
+    .pill-on{background:rgba(34,197,94,0.85)}
 
     .budget-box{
       display:grid;
@@ -275,6 +301,7 @@
       gap:8px;
       flex-wrap:wrap;
       margin-top:8px;
+      align-items:center;
     }
 
     .edit-box{
@@ -288,15 +315,50 @@
       padding:8px 0 2px;
     }
 
-    @media (max-width:980px){
-      .split{
-        grid-template-columns:1fr;
-      }
+    .toggle-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:8px;
+    }
 
+    .toggle{
+      position:relative;
+      width:52px;
+      height:30px;
+      background:rgba(255,255,255,0.12);
+      border-radius:999px;
+      cursor:pointer;
+      transition:background .15s ease;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .toggle.on{
+      background:rgba(34,197,94,0.35);
+    }
+
+    .toggle-knob{
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:22px;
+      height:22px;
+      background:#fff;
+      border-radius:50%;
+      transition:left .15s ease;
+    }
+
+    .toggle.on .toggle-knob{
+      left:25px;
+    }
+
+    @media (max-width:980px){
+      .split,
       .kpis,
       .budget-box,
       .row,
-      .row-3{
+      .row-3,
+      .settings-row{
         grid-template-columns:1fr;
       }
     }
@@ -308,12 +370,18 @@
     <div class="glass card">
       <div class="topbar">
         <div>
-          <h2 style="margin:0;">Finance</h2>
+          <h2 style="margin:0;">Pace Finance</h2>
           <p class="muted" style="margin:6px 0 0 0;">Life and business split clearly, with active fixed bills feeding the totals.</p>
         </div>
         <a class="back-btn" href="dashboard.html">← Dashboard</a>
       </div>
 
+      <div class="settings-row">
+        <input id="monthlyPay" type="number" placeholder="Monthly pay e.g. 1854.09">
+        <button id="savePayBtn" type="button">Save monthly pay</button>
+      </div>
+
+      <p id="paySaved" class="notice"></p>
       <div class="kpis" id="combinedKpis"></div>
     </div>
 
@@ -353,7 +421,7 @@
 
           <div class="subcard">
             <h3 style="margin-bottom:6px;">Fixed bills</h3>
-            <p class="muted" style="margin-bottom:0;">All active bills count toward your life outgoings and pay balance.</p>
+            <p class="muted" style="margin-bottom:0;">All active bills count toward your life outgoings and monthly pay balance.</p>
 
             <div class="row">
               <input id="fixedName" placeholder="Bill name e.g. Rent, Utilities, Phone">
@@ -416,7 +484,7 @@
 
     <div class="glass card">
       <h3 style="margin-bottom:6px;">Budget snapshot</h3>
-      <p class="muted" style="margin-bottom:0;">This uses your monthly pay and the current active fixed bills list.</p>
+      <p class="muted" style="margin-bottom:0;">This uses your saved monthly pay and the current active fixed bills list.</p>
       <div class="budget-box" id="budgetBox"></div>
       <p id="msg" class="notice"></p>
     </div>
@@ -433,26 +501,11 @@
         auth: {
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: true
+          detectSessionInUrl: true,
+          storage: localStorage
         }
       }
     );
-
-    const MONTHLY_PAY = 1854.09;
-
-    const DEFAULT_FIXED_EXPENSES = [
-      { name: "Rent", amount: 740 },
-      { name: "Utilities/Bills", amount: 429.01 },
-      { name: "Loan", amount: 200 },
-      { name: "Zable", amount: 60 },
-      { name: "Capital One", amount: 20 },
-      { name: "Waggel", amount: 4.48 },
-      { name: "Credit Spring", amount: 60 },
-      { name: "Rotherham CT", amount: 112 },
-      { name: "Eon", amount: 106.21 },
-      { name: "Zero Deposit", amount: 17.98 },
-      { name: "Phone Bill", amount: 48.34 }
-    ];
 
     const combinedKpisEl = document.getElementById("combinedKpis");
     const lifeKpisEl = document.getElementById("lifeKpis");
@@ -462,6 +515,8 @@
     const businessListEl = document.getElementById("businessList");
     const budgetBoxEl = document.getElementById("budgetBox");
     const msgEl = document.getElementById("msg");
+    const monthlyPayEl = document.getElementById("monthlyPay");
+    const paySavedEl = document.getElementById("paySaved");
 
     const lifeTypeEl = document.getElementById("lifeType");
     const lifeAmountEl = document.getElementById("lifeAmount");
@@ -481,13 +536,20 @@
     let transactions = [];
     let payments = [];
     let fixedExpenses = [];
+    let monthlyPay = 0;
 
     function money(v){
       return `£${Number(v || 0).toFixed(2)}`;
     }
 
-    function setMsg(text){
+    function setMsg(text, good=false){
       msgEl.textContent = text;
+      msgEl.className = good ? "notice success" : "notice";
+    }
+
+    function setPayMsg(text, good=false){
+      paySavedEl.textContent = text;
+      paySavedEl.className = good ? "notice success" : "notice";
     }
 
     async function getUser(){
@@ -499,23 +561,22 @@
       return new Date().toISOString().split("T")[0];
     }
 
-    async function seedFixedExpenses(userId){
+    async function upsertSettings(userId, patch) {
+      const { error } = await supabase
+        .from("app_settings")
+        .upsert([{ user_id: userId, ...patch }], { onConflict: "user_id" });
+      return error;
+    }
+
+    async function loadSettings(userId) {
       const { data } = await supabase
-        .from("fixed_expenses")
+        .from("app_settings")
         .select("*")
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if ((data || []).length) return;
-
-      const rows = DEFAULT_FIXED_EXPENSES.map(item => ({
-        user_id: userId,
-        name: item.name,
-        amount: item.amount,
-        bucket: "bills",
-        is_active: true
-      }));
-
-      await supabase.from("fixed_expenses").insert(rows);
+      monthlyPay = Number(data?.monthly_pay || 0);
+      monthlyPayEl.value = monthlyPay || "";
     }
 
     function groupFigures(){
@@ -613,12 +674,12 @@
         .filter(x => x.is_active)
         .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
-      const remaining = MONTHLY_PAY - activeFixedBills;
+      const remaining = monthlyPay - activeFixedBills;
 
       budgetBoxEl.innerHTML = `
         <div class="budget-card">
           <div class="kpi-title">Monthly pay</div>
-          <div class="kpi-value">${money(MONTHLY_PAY)}</div>
+          <div class="kpi-value">${money(monthlyPay)}</div>
         </div>
         <div class="budget-card">
           <div class="kpi-title">Active fixed bills</div>
@@ -646,14 +707,17 @@
           <div style="flex:1;min-width:0;">
             <div class="item-title">${item.name}</div>
             <div class="item-meta">${item.is_active ? "Active" : "Inactive"}</div>
-            <div class="pill-row">
-              <span class="pill ${item.is_active ? "pill-bills" : "pill-off"}">${item.is_active ? "Included in totals" : "Not included"}</span>
+
+            <div class="toggle-wrap">
+              <div class="toggle ${item.is_active ? 'on' : ''}" onclick="toggleFixed('${item.id}', ${item.is_active ? 'false' : 'true'})">
+                <div class="toggle-knob"></div>
+              </div>
+              <span class="pill ${item.is_active ? "pill-on" : "pill-off"}">
+                ${item.is_active ? "Included in totals" : "Not included"}
+              </span>
             </div>
 
             <div class="inline-actions">
-              <button class="small-btn ghost-btn" onclick="toggleFixed('${item.id}', ${item.is_active ? 'false' : 'true'})">
-                ${item.is_active ? "Turn off" : "Turn on"}
-              </button>
               <button class="small-btn ghost-btn" onclick="toggleFixedEdit('${item.id}')">Edit</button>
               <button class="small-btn danger-btn" onclick="deleteFixed('${item.id}')">Delete</button>
             </div>
@@ -663,7 +727,7 @@
                 <input id="fixed-edit-name-${item.id}" value="${(item.name || "").replace(/"/g, '&quot;')}" placeholder="Bill name">
                 <input id="fixed-edit-amount-${item.id}" type="number" value="${Number(item.amount || 0)}" placeholder="Amount">
               </div>
-              <button class="small-btn" style="margin-top:10px;" onclick="saveFixedEdit('${item.id}')">Save changes</button>
+              <button class="small-btn save-btn" style="margin-top:10px;" onclick="saveFixedEdit('${item.id}')">Save changes</button>
             </div>
           </div>
 
@@ -672,7 +736,7 @@
       `).join("");
     }
 
-    function renderList(targetEl, rows, bucketType){
+    function renderTransactionList(targetEl, rows, bucketType){
       if (!rows.length) {
         targetEl.innerHTML = `<div class="empty">Nothing here yet.</div>`;
         return;
@@ -680,14 +744,36 @@
 
       targetEl.innerHTML = rows.map(t => `
         <div class="item">
-          <div>
+          <div style="flex:1;min-width:0;">
             <div class="item-title">${t.subtype || t.category || "Uncategorised"}</div>
             <div class="item-meta">${t.date || ""}${t.note ? ` • ${t.note}` : ""}</div>
             <div class="pill-row">
               <span class="pill ${bucketType === "life" ? "pill-life" : "pill-biz"}">${bucketType}</span>
               <span class="pill ${t.type === "income" ? "pill-income" : "pill-expense"}">${t.type}</span>
             </div>
+
+            <div class="inline-actions">
+              <button class="small-btn ghost-btn" onclick="toggleTransactionEdit('${t.id}')">Edit</button>
+              <button class="small-btn danger-btn" onclick="deleteTransaction('${t.id}')">Delete</button>
+            </div>
+
+            <div id="tx-edit-${t.id}" class="edit-box" style="display:none;">
+              <div class="row-3">
+                <select id="tx-edit-type-${t.id}">
+                  <option value="income" ${t.type === "income" ? "selected" : ""}>Income</option>
+                  <option value="expense" ${t.type === "expense" ? "selected" : ""}>Expense</option>
+                </select>
+                <input id="tx-edit-amount-${t.id}" type="number" value="${Number(t.amount || 0)}">
+                <input id="tx-edit-date-${t.id}" type="date" value="${t.date || ""}">
+              </div>
+              <div class="row">
+                <input id="tx-edit-subtype-${t.id}" value="${(t.subtype || t.category || "").replace(/"/g, '&quot;')}" placeholder="Category">
+                <input id="tx-edit-note-${t.id}" value="${(t.note || "").replace(/"/g, '&quot;')}" placeholder="Note">
+              </div>
+              <button class="small-btn save-btn" style="margin-top:10px;" onclick="saveTransactionEdit('${t.id}', '${bucketType}')">Save changes</button>
+            </div>
           </div>
+
           <div class="item-money ${t.type === "income" ? "good" : "bad"}">
             ${t.type === "income" ? "+" : "-"}${money(t.amount)}
           </div>
@@ -699,8 +785,8 @@
       const lifeRows = transactions.filter(t => t.bucket === "life");
       const businessRows = transactions.filter(t => t.bucket === "business");
 
-      renderList(lifeListEl, lifeRows, "life");
-      renderList(businessListEl, businessRows, "business");
+      renderTransactionList(lifeListEl, lifeRows, "life");
+      renderTransactionList(businessListEl, businessRows, "business");
     }
 
     async function addTransaction(bucket, type, amount, subtype, date, note){
@@ -733,7 +819,7 @@
         return;
       }
 
-      setMsg("Transaction saved.");
+      setMsg("Transaction saved.", true);
       await load();
     }
 
@@ -773,7 +859,7 @@
 
       fixedNameEl.value = "";
       fixedAmountEl.value = "";
-      setMsg("Fixed bill added.");
+      setMsg("Fixed bill added.", true);
       await load();
     }
 
@@ -813,6 +899,22 @@
 
     document.getElementById("saveFixedBtn").addEventListener("click", addFixedBill);
 
+    document.getElementById("savePayBtn").addEventListener("click", async () => {
+      const user = await getUser();
+      if (!user) return;
+
+      const value = Number(monthlyPayEl.value || 0);
+      const error = await upsertSettings(user.id, { monthly_pay: value });
+
+      if (error) {
+        setPayMsg(error.message);
+        return;
+      }
+
+      setPayMsg("Monthly pay saved.", true);
+      await load();
+    });
+
     window.toggleFixed = async function(id, nextState){
       const { error } = await supabase
         .from("fixed_expenses")
@@ -824,6 +926,7 @@
         return;
       }
 
+      setMsg(nextState ? "Bill turned on." : "Bill turned off.", true);
       await load();
     };
 
@@ -860,7 +963,7 @@
         return;
       }
 
-      setMsg("Fixed bill updated.");
+      setMsg("Fixed bill updated.", true);
       await load();
     };
 
@@ -875,7 +978,61 @@
         return;
       }
 
-      setMsg("Fixed bill deleted.");
+      setMsg("Fixed bill deleted.", true);
+      await load();
+    };
+
+    window.toggleTransactionEdit = function(id){
+      const box = document.getElementById(`tx-edit-${id}`);
+      if (!box) return;
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    };
+
+    window.saveTransactionEdit = async function(id, bucketType){
+      const type = document.getElementById(`tx-edit-type-${id}`).value;
+      const amount = Number(document.getElementById(`tx-edit-amount-${id}`).value || 0);
+      const date = document.getElementById(`tx-edit-date-${id}`).value || null;
+      const subtype = document.getElementById(`tx-edit-subtype-${id}`).value.trim();
+      const note = document.getElementById(`tx-edit-note-${id}`).value.trim();
+
+      if (!amount) {
+        setMsg("Transaction amount is required.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          type,
+          amount,
+          date,
+          category: subtype,
+          subtype,
+          note: note || null
+        })
+        .eq("id", id);
+
+      if (error) {
+        setMsg(error.message);
+        return;
+      }
+
+      setMsg(`${bucketType === "life" ? "Life" : "Business"} transaction updated.`, true);
+      await load();
+    };
+
+    window.deleteTransaction = async function(id){
+      const { error } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        setMsg(error.message);
+        return;
+      }
+
+      setMsg("Transaction deleted.", true);
       await load();
     };
 
@@ -887,11 +1044,11 @@
         return;
       }
 
-      await seedFixedExpenses(user.id);
+      await loadSettings(user.id);
 
       const [txRes, payRes, fixedRes] = await Promise.all([
         supabase.from("transactions").select("*").eq("user_id", user.id).order("date", { ascending: false }),
-        supabase.from("payments").select("*").order("payment_date", { ascending: false }),
+        supabase.from("payments").select("*").eq("user_id", user.id).order("payment_date", { ascending: false }),
         supabase.from("fixed_expenses").select("*").eq("user_id", user.id).order("created_at", { ascending: true })
       ]);
 
