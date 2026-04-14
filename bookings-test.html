@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pace Bookings</title>
-  <link rel="manifest" href="site.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-32.png">
-<meta name="theme-color" content="#0f1115">
+  <link rel="manifest" href="/Pace/site.webmanifest">
+  <link rel="apple-touch-icon" href="/Pace/icon-180.png">
+  <link rel="icon" href="/Pace/icon-32.png">
+  <meta name="theme-color" content="#0f1115">
   <style>
     :root {
       --bg1:#0f1115;
@@ -42,7 +42,7 @@
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
       background:
         radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(255,59,48,0.08), transparent 28%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
     }
 
@@ -441,7 +441,8 @@
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        storage: localStorage
       }
     }
   );
@@ -675,6 +676,11 @@
   async function addPayment(bookingId) {
     const user = await getUser();
 
+    if (!user) {
+      setMsg("Not logged in.");
+      return;
+    }
+
     const amountEl = document.getElementById(`payment-amount-${bookingId}`);
     const typeEl = document.getElementById(`payment-type-${bookingId}`);
     const dateEl = document.getElementById(`payment-date-${bookingId}`);
@@ -703,6 +709,11 @@
       setMsg(error.message);
       return;
     }
+
+    amountEl.value = "";
+    typeEl.value = "Deposit";
+    dateEl.value = "";
+    noteEl.value = "";
 
     setMsg("Payment saved.");
     await load();
