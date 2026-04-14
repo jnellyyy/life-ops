@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bookings</title>
+  <title>Pace Bookings</title>
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f1115">
   <style>
     :root {
       --bg1:#0f1115;
@@ -26,7 +29,7 @@
 
       --shadow:0 20px 50px rgba(0,0,0,0.35);
       --blur:18px;
-      --radius:22px;
+      --radius:24px;
     }
 
     * { box-sizing: border-box; }
@@ -98,7 +101,6 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 18px;
       padding: 12px 14px;
-      min-width: 130px;
     }
 
     .kpi-title {
@@ -337,6 +339,13 @@
       padding: 14px;
     }
 
+    .settings-box {
+      display:grid;
+      grid-template-columns: 1fr 200px;
+      gap:10px;
+      align-items:end;
+    }
+
     .enquiry { background: var(--enquiry); }
     .pending { background: var(--pending); }
     .booked { background: var(--booked); }
@@ -355,7 +364,7 @@
         padding:14px;
       }
 
-      .row, .row-3, .money-grid, .kpi {
+      .row, .row-3, .money-grid, .kpi, .settings-box {
         grid-template-columns: 1fr;
       }
     }
@@ -368,12 +377,18 @@
   <div class="glass card">
     <div class="topbar">
       <div>
-        <h2 style="margin:0;">Bookings</h2>
+        <h2 style="margin:0;">Pace Bookings</h2>
         <p class="muted" style="margin:6px 0 0 0;">Track jobs, payments, balances and due dates</p>
       </div>
       <a class="back-btn" href="dashboard.html">← Dashboard</a>
     </div>
 
+    <div class="settings-box">
+      <input id="businessName" placeholder="Business name">
+      <button id="saveBusinessNameBtn" type="button">Save business name</button>
+    </div>
+
+    <p id="businessSaved" class="notice"></p>
     <div class="kpi" id="kpi"></div>
   </div>
 
@@ -442,6 +457,8 @@
   const kpiEl = document.getElementById("kpi");
   const msgEl = document.getElementById("msg");
   const comingUpEl = document.getElementById("comingUp");
+  const businessNameEl = document.getElementById("businessName");
+  const businessSavedEl = document.getElementById("businessSaved");
 
   const order = [
     "Enquiry",
@@ -483,6 +500,40 @@
     if (error) return null;
     return data.user;
   }
+
+  async function upsertSettings(userId, patch) {
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert([{ user_id: userId, ...patch }], { onConflict: "user_id" });
+    return error;
+  }
+
+  async function loadSettings(userId) {
+    const { data } = await supabase
+      .from("app_settings")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (data?.business_name) {
+      businessNameEl.value = data.business_name;
+    }
+  }
+
+  document.getElementById("saveBusinessNameBtn").addEventListener("click", async () => {
+    const user = await getUser();
+    if (!user) return;
+
+    const businessName = businessNameEl.value.trim();
+    const error = await upsertSettings(user.id, { business_name: businessName || null });
+
+    if (error) {
+      businessSavedEl.textContent = error.message;
+      return;
+    }
+
+    businessSavedEl.textContent = "Business name saved.";
+  });
 
   function formatDate(value) {
     if (!value) return "No date set";
@@ -592,13 +643,14 @@
 
   saveBtn.addEventListener("click", addBooking);
 
-  async function getPaymentsMap(bookings) {
+  async function getPaymentsMap(bookings, userId) {
     const ids = bookings.map(b => b.id);
     if (!ids.length) return {};
 
     const { data, error } = await supabase
       .from("payments")
       .select("*")
+      .eq("user_id", userId)
       .in("booking_id", ids)
       .order("payment_date", { ascending: false });
 
@@ -620,6 +672,8 @@
   }
 
   async function addPayment(bookingId) {
+    const user = await getUser();
+
     const amountEl = document.getElementById(`payment-amount-${bookingId}`);
     const typeEl = document.getElementById(`payment-type-${bookingId}`);
     const dateEl = document.getElementById(`payment-date-${bookingId}`);
@@ -636,6 +690,7 @@
     }
 
     const { error } = await supabase.from("payments").insert([{
+      user_id: user.id,
       booking_id: bookingId,
       amount,
       payment_type: paymentType,
@@ -783,6 +838,8 @@
       return;
     }
 
+    await loadSettings(user.id);
+
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
@@ -800,7 +857,7 @@
       plain_note: extractPlainNote(row.note)
     }));
 
-    const paymentsMap = await getPaymentsMap(bookings);
+    const paymentsMap = await getPaymentsMap(bookings, user.id);
 
     const total = bookings.length;
     const booked = bookings.filter(b => b.status === "Booked").length;
