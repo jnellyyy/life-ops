@@ -1,281 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pace Attendance</title>
   <link rel="manifest" href="site.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#0f1115">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance</title>
-<style>
-:root {
-  --bg1:#0f1115;
-  --bg2:#171a20;
-  --panel:rgba(255,255,255,0.06);
-  --panel-strong:rgba(255,255,255,0.08);
-  --line:rgba(255,255,255,0.10);
-  --text:#f5f7fb;
-  --muted:#a7afbe;
-  --accent:#ff3b30;
-  --office:#22c55e;
-  --wfh:#60a5fa;
-  --sick:#ef4444;
-  --holiday:#f59e0b;
-  --bank:#a855f7;
-  --weekend:#6b7280;
-  --shadow:0 20px 50px rgba(0,0,0,0.35);
-  --blur:18px;
-  --radius:22px;
-}
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#0f1115">
+  <style>
+    :root {
+      --bg1:#0f1115;
+      --bg2:#171a20;
+      --panel:rgba(255,255,255,0.06);
+      --panel-strong:rgba(255,255,255,0.08);
+      --line:rgba(255,255,255,0.10);
+      --text:#f5f7fb;
+      --muted:#a7afbe;
+      --accent:#ff3b30;
+      --office:#22c55e;
+      --wfh:#60a5fa;
+      --sick:#ef4444;
+      --holiday:#f59e0b;
+      --bank:#a855f7;
+      --blocked:#6b7280;
+      --shadow:0 20px 50px rgba(0,0,0,0.35);
+      --blur:18px;
+      --radius:24px;
+    }
 
-* { box-sizing: border-box; }
+    * { box-sizing: border-box; }
 
-body {
-  margin:0;
-  padding:18px;
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-    radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
-    linear-gradient(180deg, var(--bg1), var(--bg2));
-}
+    body {
+      margin:0;
+      padding:18px;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
+        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
 
-.wrap {
-  max-width: 1040px;
-  margin: 0 auto;
-}
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
 
-.glass {
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  backdrop-filter:blur(var(--blur));
-  -webkit-backdrop-filter:blur(var(--blur));
-  box-shadow:var(--shadow);
-}
+    .glass {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      backdrop-filter:blur(var(--blur));
+      -webkit-backdrop-filter:blur(var(--blur));
+      box-shadow:var(--shadow);
+    }
 
-.card {
-  padding:20px;
-  margin-top:16px;
-}
+    .card {
+      padding:20px;
+      margin-top:16px;
+    }
 
-.topbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:16px;
-}
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
 
-.back-btn {
-  width:auto;
-  padding:10px 14px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.08);
-  color:#fff;
-  border:none;
-  font-weight:700;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-block;
-}
+    .back-btn {
+      width:auto;
+      padding:10px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-block;
+    }
 
-.muted { color:var(--muted); }
+    .muted { color:var(--muted); }
 
-.stats-box {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-}
+    .kpis {
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
 
-.stat {
-  background: var(--panel-strong);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  padding: 12px 14px;
-}
+    .kpi {
+      background:var(--panel-strong);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:12px 14px;
+    }
 
-.stat-title {
-  font-size: 12px;
-  color: var(--muted);
-}
+    .kpi-title {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
 
-.stat-value {
-  font-size: 18px;
-  font-weight: 700;
-  margin-top:4px;
-}
+    .kpi-value {
+      font-size:18px;
+      font-weight:700;
+    }
 
-.status-on { color: var(--office); }
-.status-off { color: var(--holiday); }
-.status-bad { color: var(--sick); }
+    .status-on { color:var(--office); }
+    .status-warn { color:var(--holiday); }
+    .status-bad { color:var(--sick); }
 
-.calendar-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-}
+    .section-title {
+      margin:0 0 8px 0;
+      font-size:22px;
+      letter-spacing:-0.03em;
+    }
 
-button {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  font:inherit;
-}
+    .grid-2 {
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:16px;
+      margin-top:16px;
+    }
 
-button.secondary {
-  background: rgba(255,255,255,0.08);
-}
+    .rule-form-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
 
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-top:12px;
-}
+    .rule-form-grid-3 {
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
 
-.dow {
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-  padding-bottom:4px;
-}
+    input, select, button {
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.05);
+      color:#fff;
+      border:1px solid rgba(255,255,255,0.10);
+      font:inherit;
+    }
 
-.day {
-  background: var(--panel-strong);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  min-height: 96px;
-  padding: 10px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+    input::placeholder {
+      color:#9da6b5;
+    }
 
-.day.office { border-color: rgba(34,197,94,0.65); }
-.day.wfh { border-color: rgba(96,165,250,0.65); }
-.day.sick { border-color: rgba(239,68,68,0.65); }
-.day.holiday { border-color: rgba(245,158,11,0.65); }
+    button {
+      background:var(--accent);
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+    }
 
-.day.bank-holiday {
-  border-color: rgba(168,85,247,0.70);
-  box-shadow: inset 0 0 0 1px rgba(168,85,247,0.50);
-  cursor: not-allowed;
-  background: rgba(168,85,247,0.10);
-}
+    .secondary-btn {
+      background:rgba(255,255,255,0.10);
+    }
 
-.day.weekend {
-  border-color: rgba(107,114,128,0.45);
-  background: rgba(255,255,255,0.03);
-  color: #8a93a2;
-  cursor: not-allowed;
-  opacity: 0.72;
-}
+    .danger-btn {
+      background:rgba(239,68,68,0.18);
+    }
 
-.day-number { font-weight: 700; }
+    .notice {
+      color:#bbb;
+      white-space:pre-wrap;
+      margin-top:10px;
+      min-height:18px;
+    }
 
-.day-status {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.25;
-}
+    .working-days {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
 
-.notice {
-  color: var(--muted);
-  margin-top: 10px;
-}
+    .day-check {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:10px 8px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      font-size:13px;
+    }
 
-.progress-wrap {
-  margin-top: 16px;
-}
+    .day-check input {
+      width:auto;
+      margin:0;
+      padding:0;
+    }
 
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
+    .rule-item {
+      background:var(--panel-strong);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:14px;
+      margin-top:10px;
+    }
 
-.progress-bar {
-  height: 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  overflow: hidden;
-}
+    .rule-head {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
 
-.progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--office);
-}
+    .rule-name {
+      font-weight:700;
+      margin-bottom:4px;
+      font-size:15px;
+    }
 
-.summary-lines {
-  margin-top: 12px;
-  color: #d6dbe4;
-  line-height: 1.5;
-}
+    .rule-meta {
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
 
-.summary-lines strong {
-  color: #fff;
-}
+    .rule-actions {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
 
-.legend {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 14px 0 18px;
-  color: var(--muted);
-  font-size: 13px;
-}
+    .pill-row {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    .pill {
+      display:inline-block;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      color:#fff;
+    }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  display: inline-block;
-}
+    .pill-monthly { background:#6b7280; }
+    .pill-rolling { background:#60a5fa; }
+    .pill-current { background:#22c55e; }
+    .pill-ended { background:#4b5563; }
 
-@media (max-width: 900px) {
-  .stats-box {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+    .calendar-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:12px;
+    }
 
-@media (max-width: 700px) {
-  body{
-    padding:14px;
-  }
+    .calendar {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:8px;
+      margin-top:8px;
+    }
 
-  .calendar {
-    gap: 6px;
-  }
+    .dow {
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+      padding-bottom:2px;
+    }
 
-  .day {
-    min-height: 78px;
-  }
+    .day {
+      background:var(--panel-strong);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      min-height:96px;
+      padding:10px;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
 
-  .stats-box {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+    .day.office { border-color:rgba(34,197,94,0.65); }
+    .day.wfh { border-color:rgba(96,165,250,0.65); }
+    .day.sick { border-color:rgba(239,68,68,0.65); }
+    .day.holiday { border-color:rgba(245,158,11,0.65); }
+
+    .day.bank-holiday {
+      border-color:rgba(168,85,247,0.75);
+      box-shadow:inset 0 0 0 1px rgba(168,85,247,0.45);
+      cursor:not-allowed;
+      background:rgba(168,85,247,0.10);
+    }
+
+    .day.blocked {
+      border-color:rgba(107,114,128,0.45);
+      background:rgba(255,255,255,0.03);
+      color:#8a93a2;
+      cursor:not-allowed;
+      opacity:0.72;
+    }
+
+    .day-number {
+      font-weight:700;
+    }
+
+    .day-status {
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.25;
+    }
+
+    .progress-wrap {
+      margin-top:16px;
+    }
+
+    .progress-label {
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    .progress-bar {
+      height:12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      overflow:hidden;
+    }
+
+    .progress-fill {
+      height:100%;
+      border-radius:999px;
+      background:var(--office);
+    }
+
+    .summary-lines {
+      margin-top:12px;
+      color:#d6dbe4;
+      line-height:1.55;
+    }
+
+    .summary-lines strong {
+      color:#fff;
+    }
+
+    .legend {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin:14px 0 10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .legend-item {
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .dot {
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
+    @media (max-width:980px) {
+      .grid-2,
+      .kpis,
+      .rule-form-grid,
+      .rule-form-grid-3,
+      .working-days {
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:700px) {
+      body {
+        padding:14px;
+      }
+
+      .calendar {
+        gap:6px;
+      }
+
+      .day {
+        min-height:78px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -284,8 +409,8 @@ button.secondary {
   <div class="glass card">
     <div class="topbar">
       <div>
-        <h2 style="margin:0;">Attendance</h2>
-        <p class="muted" style="margin:6px 0 0 0;">Track office days and policy progress</p>
+        <h2 style="margin:0;">Pace Attendance</h2>
+        <p class="muted" style="margin:6px 0 0 0;">Flexible rules by date range, with monthly or rolling periods.</p>
       </div>
       <a class="back-btn" href="dashboard.html">← Dashboard</a>
     </div>
@@ -293,27 +418,70 @@ button.secondary {
     <div id="stats"></div>
   </div>
 
-  <div class="glass card">
-    <div class="calendar-head">
-      <h2 id="monthTitle" style="margin:0;"></h2>
-      <div>
-        <button class="secondary" onclick="changeMonth(-1)">Prev</button>
-        <button class="secondary" onclick="goToday()">Today</button>
-        <button class="secondary" onclick="changeMonth(1)">Next</button>
+  <div class="grid-2">
+    <div class="glass card">
+      <h3 class="section-title">Attendance Rules</h3>
+      <p class="muted" style="margin-bottom:0;">Each rule applies over its date range. Later rules override earlier ones.</p>
+
+      <input id="ruleName" placeholder="Rule name e.g. Rolling 2 days" />
+
+      <div class="rule-form-grid">
+        <input id="ruleStart" type="date" />
+        <input id="ruleEnd" type="date" />
       </div>
+
+      <div class="rule-form-grid">
+        <select id="ruleMode">
+          <option value="monthly">Monthly</option>
+          <option value="rolling_28">Rolling 28 days</option>
+        </select>
+
+        <input id="ruleDaysPerWeek" type="number" min="0" step="0.5" placeholder="Days per week" />
+      </div>
+
+      <div style="margin-top:10px;font-size:13px;color:var(--muted);">Working days</div>
+      <div class="working-days">
+        <label class="day-check"><input type="checkbox" value="1" checked> Mon</label>
+        <label class="day-check"><input type="checkbox" value="2" checked> Tue</label>
+        <label class="day-check"><input type="checkbox" value="3" checked> Wed</label>
+        <label class="day-check"><input type="checkbox" value="4" checked> Thu</label>
+        <label class="day-check"><input type="checkbox" value="5" checked> Fri</label>
+        <label class="day-check"><input type="checkbox" value="6"> Sat</label>
+        <label class="day-check"><input type="checkbox" value="0"> Sun</label>
+      </div>
+
+      <div class="rule-form-grid">
+        <button id="saveRuleBtn" type="button">Save rule</button>
+        <button id="clearRuleBtn" class="secondary-btn" type="button">Clear form</button>
+      </div>
+
+      <p id="ruleMsg" class="notice"></p>
+
+      <div id="rulesList"></div>
     </div>
 
-    <div class="legend">
-      <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Office</div>
-      <div class="legend-item"><span class="dot" style="background:#60a5fa;"></span> WFH</div>
-      <div class="legend-item"><span class="dot" style="background:#ef4444;"></span> Sick</div>
-      <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Holiday</div>
-      <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> Bank holiday</div>
-      <div class="legend-item"><span class="dot" style="background:#6b7280;"></span> Weekend</div>
-    </div>
+    <div class="glass card">
+      <div class="calendar-head">
+        <h3 class="section-title" id="monthTitle" style="margin:0;"></h3>
+        <div>
+          <button class="secondary-btn" onclick="changeMonth(-1)">Prev</button>
+          <button class="secondary-btn" onclick="goToday()">Today</button>
+          <button class="secondary-btn" onclick="changeMonth(1)">Next</button>
+        </div>
+      </div>
 
-    <div class="calendar" id="calendar"></div>
-    <p class="notice" id="msg"></p>
+      <div class="legend">
+        <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Office</div>
+        <div class="legend-item"><span class="dot" style="background:#60a5fa;"></span> WFH</div>
+        <div class="legend-item"><span class="dot" style="background:#ef4444;"></span> Sick</div>
+        <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Holiday</div>
+        <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> Bank holiday</div>
+        <div class="legend-item"><span class="dot" style="background:#6b7280;"></span> Non-working day</div>
+      </div>
+
+      <div class="calendar" id="calendar"></div>
+      <p class="notice" id="msg"></p>
+    </div>
   </div>
 
 </div>
@@ -371,16 +539,33 @@ const BANK_HOLIDAYS = {
   "2028-12-26": "Boxing Day"
 };
 
+const DEFAULT_RULE = {
+  rule_name: "Default rule",
+  start_date: "2025-01-01",
+  end_date: null,
+  calculation_mode: "monthly",
+  days_per_week: 3,
+  working_days: [1,2,3,4,5]
+};
+
 const calendar = document.getElementById("calendar");
 const monthTitle = document.getElementById("monthTitle");
 const msg = document.getElementById("msg");
+const ruleMsg = document.getElementById("ruleMsg");
+const rulesList = document.getElementById("rulesList");
+
+const ruleNameEl = document.getElementById("ruleName");
+const ruleStartEl = document.getElementById("ruleStart");
+const ruleEndEl = document.getElementById("ruleEnd");
+const ruleModeEl = document.getElementById("ruleMode");
+const ruleDaysPerWeekEl = document.getElementById("ruleDaysPerWeek");
 
 let currentDate = new Date();
 let attendanceMap = {};
+let rules = [];
+let editingRuleId = null;
 
-const order = ["blank", "Office", "WFH", "Sick", "Holiday"];
-const OFFICE_TARGET_RATIO = 0.6;
-const POLICY_CHANGE_DATE = new Date("2026-03-01");
+const attendanceOrder = ["blank", "Office", "WFH", "Sick", "Holiday"];
 
 function formatDate(d) {
   const year = d.getFullYear();
@@ -400,14 +585,8 @@ function formatMonthLabel(d) {
   });
 }
 
-async function getUser() {
-  const { data } = await supabase.auth.getUser();
-  return data.user;
-}
-
-function isWeekend(date) {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+function parseDateOnly(value) {
+  return new Date(value + "T00:00:00");
 }
 
 function isBankHoliday(date) {
@@ -416,6 +595,60 @@ function isBankHoliday(date) {
 
 function getBankHolidayTitle(date) {
   return BANK_HOLIDAYS[formatDate(date)] || "";
+}
+
+function checkedWorkingDays() {
+  return [...document.querySelectorAll('.working-days input:checked')].map(el => Number(el.value));
+}
+
+function setWorkingDays(values) {
+  const chosen = new Set((values || []).map(Number));
+  document.querySelectorAll('.working-days input').forEach(el => {
+    el.checked = chosen.has(Number(el.value));
+  });
+}
+
+function clearRuleForm() {
+  editingRuleId = null;
+  ruleNameEl.value = "";
+  ruleStartEl.value = "";
+  ruleEndEl.value = "";
+  ruleModeEl.value = "monthly";
+  ruleDaysPerWeekEl.value = "";
+  setWorkingDays([1,2,3,4,5]);
+  ruleMsg.textContent = "";
+}
+
+async function getUser() {
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+async function seedRules(userId) {
+  const { data } = await supabase
+    .from("attendance_rules")
+    .select("id")
+    .eq("user_id", userId);
+
+  if ((data || []).length) return;
+
+  await supabase.from("attendance_rules").insert([{
+    user_id: userId,
+    ...DEFAULT_RULE
+  }]);
+}
+
+function getRuleForDate(date) {
+  const applicable = rules.filter(rule => {
+    const start = parseDateOnly(rule.start_date);
+    const end = rule.end_date ? parseDateOnly(rule.end_date) : null;
+    return start <= date && (!end || date <= end);
+  });
+
+  if (!applicable.length) return null;
+
+  applicable.sort((a, b) => parseDateOnly(b.start_date) - parseDateOnly(a.start_date));
+  return applicable[0];
 }
 
 function getViewedMonthBounds() {
@@ -427,91 +660,108 @@ function getViewedMonthBounds() {
   };
 }
 
-function countBaseWorkingDays(start, end) {
-  let count = 0;
-  const d = new Date(start);
+function getPeriodForView() {
+  const { start: monthStart, end: monthEnd } = getViewedMonthBounds();
+  const controllingRule = getRuleForDate(monthEnd) || DEFAULT_RULE;
 
-  while (d <= end) {
-    if (!isWeekend(d) && !isBankHoliday(d)) {
-      count++;
-    }
-    d.setDate(d.getDate() + 1);
-  }
-
-  return count;
-}
-
-function countExcludedWeekdays(start, end) {
-  let count = 0;
-
-  for (const key in attendanceMap) {
-    const date = new Date(key + "T00:00:00");
-    const status = attendanceMap[key];
-
-    if (
-      date >= start &&
-      date <= end &&
-      !isWeekend(date) &&
-      !isBankHoliday(date) &&
-      (status === "Sick" || status === "Holiday")
-    ) {
-      count++;
-    }
-  }
-
-  return count;
-}
-
-function countEligibleDays(start, end) {
-  const baseWorkingDays = countBaseWorkingDays(start, end);
-  const excludedDays = countExcludedWeekdays(start, end);
-  return Math.max(baseWorkingDays - excludedDays, 0);
-}
-
-function getViewedPeriod() {
-  const { start, end } = getViewedMonthBounds();
-  const eligibleDays = countEligibleDays(start, end);
-  const target = Math.ceil(eligibleDays * OFFICE_TARGET_RATIO);
-
-  if (start < POLICY_CHANGE_DATE) {
+  if (controllingRule.calculation_mode === "rolling_28") {
+    const end = new Date(monthEnd);
+    const start = new Date(monthEnd);
+    start.setDate(start.getDate() - 27);
     return {
-      type: "month",
       start,
       end,
-      eligibleDays,
-      target,
-      label: formatMonthLabel(start)
+      mode: "rolling_28",
+      rule: controllingRule,
+      label: `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`
     };
   }
 
   return {
-    type: "rolling",
-    start,
-    end,
-    eligibleDays,
-    target,
-    label: `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`
+    start: monthStart,
+    end: monthEnd,
+    mode: "monthly",
+    rule: controllingRule,
+    label: formatMonthLabel(monthStart)
   };
 }
 
-function countOfficeInViewedPeriod() {
-  let count = 0;
-  const { start, end } = getViewedPeriod();
-
-  for (const key in attendanceMap) {
-    const date = new Date(key + "T00:00:00");
-    if (date >= start && date <= end && attendanceMap[key] === "Office") {
-      count++;
-    }
-  }
-
-  return count;
+function getWorkingDaysForDate(date) {
+  const rule = getRuleForDate(date) || DEFAULT_RULE;
+  return Array.isArray(rule.working_days) && rule.working_days.length ? rule.working_days.map(Number) : [1,2,3,4,5];
 }
 
-function getStatus(count, target) {
-  if (count >= target) return { t: "On track", c: "status-on" };
-  if (count >= Math.max(target - 1, 0)) return { t: "Off track", c: "status-off" };
-  return { t: "Not met", c: "status-bad" };
+function isWorkingDayForRule(date) {
+  const weekday = date.getDay();
+  const days = getWorkingDaysForDate(date);
+  return days.includes(weekday);
+}
+
+function getDailyExpectedContribution(date) {
+  const rule = getRuleForDate(date) || DEFAULT_RULE;
+  const days = Array.isArray(rule.working_days) && rule.working_days.length ? rule.working_days.map(Number) : [1,2,3,4,5];
+  const divisor = days.length || 5;
+  return Number(rule.days_per_week || 0) / divisor;
+}
+
+function getDayStatus(key) {
+  return attendanceMap[key] || "blank";
+}
+
+function isEligibleWorkingDay(date) {
+  if (isBankHoliday(date)) return false;
+  if (!isWorkingDayForRule(date)) return false;
+
+  const status = getDayStatus(formatDate(date));
+  if (status === "Sick" || status === "Holiday") return false;
+
+  return true;
+}
+
+function countEligibleDays(period) {
+  let total = 0;
+  const d = new Date(period.start);
+
+  while (d <= period.end) {
+    if (isEligibleWorkingDay(d)) total++;
+    d.setDate(d.getDate() + 1);
+  }
+
+  return total;
+}
+
+function countTarget(period) {
+  let sum = 0;
+  const d = new Date(period.start);
+
+  while (d <= period.end) {
+    if (isEligibleWorkingDay(d)) {
+      sum += getDailyExpectedContribution(d);
+    }
+    d.setDate(d.getDate() + 1);
+  }
+
+  return Math.ceil(sum);
+}
+
+function countActualOffice(period) {
+  let total = 0;
+  const d = new Date(period.start);
+
+  while (d <= period.end) {
+    if (getDayStatus(formatDate(d)) === "Office") {
+      total++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+
+  return total;
+}
+
+function getStatus(actual, target) {
+  if (actual >= target) return { text: "On track", cls: "status-on" };
+  if (actual >= Math.max(target - 1, 0)) return { text: "Off track", cls: "status-warn" };
+  return { text: "Not met", cls: "status-bad" };
 }
 
 function progressPercent(actual, target) {
@@ -519,40 +769,54 @@ function progressPercent(actual, target) {
   return Math.min((actual / target) * 100, 100);
 }
 
+function ruleModeLabel(mode) {
+  return mode === "rolling_28" ? "Rolling 28 days" : "Monthly";
+}
+
+function workingDayNames(days) {
+  const map = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  return (days || []).map(Number).sort((a,b) => {
+    const normalise = x => x === 0 ? 7 : x;
+    return normalise(a) - normalise(b);
+  }).map(d => map[d]).join(", ");
+}
+
 function renderStats() {
   const stats = document.getElementById("stats");
-  const { label, target, type, eligibleDays } = getViewedPeriod();
-  const actual = countOfficeInViewedPeriod();
+  const period = getPeriodForView();
+  const actual = countActualOffice(period);
+  const eligibleDays = countEligibleDays(period);
+  const target = countTarget(period);
   const status = getStatus(actual, target);
   const progress = progressPercent(actual, target);
-
-  const title = type === "month" ? "Month Status" : "28 Day Status";
+  const rule = period.rule || DEFAULT_RULE;
+  const ratio = (Number(rule.days_per_week || 0) / ((rule.working_days || [1,2,3,4,5]).length || 5)) * 100;
 
   stats.innerHTML = `
-    <div class="stats-box">
-      <div class="stat">
-        <div class="stat-title">Period Used</div>
-        <div class="stat-value">${label}</div>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-title">Period Used</div>
+        <div class="kpi-value">${period.label}</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-title">Actual Days Attended</div>
-        <div class="stat-value">${actual}</div>
+      <div class="kpi">
+        <div class="kpi-title">Actual Days Attended</div>
+        <div class="kpi-value">${actual}</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-title">Eligible Days</div>
-        <div class="stat-value">${eligibleDays}</div>
+      <div class="kpi">
+        <div class="kpi-title">Eligible Days</div>
+        <div class="kpi-value">${eligibleDays}</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-title">Target</div>
-        <div class="stat-value">${target}</div>
+      <div class="kpi">
+        <div class="kpi-title">Target</div>
+        <div class="kpi-value">${target}</div>
       </div>
 
-      <div class="stat">
-        <div class="stat-title">${title}</div>
-        <div class="stat-value ${status.c}">${status.t}</div>
+      <div class="kpi">
+        <div class="kpi-title">${ruleModeLabel(period.mode)}</div>
+        <div class="kpi-value ${status.cls}">${status.text}</div>
       </div>
     </div>
 
@@ -567,11 +831,58 @@ function renderStats() {
     </div>
 
     <div class="summary-lines">
-      <div><strong>Target:</strong> ${target} office days</div>
+      <div><strong>Rule:</strong> ${rule.rule_name || "Unnamed rule"}</div>
+      <div><strong>Mode:</strong> ${ruleModeLabel(period.mode)}</div>
+      <div><strong>Days per week:</strong> ${Number(rule.days_per_week || 0)}</div>
+      <div><strong>Working days:</strong> ${workingDayNames(rule.working_days || [1,2,3,4,5])}</div>
+      <div><strong>Equivalent percentage:</strong> ${ratio.toFixed(0)}%</div>
       <div><strong>Actual:</strong> ${actual} office days out of ${eligibleDays} eligible days</div>
-      <div><strong>Period used:</strong> ${type === "month" ? `${label} monthly` : label}</div>
     </div>
   `;
+}
+
+function renderRules() {
+  if (!rules.length) {
+    rulesList.innerHTML = `<div class="notice">No rules yet.</div>`;
+    return;
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  rulesList.innerHTML = rules.map(rule => {
+    const start = parseDateOnly(rule.start_date);
+    const end = rule.end_date ? parseDateOnly(rule.end_date) : null;
+    const current = start <= today && (!end || today <= end);
+    const ended = end && end < today;
+
+    return `
+      <div class="rule-item">
+        <div class="rule-head">
+          <div>
+            <div class="rule-name">${rule.rule_name || "Unnamed rule"}</div>
+            <div class="rule-meta">
+              ${formatDisplayDate(start)}
+              ${end ? ` to ${formatDisplayDate(end)}` : ` onward`}<br>
+              ${ruleModeLabel(rule.calculation_mode)} • ${Number(rule.days_per_week)} days/week<br>
+              Working days: ${workingDayNames(rule.working_days)}
+            </div>
+
+            <div class="pill-row">
+              <span class="pill ${rule.calculation_mode === "rolling_28" ? "pill-rolling" : "pill-monthly"}">${ruleModeLabel(rule.calculation_mode)}</span>
+              ${current ? `<span class="pill pill-current">Current</span>` : ``}
+              ${ended ? `<span class="pill pill-ended">Ended</span>` : ``}
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-actions">
+          <button class="secondary-btn" onclick="editRule('${rule.id}')">Edit</button>
+          <button class="danger-btn" onclick="deleteRule('${rule.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderCalendar() {
@@ -610,22 +921,22 @@ function renderCalendar() {
     const status = attendanceMap[key] || "blank";
     const bankHolidayTitle = getBankHolidayTitle(date);
     const bankHoliday = !!bankHolidayTitle;
-    const weekend = isWeekend(date);
+    const workingDay = isWorkingDayForRule(date);
 
     const cell = document.createElement("div");
 
-    if (weekend) {
-      cell.className = "day weekend";
-    } else if (bankHoliday) {
+    if (bankHoliday) {
       cell.className = "day bank-holiday";
+    } else if (!workingDay) {
+      cell.className = "day blocked";
     } else {
       cell.className = "day " + status.toLowerCase();
       cell.onclick = () => cycle(key, status);
     }
 
     let label = "";
-    if (weekend) label = "Weekend";
-    else if (bankHoliday) label = bankHolidayTitle;
+    if (bankHoliday) label = bankHolidayTitle;
+    else if (!workingDay) label = "Non-working";
     else if (status !== "blank") label = status;
 
     cell.innerHTML = `
@@ -639,18 +950,11 @@ function renderCalendar() {
   renderStats();
 }
 
-async function load() {
-  const user = await getUser();
-
-  if (!user) {
-    msg.textContent = "Not logged in";
-    return;
-  }
-
+async function loadAttendance(userId) {
   const { data, error } = await supabase
     .from("attendance")
     .select("*")
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
   if (error) {
     msg.textContent = error.message;
@@ -661,15 +965,121 @@ async function load() {
   (data || []).forEach(r => {
     attendanceMap[r.entry_date] = r.status;
   });
-
-  renderCalendar();
 }
+
+async function loadRules(userId) {
+  const { data, error } = await supabase
+    .from("attendance_rules")
+    .select("*")
+    .eq("user_id", userId)
+    .order("start_date", { ascending: true });
+
+  if (error) {
+    ruleMsg.textContent = error.message;
+    return;
+  }
+
+  rules = data || [];
+}
+
+window.editRule = function(id) {
+  const rule = rules.find(r => r.id === id);
+  if (!rule) return;
+
+  editingRuleId = id;
+  ruleNameEl.value = rule.rule_name || "";
+  ruleStartEl.value = rule.start_date || "";
+  ruleEndEl.value = rule.end_date || "";
+  ruleModeEl.value = rule.calculation_mode || "monthly";
+  ruleDaysPerWeekEl.value = Number(rule.days_per_week || 0);
+  setWorkingDays(rule.working_days || [1,2,3,4,5]);
+  ruleMsg.textContent = "Editing rule.";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+window.deleteRule = async function(id) {
+  const { error } = await supabase
+    .from("attendance_rules")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    ruleMsg.textContent = error.message;
+    return;
+  }
+
+  ruleMsg.textContent = "Rule deleted.";
+  await initialise();
+};
+
+async function saveRule() {
+  const user = await getUser();
+  if (!user) return;
+
+  const workingDays = checkedWorkingDays();
+  const daysPerWeek = Number(ruleDaysPerWeekEl.value || 0);
+
+  if (!ruleStartEl.value) {
+    ruleMsg.textContent = "Choose a start date.";
+    return;
+  }
+
+  if (!workingDays.length) {
+    ruleMsg.textContent = "Choose at least one working day.";
+    return;
+  }
+
+  if (!daysPerWeek) {
+    ruleMsg.textContent = "Enter days per week.";
+    return;
+  }
+
+  if (daysPerWeek > workingDays.length) {
+    ruleMsg.textContent = "Days per week cannot be more than selected working days.";
+    return;
+  }
+
+  const payload = {
+    user_id: user.id,
+    rule_name: ruleNameEl.value.trim() || null,
+    start_date: ruleStartEl.value,
+    end_date: ruleEndEl.value || null,
+    calculation_mode: ruleModeEl.value,
+    days_per_week: daysPerWeek,
+    working_days: workingDays
+  };
+
+  let error;
+
+  if (editingRuleId) {
+    ({ error } = await supabase
+      .from("attendance_rules")
+      .update(payload)
+      .eq("id", editingRuleId));
+  } else {
+    ({ error } = await supabase
+      .from("attendance_rules")
+      .insert([payload]));
+  }
+
+  if (error) {
+    ruleMsg.textContent = error.message;
+    return;
+  }
+
+  ruleMsg.textContent = editingRuleId ? "Rule updated." : "Rule saved.";
+  clearRuleForm();
+  await initialise();
+}
+
+document.getElementById("saveRuleBtn").addEventListener("click", saveRule);
+document.getElementById("clearRuleBtn").addEventListener("click", clearRuleForm);
 
 async function cycle(date, status) {
   const user = await getUser();
   if (!user) return;
 
-  const next = order[(order.indexOf(status) + 1) % order.length];
+  const next = attendanceOrder[(attendanceOrder.indexOf(status) + 1) % attendanceOrder.length];
 
   if (next === "blank") {
     const { error } = await supabase
@@ -728,7 +1138,23 @@ window.goToday = function() {
   renderCalendar();
 };
 
-load();
+async function initialise() {
+  const user = await getUser();
+
+  if (!user) {
+    msg.textContent = "Not logged in";
+    return;
+  }
+
+  await seedRules(user.id);
+  await loadRules(user.id);
+  await loadAttendance(user.id);
+
+  renderRules();
+  renderCalendar();
+}
+
+initialise();
 </script>
 
 </body>
