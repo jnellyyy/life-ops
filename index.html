@@ -463,10 +463,25 @@
         }
 
         const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
 
-        statusEl.textContent = "Account created. If email confirmation is on, check your inbox before signing in.";
-        setMode("signin");
+if (error) {
+  if (error.message.toLowerCase().includes("already")) {
+    const login = await supabase.auth.signInWithPassword({ email, password });
+
+    if (login.error) {
+      statusEl.textContent = "Account already exists. Press Sign in and try again.";
+      return;
+    }
+
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  throw error;
+}
+
+window.location.href = "dashboard.html";
+return;
       } catch (err) {
         statusEl.textContent = err.message || "Something went wrong.";
       } finally {
