@@ -88,14 +88,14 @@
 
     .settings-grid{
       display:grid;
-      grid-template-columns:1fr 1fr auto;
+      grid-template-columns:1fr 1fr 1fr auto;
       gap:10px;
       align-items:end;
     }
 
     .kpis{
       display:grid;
-      grid-template-columns:repeat(6,1fr);
+      grid-template-columns:repeat(7,1fr);
       gap:12px;
       margin-top:12px;
     }
@@ -270,7 +270,7 @@
     .pill-below{ background:rgba(34,197,94,0.85); }
     .pill-over{ background:rgba(239,68,68,0.85); }
 
-    @media (max-width:980px){
+    @media (max-width:1100px){
       .split,
       .kpis,
       .settings-grid,
@@ -288,14 +288,15 @@
       <div class="topbar">
         <div>
           <h2 style="margin:0;">Pace Creators</h2>
-          <p class="muted" style="margin:6px 0 0 0;">Track income, target progress and tax-year threshold in one place.</p>
+          <p class="muted" style="margin:6px 0 0 0;">Live target, order log, tax-year total and suggested set-aside in one place.</p>
         </div>
         <a class="back-btn" href="dashboard.html">← Dashboard</a>
       </div>
 
       <div class="settings-grid">
-        <input id="targetAmount" type="number" placeholder="Target amount e.g. 2000">
-        <input id="thresholdAmount" type="number" placeholder="Threshold amount e.g. 1000">
+        <input id="targetAmount" type="number" placeholder="Target amount e.g. 300">
+        <input id="thresholdAmount" type="number" placeholder="Threshold e.g. 1000">
+        <input id="setAsideRate" type="number" placeholder="Set-aside % e.g. 20">
         <button id="saveSettingsBtn" type="button">Save</button>
       </div>
 
@@ -317,8 +318,8 @@
     <div class="split">
       <div class="glass card">
         <div class="subcard" style="margin-top:0;">
-          <h3 style="margin-bottom:6px;">Add income entry</h3>
-          <p class="muted" style="margin-bottom:0;">Add each order or payment once. Everything above updates from this log.</p>
+          <h3 style="margin-bottom:6px;">Add earning</h3>
+          <p class="muted" style="margin-bottom:0;">Add each order, or one weekly total if that is easier.</p>
 
           <div class="row">
             <input id="entryAmount" type="number" placeholder="Amount">
@@ -326,10 +327,15 @@
           </div>
 
           <div class="row">
-            <input id="entrySource" placeholder="Source e.g. Wedding, Deliveroo, Deposit">
-            <input id="entryNote" placeholder="Note">
+            <select id="entryMode">
+              <option value="single">Single order</option>
+              <option value="weekly">Weekly total</option>
+              <option value="other">Other income</option>
+            </select>
+            <input id="entrySource" placeholder="Source e.g. Deliveroo, Weekly payout">
           </div>
 
+          <input id="entryNote" placeholder="Note">
           <button id="saveEntryBtn" type="button">Add entry</button>
           <p id="msg" class="notice"></p>
         </div>
@@ -365,11 +371,13 @@
 
     const targetAmountEl = document.getElementById("targetAmount");
     const thresholdAmountEl = document.getElementById("thresholdAmount");
+    const setAsideRateEl = document.getElementById("setAsideRate");
     const saveSettingsBtn = document.getElementById("saveSettingsBtn");
     const settingsMsgEl = document.getElementById("settingsMsg");
 
     const entryAmountEl = document.getElementById("entryAmount");
     const entryDateEl = document.getElementById("entryDate");
+    const entryModeEl = document.getElementById("entryMode");
     const entrySourceEl = document.getElementById("entrySource");
     const entryNoteEl = document.getElementById("entryNote");
     const saveEntryBtn = document.getElementById("saveEntryBtn");
@@ -382,7 +390,8 @@
 
     let settings = {
       target_amount: 0,
-      threshold_amount: 1000
+      threshold_amount: 1000,
+      set_aside_rate: 20
     };
 
     let entries = [];
@@ -432,11 +441,12 @@
     function calculateFigures() {
       const target = Number(settings.target_amount || 0);
       const threshold = Number(settings.threshold_amount || 1000);
+      const setAsideRate = Number(settings.set_aside_rate || 20);
 
       const totalMade = entries.reduce((sum, e) => sum + Number(e.amount || 0), 0);
       const leftToTarget = Math.max(target - totalMade, 0);
       const progress = target > 0 ? Math.min((totalMade / target) * 100, 100) : 0;
-      const orderCount = entries.length;
+      const entryCount = entries.length;
 
       const taxYear = getTaxYearRange(new Date());
       const taxYearTotal = entries
@@ -444,16 +454,21 @@
         .reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
       const overThreshold = taxYearTotal >= threshold;
+      const thresholdLeft = Math.max(threshold - taxYearTotal, 0);
+      const setAsideSoFar = taxYearTotal * (setAsideRate / 100);
 
       return {
         target,
         threshold,
+        setAsideRate,
         totalMade,
         leftToTarget,
         progress,
-        orderCount,
+        entryCount,
         taxYearTotal,
         overThreshold,
+        thresholdLeft,
+        setAsideSoFar,
         taxYearLabel: taxYear.label
       };
     }
@@ -479,13 +494,18 @@
           <div class="kpi-value blue">${f.progress.toFixed(0)}%</div>
         </div>
         <div class="kpi">
-          <div class="kpi-title">UK tax year ${f.taxYearLabel}</div>
+          <div class="kpi-title">Tax year ${f.taxYearLabel}</div>
           <div class="kpi-value purple">${money(f.taxYearTotal)}</div>
         </div>
         <div class="kpi">
-          <div class="kpi-title">Threshold status</div>
-          <div class="kpi-value ${f.overThreshold ? "bad" : "good"}">${f.overThreshold ? "Reached" : "Below"}</div>
+          <div class="kpi-title">Threshold</div>
+          <div class="kpi-value ${f.overThreshold ? "bad" : "good"}">${f.overThreshold ? "Reached" : money(f.thresholdLeft) + " left"}</div>
           <div class="pill ${f.overThreshold ? "pill-over" : "pill-below"}">${money(f.threshold)} threshold</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Put aside so far</div>
+          <div class="kpi-value amber">${money(f.setAsideSoFar)}</div>
+          <div class="item-meta">${f.setAsideRate}% estimate</div>
         </div>
       `;
 
@@ -503,7 +523,7 @@
         <div class="item">
           <div style="flex:1;min-width:0;">
             <div class="item-title">${entry.source || "Income entry"}</div>
-            <div class="item-meta">${entry.entry_date || ""}${entry.note ? ` • ${entry.note}` : ""}</div>
+            <div class="item-meta">${entry.entry_date || ""}${entry.note ? ` • ${entry.note}` : ""}${entry.mode ? ` • ${entry.mode}` : ""}</div>
 
             <div class="inline-actions">
               <button class="small-btn" onclick="toggleEntryEdit('${entry.id}')">Edit</button>
@@ -516,9 +536,14 @@
                 <input id="entry-edit-date-${entry.id}" type="date" value="${entry.entry_date || ""}">
               </div>
               <div class="row">
+                <select id="entry-edit-mode-${entry.id}">
+                  <option value="single" ${entry.mode === "single" ? "selected" : ""}>Single order</option>
+                  <option value="weekly" ${entry.mode === "weekly" ? "selected" : ""}>Weekly total</option>
+                  <option value="other" ${entry.mode === "other" ? "selected" : ""}>Other income</option>
+                </select>
                 <input id="entry-edit-source-${entry.id}" value="${(entry.source || "").replace(/"/g, '&quot;')}" placeholder="Source">
-                <input id="entry-edit-note-${entry.id}" value="${(entry.note || "").replace(/"/g, '&quot;')}" placeholder="Note">
               </div>
+              <input id="entry-edit-note-${entry.id}" value="${(entry.note || "").replace(/"/g, '&quot;')}" placeholder="Note">
               <button class="small-btn save-btn" style="margin-top:10px;" onclick="saveEntryEdit('${entry.id}')">Save changes</button>
             </div>
           </div>
@@ -549,6 +574,10 @@
       return user;
     }
 
+    async function ensureSettingsColumns() {
+      // no-op in frontend; just here for readability
+    }
+
     async function loadSettings(userId) {
       const { data, error } = await supabase
         .from("creators_settings")
@@ -563,11 +592,13 @@
 
       settings = {
         target_amount: Number(data?.target_amount || 0),
-        threshold_amount: Number(data?.threshold_amount || 1000)
+        threshold_amount: Number(data?.threshold_amount || 1000),
+        set_aside_rate: Number(data?.set_aside_rate || 20)
       };
 
       targetAmountEl.value = settings.target_amount || "";
       thresholdAmountEl.value = settings.threshold_amount || "";
+      setAsideRateEl.value = settings.set_aside_rate || "";
     }
 
     async function loadEntries(userId) {
@@ -592,13 +623,15 @@
 
       const target = Number(targetAmountEl.value || 0);
       const threshold = Number(thresholdAmountEl.value || 1000);
+      const setAsideRate = Number(setAsideRateEl.value || 20);
 
       const { error } = await supabase
         .from("creators_settings")
         .upsert([{
           user_id: user.id,
           target_amount: target,
-          threshold_amount: threshold
+          threshold_amount: threshold,
+          set_aside_rate: setAsideRate
         }], { onConflict: "user_id" });
 
       if (error) {
@@ -616,6 +649,7 @@
 
       const amount = Number(entryAmountEl.value || 0);
       const entryDate = entryDateEl.value || todayString();
+      const mode = entryModeEl.value;
       const source = entrySourceEl.value.trim();
       const note = entryNoteEl.value.trim();
 
@@ -630,6 +664,7 @@
           user_id: user.id,
           amount,
           entry_date: entryDate,
+          mode,
           source: source || null,
           note: note || null
         }]);
@@ -641,6 +676,7 @@
 
       entryAmountEl.value = "";
       entryDateEl.value = "";
+      entryModeEl.value = "single";
       entrySourceEl.value = "";
       entryNoteEl.value = "";
 
@@ -657,6 +693,7 @@
     window.saveEntryEdit = async function(id) {
       const amount = Number(document.getElementById(`entry-edit-amount-${id}`).value || 0);
       const entryDate = document.getElementById(`entry-edit-date-${id}`).value || null;
+      const mode = document.getElementById(`entry-edit-mode-${id}`).value;
       const source = document.getElementById(`entry-edit-source-${id}`).value.trim();
       const note = document.getElementById(`entry-edit-note-${id}`).value.trim();
 
@@ -670,6 +707,7 @@
         .update({
           amount,
           entry_date: entryDate,
+          mode,
           source: source || null,
           note: note || null
         })
