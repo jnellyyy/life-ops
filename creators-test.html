@@ -270,10 +270,6 @@
       color:var(--muted);
     }
 
-    .collapsed .collapsible-body{
-      display:none;
-    }
-
     .item{
       display:flex;
       justify-content:space-between;
@@ -362,12 +358,12 @@
           <div id="nextAppointment"></div>
           <div id="appointmentAlert" class="appointment-alert"></div>
 
-          <div class="subtle-box collapsed" id="appointmentsCollapse">
-            <div class="collapsible-head" onclick="toggleCollapse('appointmentsCollapse')">
+          <div class="subtle-box" style="margin-top:14px;">
+            <div class="collapsible-head" onclick="toggleCollapse('appointmentsList')">
               <strong>All appointments</strong>
               <span class="collapse-icon">⌄</span>
             </div>
-            <div class="collapsible-body" id="appointmentsList" style="margin-top:10px;"></div>
+            <div id="appointmentsList" style="margin-top:10px; display:none;"></div>
           </div>
         </div>
       </div>
@@ -445,14 +441,14 @@
             🎉 Daily target hit. Anything extra today is above target.
           </div>
 
-          <div class="subtle-box collapsed" id="addEarningCollapse">
-            <div class="collapsible-head" onclick="toggleCollapse('addEarningCollapse')">
+          <div class="subtle-box" style="margin-top:14px;">
+            <div class="collapsible-head" onclick="toggleCollapse('addEarningBody')">
               <strong>Add order / earning</strong>
               <span class="collapse-icon">⌄</span>
             </div>
 
-            <div class="collapsible-body">
-              <div class="row" style="margin-top:10px;">
+            <div id="addEarningBody" style="margin-top:10px;">
+              <div class="row">
                 <input id="entryAmount" type="number" placeholder="Amount">
                 <input id="entryDate" type="date">
               </div>
@@ -477,7 +473,22 @@
       <div class="glass card">
         <div class="subtle-box" style="margin-top:0;">
           <h3 style="margin:0 0 6px 0;">Income log</h3>
-          <div id="entriesList"></div>
+
+          <div class="subtle-box" style="margin-top:12px;">
+            <div class="collapsible-head" onclick="toggleCollapse('todayEntriesList')">
+              <strong>Today’s entries</strong>
+              <span class="collapse-icon">⌄</span>
+            </div>
+            <div id="todayEntriesList" style="margin-top:10px;"></div>
+          </div>
+
+          <div class="subtle-box" style="margin-top:12px;">
+            <div class="collapsible-head" onclick="toggleCollapse('olderEntriesList')">
+              <strong>Older entries</strong>
+              <span class="collapse-icon">⌄</span>
+            </div>
+            <div id="olderEntriesList" style="margin-top:10px; display:none;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -543,6 +554,7 @@
     const entryNoteEl = document.getElementById("entryNote");
     const saveEntryBtn = document.getElementById("saveEntryBtn");
     const msgEl = document.getElementById("msg");
+    const addEarningBodyEl = document.getElementById("addEarningBody");
 
     const taxYearTotalEl = document.getElementById("taxYearTotal");
     const thresholdStatusEl = document.getElementById("thresholdStatus");
@@ -558,7 +570,9 @@
     const nextAppointmentEl = document.getElementById("nextAppointment");
     const appointmentsListEl = document.getElementById("appointmentsList");
     const appointmentAlertEl = document.getElementById("appointmentAlert");
-    const entriesListEl = document.getElementById("entriesList");
+
+    const todayEntriesListEl = document.getElementById("todayEntriesList");
+    const olderEntriesListEl = document.getElementById("olderEntriesList");
 
     let settings = {
       target_date: "",
@@ -740,13 +754,13 @@
       `).join("");
     }
 
-    function renderEntries() {
-      if (!entries.length) {
-        entriesListEl.innerHTML = `<div class="empty">No entries yet.</div>`;
+    function renderEntryRows(targetEl, rows) {
+      if (!rows.length) {
+        targetEl.innerHTML = `<div class="empty">No entries here yet.</div>`;
         return;
       }
 
-      entriesListEl.innerHTML = entries.map(entry => `
+      targetEl.innerHTML = rows.map(entry => `
         <div class="item">
           <div style="flex:1;min-width:0;">
             <div class="item-title">${entry.source || "Income entry"}</div>
@@ -780,10 +794,25 @@
       `).join("");
     }
 
+    function renderEntries() {
+      const targetDate = settings.target_date || todayString();
+      const todaysEntries = entries.filter(entry => entry.entry_date === targetDate);
+      const olderEntries = entries.filter(entry => entry.entry_date !== targetDate);
+
+      renderEntryRows(todayEntriesListEl, todaysEntries);
+      renderEntryRows(olderEntriesListEl, olderEntries);
+    }
+
     window.toggleCollapse = function(id) {
       const el = document.getElementById(id);
       if (!el) return;
-      el.classList.toggle("collapsed");
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    };
+
+    window.toggleEntryEdit = function(id) {
+      const box = document.getElementById(`entry-edit-${id}`);
+      if (!box) return;
+      box.style.display = box.style.display === "none" ? "block" : "none";
     };
 
     async function getUser() {
@@ -933,14 +962,9 @@
       entryNoteEl.value = "";
 
       setMsg("Entry added.", true);
+      addEarningBodyEl.style.display = "none";
       await initialise();
     });
-
-    window.toggleEntryEdit = function(id) {
-      const box = document.getElementById(`entry-edit-${id}`);
-      if (!box) return;
-      box.style.display = box.style.display === "none" ? "block" : "none";
-    };
 
     window.saveEntryEdit = async function(id) {
       const amount = Number(document.getElementById(`entry-edit-amount-${id}`).value || 0);
