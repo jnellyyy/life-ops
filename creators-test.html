@@ -27,7 +27,9 @@
       --blur:18px;
       --radius:24px;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       padding:18px;
@@ -38,7 +40,12 @@
         radial-gradient(circle at top right, rgba(255,59,48,0.08), transparent 28%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
     }
-    .wrap{max-width:1220px;margin:0 auto;}
+
+    .wrap{
+      max-width:1220px;
+      margin:0 auto;
+    }
+
     .glass{
       background:var(--panel);
       border:1px solid var(--line);
@@ -47,81 +54,197 @@
       -webkit-backdrop-filter:blur(var(--blur));
       box-shadow:var(--shadow);
     }
-    .card{padding:18px;margin-top:16px;}
+
+    .card{
+      padding:18px;
+      margin-top:16px;
+    }
+
     .topbar{
-      display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
     }
+
     .back-btn{
-      width:auto;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,0.08);
-      color:#fff;border:none;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;
+      width:auto;
+      padding:10px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-block;
     }
+
     .muted{color:var(--muted);}
     .notice{color:#bbb;white-space:pre-wrap;margin-top:10px;min-height:18px;}
     .success{color:#8ff0b2;}
-    .settings-grid{
-      display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      gap:16px;
+      margin-top:16px;
     }
+
     .kpis{
-      display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:12px;
     }
+
     .kpi{
-      background:var(--panel-strong);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;
+      background:var(--panel-strong);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:14px;
     }
-    .kpi-title{font-size:12px;color:var(--muted);margin-bottom:6px;}
-    .kpi-value{font-size:22px;font-weight:700;letter-spacing:-0.03em;}
+
+    .kpi-title{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    .kpi-value{
+      font-size:22px;
+      font-weight:700;
+      letter-spacing:-0.03em;
+    }
+
     .good{color:var(--green);}
     .bad{color:var(--red);}
     .blue{color:var(--blue);}
     .amber{color:var(--amber);}
     .purple{color:var(--purple);}
-    .split{
-      display:grid;grid-template-columns:0.95fr 1.05fr;gap:16px;margin-top:16px;
+
+    .appointment-card{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:16px;
     }
-    .subcard{
-      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;margin-top:14px;
+
+    .appointment-alert{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:700;
+      display:none;
     }
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+    .appointment-alert.today{
+      display:block;
+      background:rgba(239,68,68,0.16);
+      border:1px solid rgba(239,68,68,0.35);
+      color:#ffd2d2;
+    }
+
+    .appointment-alert.soon{
+      display:block;
+      background:rgba(245,158,11,0.16);
+      border:1px solid rgba(245,158,11,0.35);
+      color:#ffe6b3;
+    }
+
+    .subtle-box{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:16px;
+      margin-top:14px;
+    }
+
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:16px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .row-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+
     input, select, button{
-      width:100%;padding:12px;margin-top:10px;border-radius:14px;background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.10);color:#fff;font:inherit;
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      font:inherit;
     }
-    input::placeholder{color:#9da6b5;}
+
+    input::placeholder{
+      color:#9da6b5;
+    }
+
     button{
-      background:var(--accent);border:none;font-weight:700;cursor:pointer;transition:transform .12s ease, opacity .12s ease;
+      background:var(--accent);
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .12s ease, opacity .12s ease;
     }
+
     button:hover{transform:translateY(-1px);}
     button:active{transform:translateY(0);opacity:0.92;}
+
     .small-btn{
-      width:auto;margin:0;padding:8px 10px;background:rgba(255,255,255,0.10);font-size:13px;border-radius:12px;
+      width:auto;
+      margin:0;
+      padding:8px 10px;
+      background:rgba(255,255,255,0.10);
+      font-size:13px;
+      border-radius:12px;
     }
+
     .danger-btn{background:rgba(239,68,68,0.18);}
     .save-btn{background:rgba(34,197,94,0.22);}
+    .ghost-btn{background:rgba(255,255,255,0.08);}
+
     .progress-wrap{margin-top:12px;}
     .progress-label{
-      display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:6px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
     }
+
     .progress-bar{
-      height:12px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;
+      height:12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      overflow:hidden;
     }
+
     .progress-fill{
-      height:100%;border-radius:999px;background:linear-gradient(90deg, var(--accent), #ff6b63);width:0%;transition:width .25s ease;
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent), #ff6b63);
+      width:0%;
+      transition:width .25s ease;
     }
-    .item{
-      display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-    .item:last-child{border-bottom:none;}
-    .item-title{font-weight:700;margin-bottom:4px;}
-    .item-meta{font-size:12px;color:var(--muted);line-height:1.45;}
-    .item-money{font-weight:700;white-space:nowrap;}
-    .inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-    .edit-box{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(255,255,255,0.12);}
-    .empty{color:var(--muted);padding:8px 0 2px;}
-    .pill{
-      display:inline-block;font-size:11px;padding:4px 8px;border-radius:999px;color:#fff;margin-top:6px;
-    }
-    .pill-below{background:rgba(34,197,94,0.85);}
-    .pill-over{background:rgba(239,68,68,0.85);}
+
     .celebrate{
       margin-top:10px;
       padding:12px 14px;
@@ -132,8 +255,90 @@
       font-weight:700;
       display:none;
     }
+
+    .collapsible-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .collapse-icon{
+      font-size:18px;
+      color:var(--muted);
+    }
+
+    .collapsed .collapsible-body{
+      display:none;
+    }
+
+    .item{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      padding:14px 0;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .item:last-child{border-bottom:none;}
+
+    .item-title{
+      font-weight:700;
+      margin-bottom:4px;
+    }
+
+    .item-meta{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .item-money{
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .inline-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .edit-box{
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px dashed rgba(255,255,255,0.12);
+    }
+
+    .empty{
+      color:var(--muted);
+      padding:8px 0 2px;
+    }
+
+    .pill{
+      display:inline-block;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      color:#fff;
+      margin-top:6px;
+    }
+
+    .pill-below{background:rgba(34,197,94,0.85);}
+    .pill-over{background:rgba(239,68,68,0.85);}
+
     @media (max-width:1100px){
-      .split,.kpis,.settings-grid,.row,.row-3{grid-template-columns:1fr;}
+      .summary-grid,
+      .two-col,
+      .kpis,
+      .row,
+      .row-3{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -144,67 +349,134 @@
       <div class="topbar">
         <div>
           <h2 style="margin:0;">Pace Creators</h2>
-          <p class="muted" style="margin:6px 0 0 0;">Daily target plus tax-year tracking from the same order log.</p>
+          <p class="muted" style="margin:6px 0 0 0;">Daily target, order log, tax-year total and ADHD appointment reminders.</p>
         </div>
         <a class="back-btn" href="dashboard.html">← Dashboard</a>
       </div>
+    </div>
 
-      <div class="settings-grid">
-        <input id="targetDate" type="date">
-        <input id="dailyTarget" type="number" placeholder="Daily target e.g. 30">
-        <input id="thresholdAmount" type="number" placeholder="Threshold e.g. 1000">
-        <input id="setAsideRate" type="number" placeholder="Set-aside % e.g. 20">
-        <button id="saveSettingsBtn" type="button">Save</button>
-      </div>
+    <div class="summary-grid">
+      <div class="glass card">
+        <div class="appointment-card">
+          <h3 style="margin:0 0 6px 0;">ADHD appointments</h3>
+          <div id="nextAppointment"></div>
+          <div id="appointmentAlert" class="appointment-alert"></div>
 
-      <p id="settingsMsg" class="notice"></p>
-
-      <div class="kpis" id="kpis"></div>
-
-      <div class="progress-wrap">
-        <div class="progress-label">
-          <span>Progress to today’s target</span>
-          <span id="progressText">£0.00 / £0.00</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
+          <div class="subtle-box collapsed" id="appointmentsCollapse">
+            <div class="collapsible-head" onclick="toggleCollapse('appointmentsCollapse')">
+              <strong>All appointments</strong>
+              <span class="collapse-icon">⌄</span>
+            </div>
+            <div class="collapsible-body" id="appointmentsList" style="margin-top:10px;"></div>
+          </div>
         </div>
       </div>
 
-      <div class="celebrate" id="celebrateBox">
-        🎉 Daily target hit. Anything extra today is above target.
+      <div class="glass card">
+        <div class="subtle-box" style="margin-top:0;">
+          <h3 style="margin:0 0 6px 0;">Tax tracking</h3>
+
+          <div class="row">
+            <input id="thresholdAmount" type="number" placeholder="Threshold e.g. 1000">
+            <input id="setAsideRate" type="number" placeholder="Set-aside % e.g. 20">
+          </div>
+
+          <button id="saveTaxSettingsBtn" type="button">Save tax settings</button>
+          <p id="settingsMsg" class="notice"></p>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-title">Tax year total</div>
+              <div class="kpi-value purple" id="taxYearTotal">£0.00</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Threshold status</div>
+              <div class="kpi-value" id="thresholdStatus">Below</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Left to threshold</div>
+              <div class="kpi-value blue" id="thresholdLeft">£0.00</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Put aside so far</div>
+              <div class="kpi-value amber" id="setAsideSoFar">£0.00</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="split">
+    <div class="two-col">
       <div class="glass card">
-        <div class="subcard" style="margin-top:0;">
-          <h3 style="margin-bottom:6px;">Add earning</h3>
-          <p class="muted" style="margin-bottom:0;">Use single order for daily tracking. Use weekly total if you just want tax logging.</p>
+        <div class="subtle-box" style="margin-top:0;">
+          <h3 style="margin:0 0 6px 0;">Add earning</h3>
+          <p class="muted" style="margin-bottom:0;">Set your daily target here and add orders for that day.</p>
 
           <div class="row">
-            <input id="entryAmount" type="number" placeholder="Amount">
-            <input id="entryDate" type="date">
+            <input id="targetDate" type="date">
+            <input id="dailyTarget" type="number" placeholder="Daily target e.g. 30">
           </div>
 
-          <div class="row">
-            <select id="entryMode">
-              <option value="single">Single order</option>
-              <option value="weekly">Weekly total</option>
-              <option value="other">Other income</option>
-            </select>
-            <input id="entrySource" placeholder="Source e.g. Deliveroo, Weekly payout">
+          <button id="saveTargetBtn" type="button">Save daily target</button>
+          <p id="targetMsg" class="notice"></p>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-title">Today made</div>
+              <div class="kpi-value good" id="todayMade">£0.00</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-title">Left today</div>
+              <div class="kpi-value amber" id="leftToday">£0.00</div>
+            </div>
           </div>
 
-          <input id="entryNote" placeholder="Note">
-          <button id="saveEntryBtn" type="button">Add entry</button>
-          <p id="msg" class="notice"></p>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Today’s progress</span>
+              <span id="progressText">£0.00 / £0.00</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="celebrate" id="celebrateBox">
+            🎉 Daily target hit. Anything extra today is above target.
+          </div>
+
+          <div class="subtle-box collapsed" id="addEarningCollapse">
+            <div class="collapsible-head" onclick="toggleCollapse('addEarningCollapse')">
+              <strong>Add order / earning</strong>
+              <span class="collapse-icon">⌄</span>
+            </div>
+
+            <div class="collapsible-body">
+              <div class="row" style="margin-top:10px;">
+                <input id="entryAmount" type="number" placeholder="Amount">
+                <input id="entryDate" type="date">
+              </div>
+
+              <div class="row">
+                <select id="entryMode">
+                  <option value="single">Single order</option>
+                  <option value="weekly">Weekly total</option>
+                  <option value="other">Other income</option>
+                </select>
+                <input id="entrySource" placeholder="Source e.g. Deliveroo, Weekly payout">
+              </div>
+
+              <input id="entryNote" placeholder="Note">
+              <button id="saveEntryBtn" type="button">Add entry</button>
+              <p id="msg" class="notice"></p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="glass card">
-        <div class="subcard" style="margin-top:0;">
-          <h3 style="margin-bottom:6px;">Income log</h3>
+        <div class="subtle-box" style="margin-top:0;">
+          <h3 style="margin:0 0 6px 0;">Income log</h3>
           <div id="entriesList"></div>
         </div>
       </div>
@@ -216,6 +488,30 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
     const OWNER_EMAIL = "janelle.lamptey@gmail.com";
+
+    const APPOINTMENTS = [
+      {
+        title: "4-Week Titration Review",
+        clinician: "Saif Ghafoory",
+        date: "2026-04-17",
+        time: "17:00",
+        phone: "020 4525 0709"
+      },
+      {
+        title: "8-Week Titration Review",
+        clinician: "Rahul Islam",
+        date: "2026-05-15",
+        time: "10:30",
+        phone: "020 4525 0709"
+      },
+      {
+        title: "12-Week Titration Review",
+        clinician: "Rahul Islam",
+        date: "2026-06-12",
+        time: "10:30",
+        phone: "020 4525 0709"
+      }
+    ];
 
     const supabase = createClient(
       "https://grgagroautlpphjsjpjh.supabase.co",
@@ -230,12 +526,15 @@
       }
     );
 
-    const targetDateEl = document.getElementById("targetDate");
-    const dailyTargetEl = document.getElementById("dailyTarget");
     const thresholdAmountEl = document.getElementById("thresholdAmount");
     const setAsideRateEl = document.getElementById("setAsideRate");
-    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+    const saveTaxSettingsBtn = document.getElementById("saveTaxSettingsBtn");
     const settingsMsgEl = document.getElementById("settingsMsg");
+
+    const targetDateEl = document.getElementById("targetDate");
+    const dailyTargetEl = document.getElementById("dailyTarget");
+    const saveTargetBtn = document.getElementById("saveTargetBtn");
+    const targetMsgEl = document.getElementById("targetMsg");
 
     const entryAmountEl = document.getElementById("entryAmount");
     const entryDateEl = document.getElementById("entryDate");
@@ -245,11 +544,21 @@
     const saveEntryBtn = document.getElementById("saveEntryBtn");
     const msgEl = document.getElementById("msg");
 
-    const kpisEl = document.getElementById("kpis");
-    const entriesListEl = document.getElementById("entriesList");
+    const taxYearTotalEl = document.getElementById("taxYearTotal");
+    const thresholdStatusEl = document.getElementById("thresholdStatus");
+    const thresholdLeftEl = document.getElementById("thresholdLeft");
+    const setAsideSoFarEl = document.getElementById("setAsideSoFar");
+
+    const todayMadeEl = document.getElementById("todayMade");
+    const leftTodayEl = document.getElementById("leftToday");
     const progressFillEl = document.getElementById("progressFill");
     const progressTextEl = document.getElementById("progressText");
     const celebrateBoxEl = document.getElementById("celebrateBox");
+
+    const nextAppointmentEl = document.getElementById("nextAppointment");
+    const appointmentsListEl = document.getElementById("appointmentsList");
+    const appointmentAlertEl = document.getElementById("appointmentAlert");
+    const entriesListEl = document.getElementById("entriesList");
 
     let settings = {
       target_date: "",
@@ -272,6 +581,11 @@
     function setSettingsMsg(text, good=false){
       settingsMsgEl.textContent = text;
       settingsMsgEl.className = good ? "notice success" : "notice";
+    }
+
+    function setTargetMsg(text, good=false){
+      targetMsgEl.textContent = text;
+      targetMsgEl.className = good ? "notice success" : "notice";
     }
 
     function todayString(){
@@ -338,45 +652,92 @@
       };
     }
 
-    function renderKpis() {
+    function renderTaxAndTarget() {
       const f = calculateFigures();
 
-      kpisEl.innerHTML = `
-        <div class="kpi">
-          <div class="kpi-title">Target date</div>
-          <div class="kpi-value">${f.targetDate || "-"}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Daily target</div>
-          <div class="kpi-value">${money(f.dailyTarget)}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Today made</div>
-          <div class="kpi-value good">${money(f.todayMade)}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Left today</div>
-          <div class="kpi-value ${f.leftToday > 0 ? "amber" : "good"}">${money(f.leftToday)}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Tax year ${f.taxYearLabel}</div>
-          <div class="kpi-value purple">${money(f.taxYearTotal)}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Threshold</div>
-          <div class="kpi-value ${f.overThreshold ? "bad" : "good"}">${f.overThreshold ? "Reached" : money(f.thresholdLeft) + " left"}</div>
-          <div class="pill ${f.overThreshold ? "pill-over" : "pill-below"}">${money(f.threshold)} threshold</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-title">Put aside so far</div>
-          <div class="kpi-value amber">${money(f.setAsideSoFar)}</div>
-          <div class="item-meta">${f.setAsideRate}% estimate</div>
-        </div>
-      `;
+      taxYearTotalEl.textContent = money(f.taxYearTotal);
+      thresholdStatusEl.textContent = f.overThreshold ? "Reached" : "Below";
+      thresholdStatusEl.className = `kpi-value ${f.overThreshold ? "bad" : "good"}`;
+      thresholdLeftEl.textContent = money(f.thresholdLeft);
+      setAsideSoFarEl.textContent = money(f.setAsideSoFar);
+
+      todayMadeEl.textContent = money(f.todayMade);
+      leftTodayEl.textContent = money(f.leftToday);
+      leftTodayEl.className = `kpi-value ${f.leftToday > 0 ? "amber" : "good"}`;
 
       progressTextEl.textContent = `${money(f.todayMade)} / ${money(f.dailyTarget)}`;
       progressFillEl.style.width = `${f.progress}%`;
       celebrateBoxEl.style.display = f.dailyTarget > 0 && f.leftToday === 0 ? "block" : "none";
+
+      thresholdAmountEl.value = settings.threshold_amount || "";
+      setAsideRateEl.value = settings.set_aside_rate || "";
+      targetDateEl.value = settings.target_date || todayString();
+      dailyTargetEl.value = settings.daily_target || "";
+    }
+
+    function daysUntil(dateStr) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const target = new Date(dateStr + "T00:00:00");
+      const diffMs = target - today;
+      return Math.round(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function renderAppointments() {
+      const upcoming = APPOINTMENTS
+        .map(a => ({ ...a, daysLeft: daysUntil(a.date) }))
+        .filter(a => a.daysLeft >= 0)
+        .sort((a, b) => a.daysLeft - b.daysLeft);
+
+      if (!upcoming.length) {
+        nextAppointmentEl.innerHTML = `<div class="empty">No upcoming appointments.</div>`;
+        appointmentsListEl.innerHTML = "";
+        appointmentAlertEl.className = "appointment-alert";
+        appointmentAlertEl.textContent = "";
+        return;
+      }
+
+      const next = upcoming[0];
+
+      nextAppointmentEl.innerHTML = `
+        <div class="item" style="padding-top:0;border-bottom:none;">
+          <div style="flex:1;min-width:0;">
+            <div class="item-title">${next.title}</div>
+            <div class="item-meta">
+              ${new Date(next.date + "T00:00:00").toLocaleDateString("en-GB")} • ${next.time}<br>
+              Clinician: ${next.clinician}<br>
+              Call from: ${next.phone}
+            </div>
+            <div class="pill ${next.daysLeft <= 1 ? "pill-over" : "pill-below"}">
+              ${next.daysLeft === 0 ? "Today" : next.daysLeft === 1 ? "Tomorrow" : `${next.daysLeft} days left`}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (next.daysLeft === 0) {
+        appointmentAlertEl.className = "appointment-alert today";
+        appointmentAlertEl.textContent = `Appointment today at ${next.time}. Watch for a call from ${next.phone}.`;
+      } else if (next.daysLeft <= 3) {
+        appointmentAlertEl.className = "appointment-alert soon";
+        appointmentAlertEl.textContent = `Upcoming appointment in ${next.daysLeft} day${next.daysLeft === 1 ? "" : "s"}.`;
+      } else {
+        appointmentAlertEl.className = "appointment-alert";
+        appointmentAlertEl.textContent = "";
+      }
+
+      appointmentsListEl.innerHTML = upcoming.map(a => `
+        <div class="item">
+          <div style="flex:1;min-width:0;">
+            <div class="item-title">${a.title}</div>
+            <div class="item-meta">
+              ${new Date(a.date + "T00:00:00").toLocaleDateString("en-GB")} • ${a.time}<br>
+              ${a.clinician} • ${a.phone}
+            </div>
+          </div>
+          <div class="item-money">${a.daysLeft === 0 ? "Today" : a.daysLeft === 1 ? "Tomorrow" : `${a.daysLeft}d`}</div>
+        </div>
+      `).join("");
     }
 
     function renderEntries() {
@@ -392,7 +753,7 @@
             <div class="item-meta">${entry.entry_date || ""}${entry.note ? ` • ${entry.note}` : ""}${entry.mode ? ` • ${entry.mode}` : ""}</div>
 
             <div class="inline-actions">
-              <button class="small-btn" onclick="toggleEntryEdit('${entry.id}')">Edit</button>
+              <button class="small-btn ghost-btn" onclick="toggleEntryEdit('${entry.id}')">Edit</button>
               <button class="small-btn danger-btn" onclick="deleteEntry('${entry.id}')">Delete</button>
             </div>
 
@@ -418,6 +779,12 @@
         </div>
       `).join("");
     }
+
+    window.toggleCollapse = function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle("collapsed");
+    };
 
     async function getUser() {
       const { data } = await supabase.auth.getUser();
@@ -458,11 +825,6 @@
         threshold_amount: Number(data?.threshold_amount || 1000),
         set_aside_rate: Number(data?.set_aside_rate || 20)
       };
-
-      targetDateEl.value = settings.target_date || "";
-      dailyTargetEl.value = settings.daily_target || "";
-      thresholdAmountEl.value = settings.threshold_amount || "";
-      setAsideRateEl.value = settings.set_aside_rate || "";
     }
 
     async function loadEntries(userId) {
@@ -481,12 +843,10 @@
       entries = data || [];
     }
 
-    saveSettingsBtn.addEventListener("click", async () => {
+    saveTaxSettingsBtn.addEventListener("click", async () => {
       const user = await getUser();
       if (!user) return;
 
-      const targetDate = targetDateEl.value || todayString();
-      const dailyTarget = Number(dailyTargetEl.value || 0);
       const threshold = Number(thresholdAmountEl.value || 1000);
       const setAsideRate = Number(setAsideRateEl.value || 20);
 
@@ -494,8 +854,8 @@
         .from("creators_settings")
         .upsert([{
           user_id: user.id,
-          target_date: targetDate,
-          daily_target: dailyTarget,
+          target_date: settings.target_date || todayString(),
+          daily_target: settings.daily_target || 0,
           threshold_amount: threshold,
           set_aside_rate: setAsideRate
         }], { onConflict: "user_id" });
@@ -505,7 +865,33 @@
         return;
       }
 
-      setSettingsMsg("Settings saved.", true);
+      setSettingsMsg("Tax settings saved.", true);
+      await initialise();
+    });
+
+    saveTargetBtn.addEventListener("click", async () => {
+      const user = await getUser();
+      if (!user) return;
+
+      const targetDate = targetDateEl.value || todayString();
+      const dailyTarget = Number(dailyTargetEl.value || 0);
+
+      const { error } = await supabase
+        .from("creators_settings")
+        .upsert([{
+          user_id: user.id,
+          target_date: targetDate,
+          daily_target: dailyTarget,
+          threshold_amount: settings.threshold_amount || 1000,
+          set_aside_rate: settings.set_aside_rate || 20
+        }], { onConflict: "user_id" });
+
+      if (error) {
+        setTargetMsg(error.message);
+        return;
+      }
+
+      setTargetMsg("Daily target saved.", true);
       await initialise();
     });
 
@@ -610,7 +996,8 @@
       await loadSettings(user.id);
       await loadEntries(user.id);
 
-      renderKpis();
+      renderTaxAndTarget();
+      renderAppointments();
       renderEntries();
     }
 
