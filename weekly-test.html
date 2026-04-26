@@ -16,7 +16,6 @@
   --bg1:#0f1115;
   --bg2:#171a20;
   --panel:rgba(255,255,255,0.06);
-  --panel2:rgba(255,255,255,0.09);
   --line:rgba(255,255,255,0.12);
   --text:#f5f7fb;
   --muted:#a7afbe;
@@ -33,15 +32,10 @@ body{
   padding:18px;
   color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-    linear-gradient(180deg, var(--bg1), var(--bg2));
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
 }
 
-.wrap{
-  max-width:1400px;
-  margin:0 auto;
-}
+.wrap{max-width:1400px;margin:0 auto;}
 
 .card{
   background:var(--panel);
@@ -70,9 +64,7 @@ body{
   font-weight:800;
 }
 
-.muted{
-  color:var(--muted);
-}
+.muted{color:var(--muted);}
 
 .controls{
   display:grid;
@@ -81,7 +73,7 @@ body{
   align-items:end;
 }
 
-input, button, textarea{
+input, button, textarea, select{
   width:100%;
   padding:12px;
   margin-top:10px;
@@ -165,6 +157,10 @@ button.secondary{
   white-space:pre-wrap;
 }
 
+.slot-content.linked{
+  border:1px solid rgba(96,165,250,.45);
+}
+
 .slot-content.done{
   text-decoration:line-through;
   color:var(--muted);
@@ -194,11 +190,11 @@ button.secondary{
   border-radius:28px 28px 0 0;
   padding:20px;
   border-top:1px solid var(--line);
+  max-height:92vh;
+  overflow:auto;
 }
 
-.sheet h3{
-  margin:0;
-}
+.sheet h3{margin:0;}
 
 .sheet-actions{
   display:grid;
@@ -226,7 +222,7 @@ button.secondary{
     <div class="topbar">
       <div>
         <h2 style="margin:0;">Weekly Whiteboard</h2>
-        <p class="muted" style="margin:6px 0 0;">Fixed Monday–Sunday planner with 30-minute slots.</p>
+        <p class="muted" style="margin:6px 0 0;">Fixed Monday–Sunday planner with 30-minute slots. Pull tasks from To Do.</p>
       </div>
       <a href="dashboard.html" class="back-btn">← Dashboard</a>
     </div>
@@ -251,7 +247,13 @@ button.secondary{
     <h3 id="modalTitle">Edit slot</h3>
     <p class="muted" id="modalSub"></p>
 
-    <textarea id="slotText" placeholder="What are you doing?"></textarea>
+    <textarea id="slotText" placeholder="Write manually, or choose a To Do task below."></textarea>
+
+    <select id="taskSelect">
+      <option value="">Pull from To Do...</option>
+    </select>
+
+    <button id="pullTaskBtn" class="secondary">Use selected task</button>
 
     <div class="sheet-actions">
       <button id="saveSlotBtn">Save</button>
@@ -291,12 +293,15 @@ const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalSub = document.getElementById("modalSub");
 const slotText = document.getElementById("slotText");
+const taskSelect = document.getElementById("taskSelect");
+const pullTaskBtn = document.getElementById("pullTaskBtn");
 const saveSlotBtn = document.getElementById("saveSlotBtn");
 const doneSlotBtn = document.getElementById("doneSlotBtn");
 const deleteSlotBtn = document.getElementById("deleteSlotBtn");
 
 let user = null;
 let slots = [];
+let tasks = [];
 let active = null;
 
 function setMsg(text){
@@ -329,6 +334,19 @@ async function getUser(){
   return data.user;
 }
 
+function renderTaskOptions(){
+  const openTasks = tasks
+    .filter(t => !t.done)
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  taskSelect.innerHTML = `
+    <option value="">Pull from To Do...</option>
+    ${openTasks.map(t => `
+      <option value="${t.id}">${t.category || "Life"} — ${t.title}</option>
+    `).join("")}
+  `;
+}
+
 function render(){
   const times = makeTimes();
 
@@ -347,7 +365,7 @@ function render(){
         <div class="cell slot" onclick="openSlot('${day}', '${time}')">
           ${
             slot?.text
-              ? `<div class="slot-content ${slot.done ? "done" : ""}">${slot.text}</div>`
+              ? `<div class="slot-content ${slot.done ? "done" : ""} ${slot.task_id ? "linked" : ""}">${slot.text}</div>`
               : `<div class="empty-slot">＋</div>`
           }
         </div>
@@ -370,18 +388,33 @@ async function load(){
     weekStartEl.value = todayMonday();
   }
 
-  const { data, error } = await supabase
-    .from("weekly_slots")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("week_start", weekStartEl.value);
+  const [slotsRes, tasksRes] = await Promise.all([
+    supabase
+      .from("weekly_slots")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("week_start", weekStartEl.value),
 
-  if(error){
-    setMsg(error.message);
+    supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending:false })
+  ]);
+
+  if(slotsRes.error){
+    setMsg(slotsRes.error.message);
     return;
   }
 
-  slots = data || [];
+  if(tasksRes.error){
+    setMsg(tasksRes.error.message);
+    return;
+  }
+
+  slots = slotsRes.data || [];
+  tasks = tasksRes.data || [];
+
   render();
 }
 
@@ -392,30 +425,50 @@ window.openSlot = function(day, time){
     day,
     time,
     id: existing?.id || null,
-    done: existing?.done || false
+    done: existing?.done || false,
+    task_id: existing?.task_id || null
   };
 
   modalTitle.textContent = `${day} ${time}`;
   modalSub.textContent = weekStartEl.value;
   slotText.value = existing?.text || "";
   doneSlotBtn.textContent = existing?.done ? "Undo" : "Mark done";
+
+  renderTaskOptions();
+  taskSelect.value = existing?.task_id || "";
+
   modal.style.display = "flex";
-}
+};
 
 window.closeModal = function(){
   modal.style.display = "none";
   active = null;
-}
+};
+
+pullTaskBtn.onclick = function(){
+  const taskId = taskSelect.value;
+  if(!taskId) return;
+
+  const task = tasks.find(t => t.id === taskId);
+  if(!task) return;
+
+  slotText.value = task.title || "";
+  active.task_id = task.id;
+};
 
 saveSlotBtn.onclick = async function(){
   if(!active) return;
 
   const text = slotText.value.trim();
+  const taskId = taskSelect.value || active.task_id || null;
 
   if(active.id){
     const { error } = await supabase
       .from("weekly_slots")
-      .update({ text })
+      .update({
+        text,
+        task_id: taskId
+      })
       .eq("id", active.id);
 
     if(error) return setMsg(error.message);
@@ -430,7 +483,8 @@ saveSlotBtn.onclick = async function(){
         day_name:active.day,
         slot_time:active.time,
         text,
-        done:false
+        done:false,
+        task_id:taskId
       }]);
 
     if(error) return setMsg(error.message);
@@ -438,21 +492,32 @@ saveSlotBtn.onclick = async function(){
 
   closeModal();
   await load();
-}
+};
 
 doneSlotBtn.onclick = async function(){
   if(!active?.id) return;
 
-  const { error } = await supabase
+  const newDone = !active.done;
+
+  const slotUpdate = await supabase
     .from("weekly_slots")
-    .update({ done: !active.done })
+    .update({ done: newDone })
     .eq("id", active.id);
 
-  if(error) return setMsg(error.message);
+  if(slotUpdate.error) return setMsg(slotUpdate.error.message);
+
+  if(active.task_id){
+    const taskUpdate = await supabase
+      .from("tasks")
+      .update({ done: newDone })
+      .eq("id", active.task_id);
+
+    if(taskUpdate.error) return setMsg(taskUpdate.error.message);
+  }
 
   closeModal();
   await load();
-}
+};
 
 deleteSlotBtn.onclick = async function(){
   if(!active?.id){
@@ -469,7 +534,7 @@ deleteSlotBtn.onclick = async function(){
 
   closeModal();
   await load();
-}
+};
 
 document.getElementById("loadWeekBtn").onclick = load;
 
@@ -486,7 +551,7 @@ document.getElementById("clearWeekBtn").onclick = async function(){
   if(error) return setMsg(error.message);
 
   await load();
-}
+};
 
 load();
 </script>
