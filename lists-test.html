@@ -1,157 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>Pace Lists</title>
 
+<link rel="manifest" href="/Pace/site.webmanifest">
+<link rel="apple-touch-icon" href="/Pace/icon-180.png">
+<link rel="icon" href="/Pace/icon-32.png">
+
 <style>
+:root{
+  --bg:#0f1115;
+  --card:#1a1d23;
+  --line:rgba(255,255,255,0.08);
+  --text:#fff;
+  --muted:#aaa;
+  --accent:#ff3b30;
+}
+
 body{
   margin:0;
   padding:18px;
-  background:#0f1115;
-  color:#fff;
-  font-family:-apple-system;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont;
 }
 
-.card{
-  background:rgba(255,255,255,0.06);
-  padding:16px;
-  border-radius:16px;
-  margin-bottom:14px;
-}
+.wrap{max-width:1000px;margin:auto;}
 
-.topbar{
+.top{
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 
 .back{
-  padding:8px 12px;
-  background:rgba(255,255,255,0.08);
-  border-radius:12px;
   text-decoration:none;
-  color:white;
+  color:#fff;
   font-weight:700;
 }
 
-input, button{
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:12px;
+.add{
+  background:var(--accent);
   border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  color:#fff;
+  font-weight:800;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:14px;
+  margin-top:20px;
+}
+
+.note{
+  background:var(--card);
+  border-radius:18px;
+  padding:12px;
+  border:1px solid var(--line);
+  min-height:120px;
+  cursor:pointer;
+}
+
+.note-title{
+  font-weight:800;
+  font-size:14px;
+}
+
+.note-preview{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+  line-height:1.4;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  align-items:flex-end;
+}
+
+.sheet{
+  background:#13151b;
+  width:100%;
+  border-radius:24px 24px 0 0;
+  padding:20px;
+}
+
+input,textarea{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:12px;
+  background:#1f232a;
+  border:none;
+  color:#fff;
 }
 
 button{
-  background:#ff3b30;
-  color:white;
-  font-weight:700;
+  margin-top:10px;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-weight:800;
 }
 
-.item{
-  display:flex;
-  justify-content:space-between;
-  margin-top:6px;
-}
+.save{background:var(--accent);}
+.delete{background:#333;}
 </style>
 </head>
 
 <body>
+<div class="wrap">
 
-<div class="card topbar">
-  <h2>Lists</h2>
-  <a href="dashboard.html" class="back">←</a>
+  <div class="top">
+    <a href="dashboard.html" class="back">← Dashboard</a>
+    <button class="add" onclick="newNote()">+ New</button>
+  </div>
+
+  <h1>Quick Lists</h1>
+
+  <div id="grid" class="grid"></div>
+
 </div>
 
-<div class="card">
-  <input id="listName" placeholder="List name">
-  <button onclick="addList()">Create list</button>
+<div class="modal" id="modal">
+  <div class="sheet">
+    <input id="title" placeholder="Title">
+    <textarea id="content" rows="6" placeholder="Write your list..."></textarea>
+
+    <button class="save" onclick="saveNote()">Save</button>
+    <button class="delete" onclick="deleteNote()">Delete</button>
+    <button onclick="closeModal()">Close</button>
+  </div>
 </div>
-
-<div id="lists"></div>
-
-<script>
-let lists = JSON.parse(localStorage.getItem("lists") || "[]");
-
-function save(){
-  localStorage.setItem("lists", JSON.stringify(lists));
-  render();
-}
-
-function addList(){
-  const name = document.getElementById("listName").value;
-  lists.push({name,items:[]});
-  save();
-}
-
-function addItem(i){
-  const text = prompt("Add item");
-  if(!text) return;
-
-  lists[i].items.push({text,done:false});
-  save();
-}
-
-function toggle(i,j){
-  lists[i].items[j].done = !lists[i].items[j].done;
-  save();
-}
-
-function render(){
-  const el = document.getElementById("lists");
-
-  el.innerHTML = lists.map((l,i)=>`
-    <div class="card">
-      <h3>${l.name}</h3>
-      <button onclick="addItem(${i})">Add item</button>
-
-      ${l.items.map((it,j)=>`
-        <div class="item">
-          <span style="text-decoration:${it.done?'line-through':'none'}">
-            ${it.text}
-          </span>
-          <button onclick="toggle(${i},${j})">✔</button>
-        </div>
-      `).join("")}
-    </div>
-  `).join("");
-}
-
-render();
-</script>
-
-</body>
-</html>
-.list{
-  margin-top:12px;
-}
-
-.item{
-  display:flex;
-  justify-content:space-between;
-  margin-top:8px;
-}
-
-.small-btn{
-  width:auto;
-  padding:6px 10px;
-  margin-left:6px;
-}
-</style>
-</head>
-
-<body>
-
-<h2>Lists</h2>
-
-<div class="card">
-  <input id="listTitle" placeholder="New list name">
-  <button onclick="createList()">Create list</button>
-</div>
-
-<div id="lists"></div>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -161,111 +151,72 @@ const supabase = createClient(
   "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn"
 );
 
-let user;
-let lists = [];
+let user, notes=[], activeId=null;
+
+const grid = document.getElementById("grid");
 
 async function init(){
   const { data } = await supabase.auth.getUser();
   user = data.user;
-
-  if(!user){
-    window.location.href="index.html";
-    return;
-  }
-
-  loadLists();
+  if(!user) location.href="index.html";
+  load();
 }
 
-async function loadLists(){
+async function load(){
   const { data } = await supabase
     .from("lists")
     .select("*")
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .order("created_at",{ascending:false});
 
-  lists = data || [];
-
+  notes = data || [];
   render();
 }
 
 function render(){
-  const container = document.getElementById("lists");
-
-  container.innerHTML = lists.map(list => `
-    <div class="card">
-      <h3>${list.title}</h3>
-
-      <input placeholder="Add item"
-        onkeydown="if(event.key==='Enter') addItem('${list.id}', this.value, this)">
-      
-      <div class="list" id="items-${list.id}"></div>
-    </div>
-  `).join("");
-
-  lists.forEach(loadItems);
-}
-
-async function loadItems(listId){
-  const { data } = await supabase
-    .from("list_items")
-    .select("*")
-    .eq("list_id", listId);
-
-  const el = document.getElementById(`items-${listId}`);
-
-  el.innerHTML = (data || []).map(item => `
-    <div class="item">
-      <span style="text-decoration:${item.done ? 'line-through':'none'}">
-        ${item.text}
-      </span>
-
-      <div>
-        <button class="small-btn" onclick="toggleDone('${item.id}', ${!item.done})">✔</button>
-        <button class="small-btn" onclick="deleteItem('${item.id}')">✕</button>
-      </div>
+  grid.innerHTML = notes.map(n => `
+    <div class="note" onclick="openNote('${n.id}')">
+      <div class="note-title">${n.title || "Untitled"}</div>
+      <div class="note-preview">${(n.content||"").slice(0,80)}</div>
     </div>
   `).join("");
 }
 
-window.createList = async function(){
-  const title = document.getElementById("listTitle").value;
-
-  if(!title) return;
-
-  await supabase.from("lists").insert([{
-    user_id:user.id,
-    title
-  }]);
-
-  document.getElementById("listTitle").value="";
-  loadLists();
+window.newNote = ()=>{
+  activeId=null;
+  title.value="";
+  content.value="";
+  modal.style.display="flex";
 }
 
-window.addItem = async function(listId, text, input){
-  if(!text) return;
-
-  await supabase.from("list_items").insert([{
-    list_id:listId,
-    text
-  }]);
-
-  input.value="";
-  loadItems(listId);
+window.openNote = id=>{
+  const n = notes.find(x=>x.id===id);
+  activeId=id;
+  title.value=n.title;
+  content.value=n.content;
+  modal.style.display="flex";
 }
 
-window.toggleDone = async function(id, done){
-  await supabase.from("list_items")
-    .update({done})
-    .eq("id", id);
+window.closeModal = ()=> modal.style.display="none";
 
-  loadLists();
+window.saveNote = async ()=>{
+  if(activeId){
+    await supabase.from("lists")
+      .update({title:title.value, content:content.value})
+      .eq("id",activeId);
+  } else {
+    await supabase.from("lists")
+      .insert([{user_id:user.id,title:title.value,content:content.value}]);
+  }
+  closeModal();
+  load();
 }
 
-window.deleteItem = async function(id){
-  await supabase.from("list_items")
-    .delete()
-    .eq("id", id);
-
-  loadLists();
+window.deleteNote = async ()=>{
+  if(!activeId) return closeModal();
+  await supabase.from("lists").delete().eq("id",activeId);
+  closeModal();
+  load();
 }
 
 init();
