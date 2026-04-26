@@ -1,1078 +1,772 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pace Bookings</title>
-  <link rel="manifest" href="/Pace/site.webmanifest">
-  <link rel="apple-touch-icon" href="/Pace/icon-180.png">
-  <link rel="icon" href="/Pace/icon-32.png">
-  <meta name="theme-color" content="#0f1115">
-  <style>
-    :root {
-      --bg1:#0f1115;
-      --bg2:#171a20;
-      --panel:rgba(255,255,255,0.06);
-      --panel-strong:rgba(255,255,255,0.08);
-      --line:rgba(255,255,255,0.10);
-      --text:#f5f7fb;
-      --muted:#a7afbe;
-      --accent:#ff3b30;
-      --enquiry:#6b7280;
-      --pending:#f59e0b;
-      --booked:#22c55e;
-      --completed:#0f766e;
-      --cancelled:#ef4444;
-      --lost:#4b5563;
-      --overdue:#b91c1c;
-      --coming:#60a5fa;
-      --shadow:0 20px 50px rgba(0,0,0,0.35);
-      --blur:18px;
-      --radius:24px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pace Bookings</title>
 
-    * { box-sizing: border-box; }
+<link rel="manifest" href="/Pace/site.webmanifest">
+<link rel="apple-touch-icon" href="/Pace/icon-180.png">
+<link rel="icon" href="/Pace/icon-32.png">
+<meta name="theme-color" content="#0f1115">
 
-    body {
-      margin:0;
-      padding:18px;
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-        radial-gradient(circle at top right, rgba(255,59,48,0.08), transparent 28%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-    }
+<style>
+:root{
+  --bg1:#0f1115;
+  --bg2:#171a20;
+  --panel:rgba(255,255,255,0.06);
+  --panel2:rgba(255,255,255,0.09);
+  --line:rgba(255,255,255,0.12);
+  --text:#f5f7fb;
+  --muted:#a7afbe;
+  --accent:#ff3b30;
+  --green:#22c55e;
+  --amber:#f59e0b;
+  --blue:#60a5fa;
+  --red:#ef4444;
+  --shadow:0 20px 50px rgba(0,0,0,0.35);
+  --radius:24px;
+}
 
-    .wrap {
-      max-width: 1160px;
-      margin: 0 auto;
-    }
+*{box-sizing:border-box}
 
-    .glass {
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      backdrop-filter:blur(var(--blur));
-      -webkit-backdrop-filter:blur(var(--blur));
-      box-shadow:var(--shadow);
-    }
+body{
+  margin:0;
+  padding:18px;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+}
 
-    .card {
-      padding:18px;
-      margin-top:16px;
-    }
+.wrap{max-width:1150px;margin:0 auto;}
 
-    .topbar {
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:14px;
-    }
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  margin-top:16px;
+  backdrop-filter:blur(18px);
+}
 
-    .back-btn {
-      width:auto;
-      padding:10px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      border:none;
-      font-weight:700;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-block;
-    }
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
 
-    .muted { color:var(--muted); }
-    .notice { color:#bbb; margin-top:10px; white-space:pre-wrap; }
-    .success { color:#8ff0b2; }
+.back-btn{
+  padding:10px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+}
 
-    .kpi {
-      display:grid;
-      grid-template-columns:repeat(6, 1fr);
-      gap:12px;
-      margin-top:14px;
-    }
+.muted{color:var(--muted)}
 
-    .kpi-box {
-      background:var(--panel-strong);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:18px;
-      padding:12px 14px;
-    }
+input,select,textarea,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  color:#fff;
+  font:inherit;
+}
 
-    .kpi-title {
-      font-size:12px;
-      color:var(--muted);
-    }
+input::placeholder,textarea::placeholder{color:#9da6b5}
 
-    .kpi-value {
-      font-size:18px;
-      font-weight:700;
-      margin-top:4px;
-    }
+textarea{
+  min-height:76px;
+  resize:vertical;
+}
 
-    input, select, textarea {
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border:1px solid rgba(255,255,255,0.10);
-      box-sizing:border-box;
-      font:inherit;
-    }
+button{
+  background:var(--accent);
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
 
-    input::placeholder,
-    textarea::placeholder {
-      color:#9da6b5;
-    }
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 
-    textarea {
-      min-height:88px;
-      resize:vertical;
-    }
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
 
-    .row {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+.tab{
+  width:auto;
+  margin:0;
+  padding:8px 11px;
+  background:rgba(255,255,255,0.08);
+  font-size:13px;
+}
 
-    .row-3 {
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-    }
+.tab.active{background:var(--accent)}
 
-    button {
-      margin-top:10px;
-      padding:12px;
-      border-radius:14px;
-      background:var(--accent);
-      color:#fff;
-      border:none;
-      font-weight:700;
-      cursor:pointer;
-      font:inherit;
-      transition:transform .12s ease, opacity .12s ease;
-    }
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-top:14px;
+}
 
-    button:hover {
-      transform:translateY(-1px);
-    }
+.kpi{
+  background:var(--panel2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+  padding:14px;
+}
 
-    button:active {
-      transform:translateY(0);
-      opacity:0.92;
-    }
+.kpi-title{
+  font-size:12px;
+  color:var(--muted);
+}
 
-    .small-btn {
-      width:auto;
-      margin-top:8px;
-      padding:8px 10px;
-      background:rgba(255,255,255,0.10);
-      font-size:13px;
-    }
+.kpi-value{
+  font-size:20px;
+  font-weight:800;
+  margin-top:4px;
+}
 
-    .warn-btn {
-      background:rgba(185,28,28,0.85);
-    }
+.booking{
+  background:var(--panel2);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+  padding:16px;
+  margin-top:12px;
+}
 
-    .danger-btn {
-      background:rgba(239,68,68,0.18);
-    }
+.booking-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
 
-    .section {
-      margin-top:24px;
-    }
+.name{
+  font-weight:800;
+  font-size:17px;
+}
 
-    .section-title {
-      font-weight:700;
-      margin-bottom:10px;
-      font-size:18px;
-      letter-spacing:-0.02em;
-    }
+.meta{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  margin-top:4px;
+}
 
-    .booking {
-      background:var(--panel-strong);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:18px;
-      padding:16px;
-      margin-top:10px;
-    }
+.badge{
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
 
-    .top {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
+.Enquiry{background:#6b7280}
+.Pending{background:var(--amber)}
+.Booked{background:var(--green)}
+.Completed{background:#0f766e}
+.Cancelled{background:var(--red)}
+.Lost{background:#4b5563}
+.Postponed{background:var(--blue)}
 
-    .name {
-      font-weight:700;
-      margin-bottom:4px;
-      font-size:16px;
-    }
+.money-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
 
-    .meta {
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.45;
-    }
+.money-box{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:15px;
+  padding:10px;
+}
 
-    .money-grid {
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:10px;
-      margin-top:12px;
-    }
+.money-label{
+  font-size:11px;
+  color:var(--muted);
+}
 
-    .money-box {
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:16px;
-      padding:10px 12px;
-    }
+.money-value{
+  font-weight:800;
+  margin-top:4px;
+}
 
-    .money-label {
-      font-size:11px;
-      color:var(--muted);
-    }
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
 
-    .money-value {
-      font-size:15px;
-      font-weight:700;
-      margin-top:4px;
-    }
+.small-btn{
+  width:auto;
+  margin:0;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.10);
+  font-size:13px;
+}
 
-    .badge-row {
-      margin-top:8px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+.danger{background:rgba(239,68,68,0.18)}
+.save{background:rgba(34,197,94,0.22)}
 
-    .badge {
-      display:inline-block;
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      color:#fff;
-    }
+.edit-box,.payment-box{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed rgba(255,255,255,0.12);
+}
 
-    .overdue-badge { background:var(--overdue); }
-    .coming-badge { background:var(--coming); }
+.payment-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  font-size:13px;
+}
 
-    .delete {
-      background:none;
-      border:none;
-      color:#aab2c0;
-      font-size:20px;
-      cursor:pointer;
-      padding:0;
-      margin:0;
-      width:auto;
-      line-height:1;
-    }
+.empty{
+  color:var(--muted);
+  padding:14px 0;
+}
 
-    .delete:hover {
-      color:#fff;
-    }
+.notice{
+  color:#bbb;
+  min-height:18px;
+  margin-top:10px;
+}
 
-    .empty {
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .payments {
-      margin-top:14px;
-      border-top:1px solid rgba(255,255,255,0.08);
-      padding-top:12px;
-    }
-
-    .payment-row {
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-      font-size:13px;
-      color:#d7dbe3;
-      padding:10px 0;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-
-    .payment-row:last-child {
-      border-bottom:none;
-    }
-
-    .payment-left {
-      flex:1;
-      min-width:0;
-    }
-
-    .payment-actions {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-left:10px;
-    }
-
-    .payment-form {
-      margin-top:10px;
-      padding-top:10px;
-      border-top:1px dashed rgba(255,255,255,0.12);
-    }
-
-    .edit-form {
-      margin-top:12px;
-      padding-top:12px;
-      border-top:1px dashed rgba(255,255,255,0.12);
-    }
-
-    .move-row {
-      display:flex;
-      gap:8px;
-      align-items:end;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .move-row select {
-      flex:1;
-      min-width:180px;
-      margin-top:0;
-    }
-
-    .coming-list {
-      display:grid;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .coming-card {
-      background:var(--panel-strong);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:18px;
-      padding:14px;
-    }
-
-    .settings-box {
-      display:grid;
-      grid-template-columns:1fr 200px;
-      gap:10px;
-      align-items:end;
-    }
-
-    .enquiry { background:var(--enquiry); }
-    .pending { background:var(--pending); }
-    .booked { background:var(--booked); }
-    .completed { background:var(--completed); }
-    .cancelled { background:var(--cancelled); }
-    .lost { background:var(--lost); }
-
-    @media (max-width:980px) {
-      .kpi {
-        grid-template-columns:repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width:760px) {
-      body { padding:14px; }
-      .row, .row-3, .money-grid, .kpi, .settings-box { grid-template-columns:1fr; }
-    }
-  </style>
+@media(max-width:800px){
+  .row,.row-3,.kpis,.money-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <div class="glass card">
+  <div class="card">
     <div class="topbar">
       <div>
-        <h2 style="margin:0;">Pace Bookings</h2>
-        <p class="muted" style="margin:6px 0 0 0;">Track jobs, payments, balances and due dates</p>
+        <h2 style="margin:0;">Bookings</h2>
+        <p class="muted" style="margin:6px 0 0;">Manage enquiries, bookings, payments and postponed jobs.</p>
       </div>
-      <a class="back-btn" href="dashboard.html">← Dashboard</a>
+      <a href="dashboard.html" class="back-btn">← Dashboard</a>
     </div>
 
-    <div class="settings-box">
-      <input id="businessName" placeholder="Business name">
-      <button id="saveBusinessNameBtn" type="button">Save business name</button>
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 6px;">Add booking</h3>
+
+    <div class="row">
+      <input id="clientName" placeholder="Client / couple name">
+      <input id="jobName" placeholder="Job name e.g. Wedding">
     </div>
-
-    <p id="businessSaved" class="notice"></p>
-    <div class="kpi" id="kpi"></div>
-  </div>
-
-  <div class="glass card">
-    <h2 style="margin-bottom:8px;">Coming Up</h2>
-    <p class="notice" style="margin-top:0;">Nearest upcoming jobs first.</p>
-    <div id="comingUp"></div>
-  </div>
-
-  <div class="glass card">
-    <input id="clientName" placeholder="Client / couple name" />
 
     <div class="row-3">
-      <input id="jobName" placeholder="Job name e.g. Wedding / Engagement shoot" />
-      <input id="eventDate" type="date" />
-      <input id="price" type="number" placeholder="Total price" />
+      <input id="eventDate" type="date">
+      <input id="price" type="number" placeholder="Total price">
+      <input id="dueDate" type="date">
     </div>
 
     <div class="row">
-      <select id="bookingStatus">
+      <select id="status">
         <option>Enquiry</option>
         <option>Pending deposit</option>
         <option>Booked</option>
+        <option>Postponed</option>
         <option>Completed</option>
         <option>Cancelled</option>
         <option>Lost lead</option>
-        <option>Said they will book</option>
       </select>
-      <input id="dueDate" type="date" />
+      <input id="newEventDate" type="date" placeholder="New date if postponed">
     </div>
 
-    <textarea id="bookingNote" placeholder="Notes"></textarea>
-
-    <button id="saveBtn" type="button">Save booking</button>
+    <textarea id="note" placeholder="Notes"></textarea>
+    <button id="saveBookingBtn">Save booking</button>
     <p id="msg" class="notice"></p>
   </div>
 
-  <div id="sections"></div>
+  <div class="card">
+    <div id="bookings"></div>
+  </div>
 
 </div>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-  const supabase = createClient(
-    "https://grgagroautlpphjsjpjh.supabase.co",
-    "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: localStorage
-      }
-    }
-  );
-
-  const clientNameEl = document.getElementById("clientName");
-  const jobNameEl = document.getElementById("jobName");
-  const eventDateEl = document.getElementById("eventDate");
-  const priceEl = document.getElementById("price");
-  const bookingStatusEl = document.getElementById("bookingStatus");
-  const dueDateEl = document.getElementById("dueDate");
-  const bookingNoteEl = document.getElementById("bookingNote");
-  const saveBtn = document.getElementById("saveBtn");
-  const sectionsEl = document.getElementById("sections");
-  const kpiEl = document.getElementById("kpi");
-  const msgEl = document.getElementById("msg");
-  const comingUpEl = document.getElementById("comingUp");
-  const businessNameEl = document.getElementById("businessName");
-  const businessSavedEl = document.getElementById("businessSaved");
-
-  const order = [
-    "Enquiry",
-    "Pending deposit",
-    "Booked",
-    "Completed",
-    "Cancelled",
-    "Lost lead"
-  ];
-
-  const allStatuses = [
-    "Enquiry",
-    "Pending deposit",
-    "Booked",
-    "Completed",
-    "Cancelled",
-    "Lost lead",
-    "Said they will book"
-  ];
-
-  function setMsg(text, good = false) {
-    msgEl.textContent = text;
-    msgEl.className = good ? "notice success" : "notice";
-  }
-
-  function setBusinessMsg(text, good = false) {
-    businessSavedEl.textContent = text;
-    businessSavedEl.className = good ? "notice success" : "notice";
-  }
-
-  function badgeClass(status) {
-    return {
-      "Enquiry":"enquiry",
-      "Pending deposit":"pending",
-      "Booked":"booked",
-      "Completed":"completed",
-      "Cancelled":"cancelled",
-      "Lost lead":"lost",
-      "Said they will book":"pending"
-    }[status] || "";
-  }
-
-  async function getUser() {
-    const { data, error } = await supabase.auth.getUser();
-    if (error) return null;
-    return data.user;
-  }
-
-  async function upsertSettings(userId, patch) {
-    const { error } = await supabase
-      .from("app_settings")
-      .upsert([{ user_id: userId, ...patch }], { onConflict: "user_id" });
-    return error;
-  }
-
-  async function loadSettings(userId) {
-    const { data } = await supabase
-      .from("app_settings")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (data?.business_name) {
-      businessNameEl.value = data.business_name;
+const supabase = createClient(
+  "https://grgagroautlpphjsjpjh.supabase.co",
+  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storage:localStorage
     }
   }
+);
 
-  document.getElementById("saveBusinessNameBtn").addEventListener("click", async () => {
-    const user = await getUser();
-    if (!user) return;
+const statuses = [
+  "All",
+  "Enquiry",
+  "Pending deposit",
+  "Booked",
+  "Postponed",
+  "Completed",
+  "Cancelled",
+  "Lost lead"
+];
 
-    const businessName = businessNameEl.value.trim();
-    const error = await upsertSettings(user.id, { business_name: businessName || null });
+let user = null;
+let bookings = [];
+let payments = [];
+let activeTab = "All";
 
-    if (error) {
-      setBusinessMsg(error.message);
-      return;
-    }
+const tabsEl = document.getElementById("tabs");
+const bookingsEl = document.getElementById("bookings");
+const kpisEl = document.getElementById("kpis");
+const msgEl = document.getElementById("msg");
 
-    setBusinessMsg("Business name saved.", true);
+const clientNameEl = document.getElementById("clientName");
+const jobNameEl = document.getElementById("jobName");
+const eventDateEl = document.getElementById("eventDate");
+const priceEl = document.getElementById("price");
+const dueDateEl = document.getElementById("dueDate");
+const statusEl = document.getElementById("status");
+const newEventDateEl = document.getElementById("newEventDate");
+const noteEl = document.getElementById("note");
+
+function setMsg(text){ msgEl.textContent = text; }
+
+function money(v){
+  return `£${Number(v || 0).toFixed(2)}`;
+}
+
+function formatDate(v){
+  if(!v) return "No date set";
+  return new Date(v + "T00:00:00").toLocaleDateString("en-GB");
+}
+
+function safe(v){
+  return String(v || "").replace(/"/g, '&quot;');
+}
+
+function paymentsFor(id){
+  return payments.filter(p => p.booking_id === id);
+}
+
+function paidTotal(id){
+  return paymentsFor(id).reduce((sum,p) => sum + Number(p.amount || 0), 0);
+}
+
+function statusClass(status){
+  if(status === "Pending deposit") return "Pending";
+  if(status === "Lost lead") return "Lost";
+  return status;
+}
+
+function displayDate(booking){
+  if(booking.status === "Postponed"){
+    return booking.new_event_date
+      ? `New date: ${formatDate(booking.new_event_date)}`
+      : "Pending new date";
+  }
+
+  return `Event: ${formatDate(booking.event_date)}`;
+}
+
+function renderTabs(){
+  tabsEl.innerHTML = statuses.map(s => `
+    <button class="tab ${activeTab === s ? "active" : ""}" onclick="setTab('${s}')">
+      ${s}
+    </button>
+  `).join("");
+}
+
+window.setTab = function(tab){
+  activeTab = tab;
+  render();
+}
+
+function renderKpis(){
+  const totalValue = bookings.reduce((sum,b) => sum + Number(b.price || 0), 0);
+  const totalPaid = payments.reduce((sum,p) => sum + Number(p.amount || 0), 0);
+  const outstanding = totalValue - totalPaid;
+
+  kpisEl.innerHTML = `
+    <div class="kpi">
+      <div class="kpi-title">Total jobs</div>
+      <div class="kpi-value">${bookings.length}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">Booked</div>
+      <div class="kpi-value">${bookings.filter(b => b.status === "Booked").length}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">Postponed</div>
+      <div class="kpi-value">${bookings.filter(b => b.status === "Postponed").length}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">Paid</div>
+      <div class="kpi-value">${money(totalPaid)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-title">Outstanding</div>
+      <div class="kpi-value">${money(outstanding)}</div>
+    </div>
+  `;
+}
+
+function render(){
+  renderTabs();
+  renderKpis();
+
+  let rows = [...bookings];
+
+  if(activeTab !== "All"){
+    rows = rows.filter(b => b.status === activeTab);
+  }
+
+  rows.sort((a,b) => {
+    if(a.status === "Postponed" && b.status !== "Postponed") return 1;
+    if(a.status !== "Postponed" && b.status === "Postponed") return -1;
+
+    const dateA = a.status === "Postponed" ? a.new_event_date : a.event_date;
+    const dateB = b.status === "Postponed" ? b.new_event_date : b.event_date;
+
+    return new Date(dateA || "2999-01-01") - new Date(dateB || "2999-01-01");
   });
 
-  function formatDate(value) {
-    if (!value) return "No date set";
-    return new Date(value + "T00:00:00").toLocaleDateString("en-GB");
+  if(!rows.length){
+    bookingsEl.innerHTML = `<div class="empty">No bookings here yet.</div>`;
+    return;
   }
 
-  function formatMoney(value) {
-    return `£${Number(value || 0).toFixed(0)}`;
-  }
+  bookingsEl.innerHTML = rows.map(b => {
+    const paid = paidTotal(b.id);
+    const remaining = Math.max(Number(b.price || 0) - paid, 0);
+    const bPayments = paymentsFor(b.id);
 
-  function extractJobName(note) {
-    if (!note) return "Untitled job";
-    const match = note.match(/^\[JOB:(.*?)\]/);
-    return match ? match[1].trim() : "Untitled job";
-  }
+    return `
+      <div class="booking">
+        <div class="booking-head">
+          <div>
+            <div class="name">${b.client_name || ""} — ${b.job_name || "Booking"}</div>
+            <div class="meta">
+              ${displayDate(b)}<br>
+              Original date: ${formatDate(b.event_date)}<br>
+              Due: ${formatDate(b.due_date)}
+            </div>
+            <span class="badge ${statusClass(b.status)}">${b.status === "Postponed" && !b.new_event_date ? "Pending new date" : b.status}</span>
+          </div>
 
-  function extractPlainNote(note) {
-    if (!note) return "";
-    return note.replace(/^\[JOB:.*?\]\s*/, "");
-  }
+          <button class="small-btn danger" onclick="deleteBooking('${b.id}')">Delete</button>
+        </div>
 
-  function jobNoteWithName(jobName, plainNote) {
-    const trimmed = (plainNote || "").trim();
-    return trimmed ? `[JOB:${jobName}] ${trimmed}` : `[JOB:${jobName}]`;
-  }
+        <div class="money-grid">
+          <div class="money-box">
+            <div class="money-label">Total</div>
+            <div class="money-value">${money(b.price)}</div>
+          </div>
+          <div class="money-box">
+            <div class="money-label">Paid</div>
+            <div class="money-value">${money(paid)}</div>
+          </div>
+          <div class="money-box">
+            <div class="money-label">Remaining</div>
+            <div class="money-value">${money(remaining)}</div>
+          </div>
+        </div>
 
-  function isOverdue(booking, paid) {
-    if (!booking.due_date) return false;
-    const remaining = Number(booking.price || 0) - paid;
-    if (remaining <= 0) return false;
+        ${b.note ? `<div class="meta" style="margin-top:10px;">${b.note}</div>` : ""}
 
-    const today = new Date();
-    const due = new Date(booking.due_date + "T00:00:00");
-    due.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
+        <div class="actions">
+          <button class="small-btn" onclick="toggleEdit('${b.id}')">Edit</button>
 
-    return due < today;
-  }
+          <select style="width:auto;margin:0;" id="move-${b.id}">
+            ${statuses.filter(s => s !== "All").map(s => `
+              <option ${b.status === s ? "selected" : ""}>${s}</option>
+            `).join("")}
+          </select>
 
-  function isUpcoming(booking) {
-    if (!booking.event_date) return false;
-    if (booking.status === "Completed" || booking.status === "Cancelled" || booking.status === "Lost lead") return false;
+          <button class="small-btn save" onclick="moveBooking('${b.id}')">Move</button>
+        </div>
 
-    const today = new Date();
-    today.setHours(0,0,0,0);
+        <div id="edit-${b.id}" class="edit-box" style="display:none;">
+          <div class="row">
+            <input id="edit-client-${b.id}" value="${safe(b.client_name)}" placeholder="Client">
+            <input id="edit-job-${b.id}" value="${safe(b.job_name)}" placeholder="Job">
+          </div>
 
-    const event = new Date(booking.event_date + "T00:00:00");
-    event.setHours(0,0,0,0);
+          <div class="row-3">
+            <input id="edit-event-${b.id}" type="date" value="${b.event_date || ""}">
+            <input id="edit-new-event-${b.id}" type="date" value="${b.new_event_date || ""}">
+            <input id="edit-price-${b.id}" type="number" value="${Number(b.price || 0)}">
+          </div>
 
-    return event >= today;
-  }
+          <div class="row">
+            <input id="edit-due-${b.id}" type="date" value="${b.due_date || ""}">
+            <select id="edit-status-${b.id}">
+              ${statuses.filter(s => s !== "All").map(s => `
+                <option ${b.status === s ? "selected" : ""}>${s}</option>
+              `).join("")}
+            </select>
+          </div>
 
-  async function addBooking() {
-    const user = await getUser();
+          <textarea id="edit-note-${b.id}">${b.note || ""}</textarea>
+          <button class="small-btn save" onclick="saveEdit('${b.id}')">Save changes</button>
+        </div>
 
-    if (!user) {
-      setMsg("Not logged in.");
-      return;
-    }
+        <div class="payment-box">
+          <strong>Payments</strong>
 
-    const clientName = clientNameEl.value.trim();
-    const jobName = jobNameEl.value.trim();
-    const eventDate = eventDateEl.value || null;
-    const price = Number(priceEl.value || 0);
-    const status = bookingStatusEl.value;
-    const dueDate = dueDateEl.value || null;
-    const note = bookingNoteEl.value.trim();
-
-    if (!clientName) {
-      setMsg("Enter a client name.");
-      return;
-    }
-
-    if (!jobName) {
-      setMsg("Enter a job name.");
-      return;
-    }
-
-    const combinedNote = jobNoteWithName(jobName, note);
-
-    const { error } = await supabase.from("bookings").insert([{
-      user_id: user.id,
-      client_name: clientName,
-      event_date: eventDate,
-      price: price,
-      status: status,
-      due_date: dueDate,
-      note: combinedNote
-    }]);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    clientNameEl.value = "";
-    jobNameEl.value = "";
-    eventDateEl.value = "";
-    priceEl.value = "";
-    bookingStatusEl.value = "Enquiry";
-    dueDateEl.value = "";
-    bookingNoteEl.value = "";
-    setMsg("Booking saved.", true);
-
-    await load();
-  }
-
-  saveBtn.addEventListener("click", addBooking);
-
-  async function getPaymentsMap(bookings, userId) {
-    const ids = bookings.map(b => b.id);
-    if (!ids.length) return {};
-
-    const { data, error } = await supabase
-      .from("payments")
-      .select("*")
-      .eq("user_id", userId)
-      .in("booking_id", ids)
-      .order("payment_date", { ascending: false });
-
-    if (error) {
-      setMsg(error.message);
-      return {};
-    }
-
-    const map = {};
-    for (const payment of data || []) {
-      if (!map[payment.booking_id]) map[payment.booking_id] = [];
-      map[payment.booking_id].push(payment);
-    }
-    return map;
-  }
-
-  function getPaidTotal(payments) {
-    return (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
-  }
-
-  async function addPayment(bookingId) {
-    const user = await getUser();
-
-    if (!user) {
-      setMsg("Not logged in.");
-      return;
-    }
-
-    const amountEl = document.getElementById(`payment-amount-${bookingId}`);
-    const typeEl = document.getElementById(`payment-type-${bookingId}`);
-    const dateEl = document.getElementById(`payment-date-${bookingId}`);
-    const noteEl = document.getElementById(`payment-note-${bookingId}`);
-
-    const amount = Number(amountEl.value || 0);
-    const paymentType = typeEl.value || "Payment";
-    const paymentDate = dateEl.value || null;
-    const note = noteEl.value.trim();
-
-    if (!amount) {
-      setMsg("Enter a payment amount.");
-      return;
-    }
-
-    const { error } = await supabase.from("payments").insert([{
-      user_id: user.id,
-      booking_id: bookingId,
-      amount,
-      payment_type: paymentType,
-      payment_date: paymentDate,
-      note
-    }]);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    amountEl.value = "";
-    typeEl.value = "Deposit";
-    dateEl.value = "";
-    noteEl.value = "";
-
-    setMsg("Payment saved.", true);
-    await load();
-  }
-
-  async function deletePayment(paymentId) {
-    const { error } = await supabase
-      .from("payments")
-      .delete()
-      .eq("id", paymentId);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    setMsg("Payment deleted.", true);
-    await load();
-  }
-
-  window.savePayment = addPayment;
-  window.deletePayment = deletePayment;
-
-  window.delBooking = async function(id) {
-    const { error } = await supabase
-      .from("bookings")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    setMsg("Booking deleted.", true);
-    await load();
-  };
-
-  window.toggleEdit = function(id) {
-    const block = document.getElementById(`edit-${id}`);
-    if (!block) return;
-    block.style.display = block.style.display === "none" ? "block" : "none";
-  };
-
-  window.updateBooking = async function(id) {
-    const clientName = document.getElementById(`edit-client-${id}`).value.trim();
-    const jobName = document.getElementById(`edit-job-${id}`).value.trim();
-    const eventDate = document.getElementById(`edit-event-${id}`).value || null;
-    const price = Number(document.getElementById(`edit-price-${id}`).value || 0);
-    const status = document.getElementById(`edit-status-${id}`).value;
-    const dueDate = document.getElementById(`edit-due-${id}`).value || null;
-    const note = document.getElementById(`edit-note-${id}`).value.trim();
-
-    if (!clientName) {
-      setMsg("Client name is required.");
-      return;
-    }
-
-    if (!jobName) {
-      setMsg("Job name is required.");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("bookings")
-      .update({
-        client_name: clientName,
-        event_date: eventDate,
-        price: price,
-        status: status,
-        due_date: dueDate,
-        note: jobNoteWithName(jobName, note)
-      })
-      .eq("id", id);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    setMsg("Booking updated.", true);
-    await load();
-  };
-
-  window.moveBooking = async function(id) {
-    const nextStatus = document.getElementById(`move-status-${id}`).value;
-
-    const { error } = await supabase
-      .from("bookings")
-      .update({ status: nextStatus })
-      .eq("id", id);
-
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
-
-    setMsg("Booking moved.", true);
-    await load();
-  };
-
-  function renderComingUp(bookings, paymentsMap) {
-    const upcoming = bookings
-      .filter(isUpcoming)
-      .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-      .slice(0, 8);
-
-    if (!upcoming.length) {
-      comingUpEl.innerHTML = `<div class="empty">No upcoming jobs.</div>`;
-      return;
-    }
-
-    comingUpEl.innerHTML = `
-      <div class="coming-list">
-        ${upcoming.map(b => {
-          const paid = getPaidTotal(paymentsMap[b.id] || []);
-          const remaining = Math.max(Number(b.price || 0) - paid, 0);
-          const overdue = isOverdue(b, paid);
-
-          return `
-            <div class="coming-card">
-              <div class="top">
-                <div>
-                  <div class="name">${b.client_name} — ${b.job_name}</div>
-                  <div class="meta">
-                    Event: ${formatDate(b.event_date)} • Due: ${formatDate(b.due_date)} • Remaining: ${formatMoney(remaining)}
+          ${
+            bPayments.length
+              ? bPayments.map(p => `
+                <div class="payment-row">
+                  <div>${p.payment_type || "Payment"} • ${formatDate(p.payment_date)} • ${p.note || ""}</div>
+                  <div>
+                    ${money(p.amount)}
+                    <button class="small-btn danger" onclick="deletePayment('${p.id}')">Delete</button>
                   </div>
                 </div>
-              </div>
+              `).join("")
+              : `<div class="empty">No payments yet.</div>`
+          }
 
-              <div class="badge-row">
-                <span class="badge ${badgeClass(b.status)}">${b.status}</span>
-                <span class="badge coming-badge">Coming up</span>
-                ${overdue ? `<span class="badge overdue-badge">Overdue</span>` : ``}
-              </div>
-            </div>
-          `;
-        }).join("")}
+          <div class="row-3">
+            <input id="pay-amount-${b.id}" type="number" placeholder="Amount">
+            <select id="pay-type-${b.id}">
+              <option>Deposit</option>
+              <option>Instalment</option>
+              <option>Final balance</option>
+              <option>Additional payment</option>
+            </select>
+            <input id="pay-date-${b.id}" type="date">
+          </div>
+
+          <input id="pay-note-${b.id}" placeholder="Payment note">
+          <button class="small-btn" onclick="addPayment('${b.id}')">Add payment</button>
+        </div>
       </div>
     `;
+  }).join("");
+}
+
+async function getUser(){
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+async function load(){
+  user = await getUser();
+
+  if(!user){
+    window.location.href = "index.html";
+    return;
   }
 
-  async function load() {
-    const user = await getUser();
-
-    if (!user) {
-      sectionsEl.innerHTML = `<div class="empty">Not logged in.</div>`;
-      kpiEl.innerHTML = "";
-      comingUpEl.innerHTML = "";
-      return;
-    }
-
-    await loadSettings(user.id);
-
-    const { data, error } = await supabase
+  const [bookingsRes, paymentsRes] = await Promise.all([
+    supabase
       .from("bookings")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending:false }),
 
-    if (error) {
-      setMsg(error.message);
-      return;
-    }
+    supabase
+      .from("payments")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("payment_date", { ascending:false })
+  ]);
 
-    const bookings = (data || []).map(row => ({
-      ...row,
-      job_name: extractJobName(row.note),
-      plain_note: extractPlainNote(row.note)
-    }));
-
-    const paymentsMap = await getPaymentsMap(bookings, user.id);
-
-    const total = bookings.length;
-    const booked = bookings.filter(b => b.status === "Booked").length;
-    const completed = bookings.filter(b => b.status === "Completed").length;
-    const totalContractValue = bookings.reduce((sum, b) => sum + Number(b.price || 0), 0);
-    const totalPaid = bookings.reduce((sum, b) => sum + getPaidTotal(paymentsMap[b.id]), 0);
-    const totalOutstanding = totalContractValue - totalPaid;
-    const overdueCount = bookings.filter(b => isOverdue(b, getPaidTotal(paymentsMap[b.id]))).length;
-
-    kpiEl.innerHTML = `
-      <div class="kpi-box">
-        <div class="kpi-title">Total jobs</div>
-        <div class="kpi-value">${total}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Booked</div>
-        <div class="kpi-value">${booked}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Completed</div>
-        <div class="kpi-value">${completed}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Received £</div>
-        <div class="kpi-value">${formatMoney(totalPaid)}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Outstanding £</div>
-        <div class="kpi-value">${formatMoney(totalOutstanding)}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Overdue</div>
-        <div class="kpi-value">${overdueCount}</div>
-      </div>
-    `;
-
-    renderComingUp(bookings, paymentsMap);
-
-    sectionsEl.innerHTML = order.map(section => {
-      const items = bookings.filter(b => (b.status || "Enquiry") === section);
-
-      return `
-        <div class="section">
-          <div class="section-title">${section}</div>
-          ${
-            items.length === 0
-              ? `<div class="empty">No bookings</div>`
-              : items.map(b => {
-                  const payments = paymentsMap[b.id] || [];
-                  const paid = getPaidTotal(payments);
-                  const remaining = Math.max(Number(b.price || 0) - paid, 0);
-                  const overdue = isOverdue(b, paid);
-
-                  return `
-                    <div class="booking">
-                      <div class="top">
-                        <div>
-                          <div class="name">${b.client_name || ""} — ${b.job_name}</div>
-                          <div class="meta">
-                            Event: ${formatDate(b.event_date)} • Due: ${formatDate(b.due_date)} • Total: ${formatMoney(b.price)}
-                          </div>
-                        </div>
-
-                        <button class="delete" onclick="delBooking('${b.id}')" aria-label="Delete booking">×</button>
-                      </div>
-
-                      <div class="badge-row">
-                        <span class="badge ${badgeClass(b.status)}">${b.status}</span>
-                        ${overdue ? `<span class="badge overdue-badge">Overdue</span>` : ``}
-                      </div>
-
-                      <div class="money-grid">
-                        <div class="money-box">
-                          <div class="money-label">Total</div>
-                          <div class="money-value">${formatMoney(b.price)}</div>
-                        </div>
-                        <div class="money-box">
-                          <div class="money-label">Paid</div>
-                          <div class="money-value">${formatMoney(paid)}</div>
-                        </div>
-                        <div class="money-box">
-                          <div class="money-label">Remaining</div>
-                          <div class="money-value">${formatMoney(remaining)}</div>
-                        </div>
-                      </div>
-
-                      ${b.plain_note ? `<div class="meta" style="margin-top:10px;">${b.plain_note}</div>` : ""}
-
-                      <div class="move-row">
-                        <select id="move-status-${b.id}">
-                          ${allStatuses.map(s => `<option value="${s}" ${b.status===s ? "selected" : ""}>${s}</option>`).join("")}
-                        </select>
-                        <button class="small-btn" type="button" onclick="moveBooking('${b.id}')">Move</button>
-                        <button class="small-btn" type="button" onclick="toggleEdit('${b.id}')">Edit</button>
-                      </div>
-
-                      <div id="edit-${b.id}" class="edit-form" style="display:none;">
-                        <div class="row">
-                          <input id="edit-client-${b.id}" value="${(b.client_name || "").replace(/"/g, '&quot;')}" placeholder="Client name" />
-                          <input id="edit-job-${b.id}" value="${(b.job_name || "").replace(/"/g, '&quot;')}" placeholder="Job name" />
-                        </div>
-
-                        <div class="row-3">
-                          <input id="edit-event-${b.id}" type="date" value="${b.event_date || ""}" />
-                          <input id="edit-price-${b.id}" type="number" value="${Number(b.price || 0)}" />
-                          <input id="edit-due-${b.id}" type="date" value="${b.due_date || ""}" />
-                        </div>
-
-                        <select id="edit-status-${b.id}">
-                          ${allStatuses.map(s => `<option ${b.status===s ? "selected" : ""}>${s}</option>`).join("")}
-                        </select>
-
-                        <textarea id="edit-note-${b.id}" placeholder="Notes">${b.plain_note || ""}</textarea>
-                        <button class="small-btn" type="button" onclick="updateBooking('${b.id}')">Save changes</button>
-                      </div>
-
-                      <div class="payments">
-                        <div class="meta" style="font-weight:700; margin-bottom:6px;">Payments</div>
-
-                        ${
-                          payments.length === 0
-                            ? `<div class="empty">No payments yet</div>`
-                            : payments.map(p => `
-                              <div class="payment-row">
-                                <div class="payment-left">
-                                  ${p.payment_type || "Payment"} • ${formatDate(p.payment_date)}${p.note ? ` • ${p.note}` : ""}
-                                </div>
-                                <div class="payment-actions">
-                                  <div>${formatMoney(p.amount)}</div>
-                                  <button class="small-btn danger-btn" type="button" onclick="deletePayment('${p.id}')">Delete</button>
-                                </div>
-                              </div>
-                            `).join("")
-                        }
-
-                        <div class="payment-form">
-                          <div class="row-3">
-                            <input id="payment-amount-${b.id}" type="number" placeholder="Amount" />
-                            <select id="payment-type-${b.id}">
-                              <option>Deposit</option>
-                              <option>Instalment</option>
-                              <option>Additional payment</option>
-                              <option>Final balance</option>
-                              <option>Payment</option>
-                            </select>
-                            <input id="payment-date-${b.id}" type="date" />
-                          </div>
-
-                          <input id="payment-note-${b.id}" placeholder="Payment note" />
-                          <button class="small-btn" type="button" onclick="savePayment('${b.id}')">Add payment</button>
-                        </div>
-
-                        ${overdue ? `<button class="small-btn warn-btn" type="button">Chase payment</button>` : ``}
-                      </div>
-                    </div>
-                  `;
-                }).join("")
-          }
-        </div>
-      `;
-    }).join("");
+  if(bookingsRes.error){
+    setMsg(bookingsRes.error.message);
+    return;
   }
 
-  load();
+  if(paymentsRes.error){
+    setMsg(paymentsRes.error.message);
+    return;
+  }
+
+  bookings = bookingsRes.data || [];
+  payments = paymentsRes.data || [];
+
+  render();
+}
+
+document.getElementById("saveBookingBtn").onclick = async () => {
+  const clientName = clientNameEl.value.trim();
+  const jobName = jobNameEl.value.trim();
+
+  if(!clientName){
+    setMsg("Enter client name.");
+    return;
+  }
+
+  const { error } = await supabase.from("bookings").insert([{
+    user_id:user.id,
+    client_name:clientName,
+    job_name:jobName || "Booking",
+    event_date:eventDateEl.value || null,
+    new_event_date:newEventDateEl.value || null,
+    price:Number(priceEl.value || 0),
+    due_date:dueDateEl.value || null,
+    status:statusEl.value,
+    note:noteEl.value.trim() || null
+  }]);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  clientNameEl.value = "";
+  jobNameEl.value = "";
+  eventDateEl.value = "";
+  newEventDateEl.value = "";
+  priceEl.value = "";
+  dueDateEl.value = "";
+  statusEl.value = "Enquiry";
+  noteEl.value = "";
+
+  setMsg("Booking saved.");
+  await load();
+};
+
+window.toggleEdit = function(id){
+  const box = document.getElementById(`edit-${id}`);
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+window.saveEdit = async function(id){
+  const status = document.getElementById(`edit-status-${id}`).value;
+
+  const { error } = await supabase
+    .from("bookings")
+    .update({
+      client_name:document.getElementById(`edit-client-${id}`).value.trim(),
+      job_name:document.getElementById(`edit-job-${id}`).value.trim(),
+      event_date:document.getElementById(`edit-event-${id}`).value || null,
+      new_event_date:document.getElementById(`edit-new-event-${id}`).value || null,
+      price:Number(document.getElementById(`edit-price-${id}`).value || 0),
+      due_date:document.getElementById(`edit-due-${id}`).value || null,
+      status,
+      note:document.getElementById(`edit-note-${id}`).value.trim() || null
+    })
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Booking updated.");
+  await load();
+}
+
+window.moveBooking = async function(id){
+  const status = document.getElementById(`move-${id}`).value;
+
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status })
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Booking moved.");
+  await load();
+}
+
+window.deleteBooking = async function(id){
+  const ok = confirm("Delete this booking?");
+  if(!ok) return;
+
+  const { error } = await supabase
+    .from("bookings")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Booking deleted.");
+  await load();
+}
+
+window.addPayment = async function(id){
+  const amount = Number(document.getElementById(`pay-amount-${id}`).value || 0);
+
+  if(!amount){
+    setMsg("Enter payment amount.");
+    return;
+  }
+
+  const { error } = await supabase.from("payments").insert([{
+    user_id:user.id,
+    booking_id:id,
+    amount,
+    payment_type:document.getElementById(`pay-type-${id}`).value,
+    payment_date:document.getElementById(`pay-date-${id}`).value || null,
+    note:document.getElementById(`pay-note-${id}`).value.trim() || null
+  }]);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Payment added.");
+  await load();
+}
+
+window.deletePayment = async function(id){
+  const { error } = await supabase
+    .from("payments")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Payment deleted.");
+  await load();
+}
+
+load();
 </script>
 </body>
 </html>
