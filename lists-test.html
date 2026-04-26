@@ -21,6 +21,21 @@ body{
   margin-bottom:14px;
 }
 
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.back{
+  padding:8px 12px;
+  background:rgba(255,255,255,0.08);
+  border-radius:12px;
+  text-decoration:none;
+  color:white;
+  font-weight:700;
+}
+
 input, button{
   width:100%;
   padding:12px;
@@ -35,6 +50,80 @@ button{
   font-weight:700;
 }
 
+.item{
+  display:flex;
+  justify-content:space-between;
+  margin-top:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card topbar">
+  <h2>Lists</h2>
+  <a href="dashboard.html" class="back">←</a>
+</div>
+
+<div class="card">
+  <input id="listName" placeholder="List name">
+  <button onclick="addList()">Create list</button>
+</div>
+
+<div id="lists"></div>
+
+<script>
+let lists = JSON.parse(localStorage.getItem("lists") || "[]");
+
+function save(){
+  localStorage.setItem("lists", JSON.stringify(lists));
+  render();
+}
+
+function addList(){
+  const name = document.getElementById("listName").value;
+  lists.push({name,items:[]});
+  save();
+}
+
+function addItem(i){
+  const text = prompt("Add item");
+  if(!text) return;
+
+  lists[i].items.push({text,done:false});
+  save();
+}
+
+function toggle(i,j){
+  lists[i].items[j].done = !lists[i].items[j].done;
+  save();
+}
+
+function render(){
+  const el = document.getElementById("lists");
+
+  el.innerHTML = lists.map((l,i)=>`
+    <div class="card">
+      <h3>${l.name}</h3>
+      <button onclick="addItem(${i})">Add item</button>
+
+      ${l.items.map((it,j)=>`
+        <div class="item">
+          <span style="text-decoration:${it.done?'line-through':'none'}">
+            ${it.text}
+          </span>
+          <button onclick="toggle(${i},${j})">✔</button>
+        </div>
+      `).join("")}
+    </div>
+  `).join("");
+}
+
+render();
+</script>
+
+</body>
+</html>
 .list{
   margin-top:12px;
 }
