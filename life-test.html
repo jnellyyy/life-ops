@@ -1,466 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="site.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" href="icon-32.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pace To Do</title>
+
+<link rel="manifest" href="/Pace/site.webmanifest">
+<link rel="apple-touch-icon" href="/Pace/icon-180.png">
+<link rel="icon" href="/Pace/icon-32.png">
 <meta name="theme-color" content="#0f1115">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ultimate To Do</title>
-  <style>
-    :root{
-      --bg1:#0f1115;
-      --bg2:#171a20;
-      --panel:rgba(255,255,255,0.06);
-      --panel-strong:rgba(255,255,255,0.08);
-      --line:rgba(255,255,255,0.10);
-      --text:#f5f7fb;
-      --muted:#a7afbe;
-      --accent:#ff3b30;
-      --green:#22c55e;
-      --shadow:0 20px 50px rgba(0,0,0,0.35);
-      --blur:18px;
-      --radius:22px;
-    }
 
-    * { box-sizing: border-box; }
+<style>
+:root{
+  --bg1:#0f1115;
+  --bg2:#171a20;
+  --panel:rgba(255,255,255,0.06);
+  --panel2:rgba(255,255,255,0.09);
+  --line:rgba(255,255,255,0.12);
+  --text:#f5f7fb;
+  --muted:#a7afbe;
+  --accent:#ff3b30;
+  --green:#22c55e;
+  --shadow:0 20px 50px rgba(0,0,0,0.35);
+  --radius:24px;
+}
 
-    body{
-      margin:0;
-      padding:18px;
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
-        radial-gradient(circle at top right, rgba(255,59,48,0.10), transparent 28%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-    }
+*{box-sizing:border-box}
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-    }
+body{
+  margin:0;
+  padding:18px;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 26%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+}
 
-    .glass{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      backdrop-filter:blur(var(--blur));
-      -webkit-backdrop-filter:blur(var(--blur));
-      box-shadow:var(--shadow);
-    }
+.wrap{max-width:980px;margin:0 auto;}
 
-    .card{
-      padding:18px;
-      margin-top:16px;
-    }
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  margin-top:16px;
+  backdrop-filter:blur(18px);
+}
 
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:14px;
-    }
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
 
-    .back-btn{
-      width:auto;
-      padding:10px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.08);
-      color:#fff;
-      border:none;
-      font-weight:700;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-block;
-    }
+.back-btn{
+  padding:10px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+}
 
-    .muted{
-      color:var(--muted);
-    }
+.muted{color:var(--muted)}
 
-    .top-row{
-      display:grid;
-      grid-template-columns:1fr 220px;
-      gap:10px;
-      margin-top:10px;
-    }
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  color:#fff;
+  font:inherit;
+}
 
-    input, select, button {
-      box-sizing: border-box;
-      font: inherit;
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:14px;
-      background:rgba(255,255,255,0.05);
-      color:#fff;
-      border:1px solid rgba(255,255,255,0.10);
-    }
+input::placeholder{color:#9da6b5}
 
-    input::placeholder{
-      color:#9da6b5;
-    }
+button{
+  background:var(--accent);
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
 
-    button {
-      background: var(--accent);
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-    }
+.row{
+  display:grid;
+  grid-template-columns:1fr 180px;
+  gap:10px;
+}
 
-    .add-btn{
-      margin-top:12px;
-    }
+.filters{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
 
-    .notice {
-      color: #bbb;
-      margin-top: 10px;
-      white-space: pre-wrap;
-    }
+.filter-btn{
+  width:auto;
+  margin:0;
+  padding:8px 11px;
+  background:rgba(255,255,255,0.08);
+  font-size:13px;
+}
 
-    .section {
-      margin-top: 24px;
-    }
+.filter-btn.active{
+  background:var(--accent);
+}
 
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: #fff;
-      letter-spacing:-0.02em;
-    }
+.task{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
 
-    .task-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      background:var(--panel-strong);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-      padding: 14px;
-      margin-top: 10px;
-    }
+.task:last-child{border-bottom:none}
 
-    .task-check {
-      width: 18px;
-      height: 18px;
-      margin-top: 4px;
-      flex: 0 0 auto;
-      accent-color: var(--green);
-    }
+.check{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,0.06);
+  color:#fff;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
 
-    .task-main {
-      flex: 1;
-      min-width: 0;
-    }
+.check.done{
+  background:var(--green);
+}
 
-    .task-text {
-      font-size: 15px;
-      line-height: 1.45;
-      word-break: break-word;
-    }
+.task-main{flex:1;min-width:0}
 
-    .task-text.done {
-      text-decoration: line-through;
-      opacity: 0.58;
-    }
+.task-title{
+  font-size:15px;
+  line-height:1.4;
+}
 
-    .task-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
+.task-title.done{
+  text-decoration:line-through;
+  color:var(--muted);
+}
 
-    .mini-btn {
-      width: auto;
-      margin: 0;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.10);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-    }
+.task-meta{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--muted);
+}
 
-    .delete-btn {
-      width: 34px;
-      height: 34px;
-      min-width: 34px;
-      padding: 0;
-      margin: 0;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.10);
-      color: #fff;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
+.actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
 
-    .edit-form {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed rgba(255,255,255,0.12);
-    }
+.small-btn{
+  width:auto;
+  margin:0;
+  padding:7px 9px;
+  border-radius:11px;
+  background:rgba(255,255,255,0.10);
+  font-size:12px;
+}
 
-    .empty-text {
-      color: var(--muted);
-      font-size: 14px;
-      padding: 4px 0 0;
-    }
+.danger{background:rgba(239,68,68,0.18)}
 
-    @media (max-width: 700px) {
-      .top-row {
-        grid-template-columns: 1fr;
-      }
+.edit-box{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px dashed rgba(255,255,255,0.12);
+}
 
-      body{
-        padding:14px;
-      }
-    }
-  </style>
+.empty{
+  color:var(--muted);
+  padding:12px 0;
+}
+
+.notice{
+  color:#bbb;
+  min-height:18px;
+  margin-top:10px;
+}
+
+@media(max-width:700px){
+  .row{grid-template-columns:1fr;}
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="glass card">
-      <div class="topbar">
-        <div>
-          <h2 style="margin:0;">Ultimate To Do List</h2>
-          <p class="muted" style="margin:6px 0 0 0;">Grouped by life area, with edit support.</p>
-        </div>
-        <a class="back-btn" href="dashboard.html">← Dashboard</a>
+<div class="wrap">
+
+  <div class="card">
+    <div class="topbar">
+      <div>
+        <h2 style="margin:0;">To Do</h2>
+        <p class="muted" style="margin:6px 0 0;">Your ultimate task list. Done items move to the bottom.</p>
       </div>
-
-      <div class="top-row">
-        <input id="taskInput" placeholder="Enter task" />
-        <select id="taskCategory">
-          <option value="Life">Life</option>
-          <option value="House">House</option>
-          <option value="Money">Money</option>
-          <option value="Business">Business</option>
-          <option value="Work">Work</option>
-        </select>
-      </div>
-
-      <button class="add-btn" onclick="addTask()">Add Task</button>
-
-      <p id="msg" class="notice"></p>
-
-      <div id="taskSections"></div>
+      <a href="dashboard.html" class="back-btn">← Dashboard</a>
     </div>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  <div class="card">
+    <div class="row">
+      <input id="taskInput" placeholder="Add a task">
+      <select id="categoryInput">
+        <option>Life</option>
+        <option>Business</option>
+        <option>Church</option>
+        <option>Household</option>
+        <option>Work</option>
+        <option>Health</option>
+        <option>Errands</option>
+        <option>Admin</option>
+      </select>
+    </div>
 
-    const supabase = createClient(
-      "https://grgagroautlpphjsjpjh.supabase.co",
-      "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      }
-    );
+    <button id="addBtn">Add task</button>
+    <p id="msg" class="notice"></p>
 
-    const taskInput = document.getElementById("taskInput");
-    const taskCategory = document.getElementById("taskCategory");
-    const msg = document.getElementById("msg");
-    const taskSections = document.getElementById("taskSections");
+    <div class="filters" id="filters"></div>
+  </div>
 
-    const sectionOrder = ["Life", "House", "Money", "Business", "Work"];
+  <div class="card">
+    <div id="tasks"></div>
+  </div>
 
-    async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      return data.user;
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  "https://grgagroautlpphjsjpjh.supabase.co",
+  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storage:localStorage
     }
+  }
+);
 
-    window.addTask = async function () {
-      const user = await getUser();
-      const title = taskInput.value.trim();
-      const category = taskCategory.value;
+const taskInput = document.getElementById("taskInput");
+const categoryInput = document.getElementById("categoryInput");
+const addBtn = document.getElementById("addBtn");
+const tasksEl = document.getElementById("tasks");
+const msgEl = document.getElementById("msg");
+const filtersEl = document.getElementById("filters");
 
-      if (!user) {
-        msg.textContent = "Not logged in.";
-        return;
-      }
+const categories = ["All","Life","Business","Church","Household","Work","Health","Errands","Admin"];
+let user = null;
+let tasks = [];
+let activeFilter = "All";
 
-      if (!title) {
-        msg.textContent = "Enter a task.";
-        return;
-      }
+function setMsg(text){
+  msgEl.textContent = text;
+}
 
-      const { error } = await supabase.from("tasks").insert([{
-        user_id: user.id,
-        title,
-        category,
-        status: "open"
-      }]);
+async function getUser(){
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
 
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
+function renderFilters(){
+  filtersEl.innerHTML = categories.map(cat => `
+    <button class="filter-btn ${activeFilter === cat ? "active" : ""}" onclick="setFilter('${cat}')">
+      ${cat}
+    </button>
+  `).join("");
+}
 
-      taskInput.value = "";
-      msg.textContent = "";
-      loadTasks();
-    };
+window.setFilter = function(cat){
+  activeFilter = cat;
+  render();
+}
 
-    window.toggleTask = async function (id, status) {
-      const newStatus = status === "done" ? "open" : "done";
+function sortedTasks(){
+  let rows = [...tasks];
 
-      const { error } = await supabase
-        .from("tasks")
-        .update({ status: newStatus })
-        .eq("id", id);
+  if(activeFilter !== "All"){
+    rows = rows.filter(t => (t.category || "Life") === activeFilter);
+  }
 
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
+  rows.sort((a,b) => {
+    if(Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
 
-      loadTasks();
-    };
+  return rows;
+}
 
-    window.deleteTask = async function (id) {
-      const { error } = await supabase
-        .from("tasks")
-        .delete()
-        .eq("id", id);
+function render(){
+  renderFilters();
 
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
+  const rows = sortedTasks();
 
-      loadTasks();
-    };
+  if(!rows.length){
+    tasksEl.innerHTML = `<div class="empty">No tasks here yet.</div>`;
+    return;
+  }
 
-    window.toggleEditTask = function (id) {
-      const block = document.getElementById(`edit-${id}`);
-      if (!block) return;
-      block.style.display = block.style.display === "none" ? "block" : "none";
-    };
+  tasksEl.innerHTML = rows.map(task => `
+    <div class="task">
+      <div class="check ${task.done ? "done" : ""}" onclick="toggleTask('${task.id}', ${task.done ? "false" : "true"})">
+        ${task.done ? "✓" : ""}
+      </div>
 
-    window.saveTaskEdit = async function (id) {
-      const editTitle = document.getElementById(`edit-title-${id}`).value.trim();
-      const editCategory = document.getElementById(`edit-category-${id}`).value;
+      <div class="task-main">
+        <div class="task-title ${task.done ? "done" : ""}">
+          ${task.title || ""}
+        </div>
+        <div class="task-meta">${task.category || "Life"}</div>
 
-      if (!editTitle) {
-        msg.textContent = "Task text cannot be empty.";
-        return;
-      }
+        <div class="actions" style="margin-top:8px;">
+          <button class="small-btn" onclick="toggleEdit('${task.id}')">Edit</button>
+          <button class="small-btn danger" onclick="deleteTask('${task.id}')">Delete</button>
+        </div>
 
-      const { error } = await supabase
-        .from("tasks")
-        .update({
-          title: editTitle,
-          category: editCategory
-        })
-        .eq("id", id);
+        <div id="edit-${task.id}" class="edit-box" style="display:none;">
+          <input id="edit-title-${task.id}" value="${(task.title || "").replace(/"/g, '&quot;')}">
+          <select id="edit-category-${task.id}">
+            ${categories.filter(c => c !== "All").map(cat => `
+              <option ${task.category === cat ? "selected" : ""}>${cat}</option>
+            `).join("")}
+          </select>
+          <button class="small-btn" style="margin-top:10px;" onclick="saveEdit('${task.id}')">Save changes</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
 
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
+async function load(){
+  user = await getUser();
 
-      msg.textContent = "Task updated.";
-      loadTasks();
-    };
+  if(!user){
+    window.location.href = "index.html";
+    return;
+  }
 
-    async function loadTasks() {
-      const user = await getUser();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending:false });
 
-      if (!user) {
-        taskSections.innerHTML = '<div class="notice">Not logged in.</div>';
-        return;
-      }
+  if(error){
+    setMsg(error.message);
+    return;
+  }
 
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+  tasks = data || [];
+  render();
+}
 
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
+addBtn.addEventListener("click", async () => {
+  const title = taskInput.value.trim();
+  const category = categoryInput.value;
 
-      const tasks = data || [];
+  if(!title){
+    setMsg("Type a task first.");
+    return;
+  }
 
-      taskSections.innerHTML = sectionOrder.map(section => {
-        const sectionTasks = tasks.filter(task => (task.category || "Life") === section);
+  const { error } = await supabase
+    .from("tasks")
+    .insert([{
+      user_id:user.id,
+      title,
+      category,
+      done:false
+    }]);
 
-        return `
-          <div class="section">
-            <div class="section-title">${section}</div>
-            ${
-              sectionTasks.length === 0
-                ? `<div class="empty-text">No tasks yet.</div>`
-                : sectionTasks.map(task => `
-                    <div class="task-row">
-                      <input
-                        class="task-check"
-                        type="checkbox"
-                        ${task.status === "done" ? "checked" : ""}
-                        onchange="toggleTask('${task.id}','${task.status}')"
-                      />
+  if(error){
+    setMsg(error.message);
+    return;
+  }
 
-                      <div class="task-main">
-                        <div class="task-text ${task.status === "done" ? "done" : ""}">
-                          ${task.title}
-                        </div>
+  taskInput.value = "";
+  setMsg("Task added.");
+  await load();
+});
 
-                        <div class="task-actions">
-                          <button class="mini-btn" onclick="toggleEditTask('${task.id}')">Edit</button>
-                        </div>
+taskInput.addEventListener("keydown", e => {
+  if(e.key === "Enter") addBtn.click();
+});
 
-                        <div id="edit-${task.id}" class="edit-form" style="display:none;">
-                          <input
-                            id="edit-title-${task.id}"
-                            value="${(task.title || "").replace(/"/g, '&quot;')}"
-                            placeholder="Task text"
-                          />
-                          <select id="edit-category-${task.id}">
-                            ${sectionOrder.map(option => `
-                              <option value="${option}" ${task.category === option ? "selected" : ""}>${option}</option>
-                            `).join("")}
-                          </select>
-                          <button class="mini-btn" onclick="saveTaskEdit('${task.id}')">Save changes</button>
-                        </div>
-                      </div>
+window.toggleTask = async function(id, done){
+  const { error } = await supabase
+    .from("tasks")
+    .update({ done })
+    .eq("id", id);
 
-                      <button
-                        class="delete-btn"
-                        onclick="deleteTask('${task.id}')"
-                        aria-label="Delete task"
-                        title="Delete"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  `).join("")
-            }
-          </div>
-        `;
-      }).join("");
-    }
+  if(error){
+    setMsg(error.message);
+    return;
+  }
 
-    loadTasks();
-  </script>
+  await load();
+}
+
+window.toggleEdit = function(id){
+  const box = document.getElementById(`edit-${id}`);
+  if(!box) return;
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+window.saveEdit = async function(id){
+  const title = document.getElementById(`edit-title-${id}`).value.trim();
+  const category = document.getElementById(`edit-category-${id}`).value;
+
+  if(!title){
+    setMsg("Task cannot be empty.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("tasks")
+    .update({ title, category })
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Task updated.");
+  await load();
+}
+
+window.deleteTask = async function(id){
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  setMsg("Task deleted.");
+  await load();
+}
+
+load();
+</script>
 </body>
 </html>
