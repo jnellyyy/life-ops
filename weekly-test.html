@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <title>Pace Weekly Whiteboard</title>
 
 <link rel="manifest" href="/Pace/site.webmanifest">
@@ -13,205 +12,54 @@
 
 <style>
 :root{
-  --bg1:#0f1115;
-  --bg2:#171a20;
-  --panel:rgba(255,255,255,0.06);
-  --line:rgba(255,255,255,0.12);
-  --text:#f5f7fb;
-  --muted:#a7afbe;
-  --accent:#ff3b30;
-  --green:#22c55e;
-  --shadow:0 20px 50px rgba(0,0,0,0.35);
+  --bg1:#0f1115;--bg2:#171a20;--panel:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.12);--text:#f5f7fb;--muted:#a7afbe;
+  --accent:#ff3b30;--green:#22c55e;--shadow:0 20px 50px rgba(0,0,0,.35);
   --radius:24px;
 }
-
 *{box-sizing:border-box}
-
 body{
-  margin:0;
-  padding:18px;
-  color:var(--text);
+  margin:0;padding:18px;color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
   background:linear-gradient(180deg,var(--bg1),var(--bg2));
 }
-
-.wrap{max-width:1400px;margin:0 auto;}
-
+.wrap{max-width:1400px;margin:0 auto}
 .card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:18px;
-  margin-top:16px;
-  backdrop-filter:blur(18px);
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px;margin-top:16px;backdrop-filter:blur(18px);
 }
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-  flex-wrap:wrap;
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.back-btn{padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.08);color:#fff;text-decoration:none;font-weight:800}
+.muted{color:var(--muted)}
+.controls{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:end}
+input,button,textarea,select{
+  width:100%;padding:12px;margin-top:10px;border-radius:14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:#fff;font:inherit;
 }
-
-.back-btn{
-  padding:10px 14px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.08);
-  color:#fff;
-  text-decoration:none;
-  font-weight:800;
-}
-
-.muted{color:var(--muted);}
-
-.controls{
-  display:grid;
-  grid-template-columns:1fr auto auto;
-  gap:10px;
-  align-items:end;
-}
-
-input, button, textarea, select{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.12);
-  color:#fff;
-  font:inherit;
-}
-
-button{
-  background:var(--accent);
-  border:none;
-  font-weight:800;
-  cursor:pointer;
-}
-
-button.secondary{
-  background:rgba(255,255,255,0.10);
-}
-
-.board-wrap{
-  overflow:auto;
-  margin-top:16px;
-  border-radius:22px;
-  border:1px solid var(--line);
-}
-
-.board{
-  min-width:980px;
-  display:grid;
-  grid-template-columns:82px repeat(7, 1fr);
-}
-
+textarea{min-height:170px;resize:vertical}
+button{background:var(--accent);border:none;font-weight:800;cursor:pointer}
+button.secondary{background:rgba(255,255,255,.10)}
+.board-wrap{overflow:auto;margin-top:16px;border-radius:22px;border:1px solid var(--line)}
+.board{min-width:980px;display:grid;grid-template-columns:82px repeat(7,1fr)}
 .cell{
-  min-height:72px;
-  border-right:1px solid rgba(255,255,255,0.08);
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  padding:8px;
-  background:rgba(255,255,255,0.035);
+  min-height:72px;border-right:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);padding:8px;background:rgba(255,255,255,.035);
 }
-
-.header{
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:#1b1d23;
-  font-weight:900;
-  text-align:center;
-  min-height:52px;
-}
-
-.time{
-  position:sticky;
-  left:0;
-  z-index:1;
-  background:#1b1d23;
-  color:var(--muted);
-  font-size:13px;
-  font-weight:800;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-}
-
-.slot{
-  cursor:pointer;
-}
-
-.slot:hover{
-  background:rgba(255,255,255,0.075);
-}
-
-.slot-content{
-  min-height:48px;
-  border-radius:12px;
-  padding:8px;
-  background:rgba(255,255,255,0.06);
-  font-size:13px;
-  line-height:1.35;
-  white-space:pre-wrap;
-}
-
-.slot-content.linked{
-  border:1px solid rgba(96,165,250,.45);
-}
-
-.slot-content.done{
-  text-decoration:line-through;
-  color:var(--muted);
-  background:rgba(34,197,94,0.12);
-  border:1px solid rgba(34,197,94,0.22);
-}
-
-.empty-slot{
-  color:rgba(255,255,255,0.22);
-  font-size:20px;
-  text-align:center;
-  padding-top:12px;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.72);
-  display:none;
-  align-items:flex-end;
-  z-index:50;
-}
-
-.sheet{
-  width:100%;
-  background:#13151b;
-  border-radius:28px 28px 0 0;
-  padding:20px;
-  border-top:1px solid var(--line);
-  max-height:92vh;
-  overflow:auto;
-}
-
-.sheet h3{margin:0;}
-
-.sheet-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.notice{
-  min-height:18px;
-  color:#bbb;
-  margin-top:10px;
-}
-
-@media(max-width:800px){
-  body{padding:14px;}
-  .controls{grid-template-columns:1fr;}
-}
+.header{position:sticky;top:0;z-index:2;background:#1b1d23;font-weight:900;text-align:center;min-height:52px}
+.time{position:sticky;left:0;z-index:1;background:#1b1d23;color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:flex-start;justify-content:center}
+.slot{cursor:pointer}
+.slot:hover{background:rgba(255,255,255,.075)}
+.slot-content{min-height:48px;border-radius:12px;padding:8px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.35;white-space:pre-wrap}
+.slot-content.linked{border:1px solid rgba(96,165,250,.45)}
+.slot-content.done{text-decoration:line-through;color:var(--muted);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22)}
+.empty-slot{color:rgba(255,255,255,.22);font-size:20px;text-align:center;padding-top:12px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:50}
+.sheet{width:100%;background:#13151b;border-radius:28px 28px 0 0;padding:20px;border-top:1px solid var(--line);max-height:92vh;overflow:auto}
+.sheet h3{margin:0}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notice{min-height:18px;color:#bbb;margin-top:10px}
+@media(max-width:800px){body{padding:14px}.controls{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -222,7 +70,7 @@ button.secondary{
     <div class="topbar">
       <div>
         <h2 style="margin:0;">Weekly Whiteboard</h2>
-        <p class="muted" style="margin:6px 0 0;">Fixed Monday–Sunday planner with 30-minute slots. Pull tasks from To Do.</p>
+        <p class="muted" style="margin:6px 0 0;">Fixed Monday–Sunday planner with 30-minute slots.</p>
       </div>
       <a href="dashboard.html" class="back-btn">← Dashboard</a>
     </div>
@@ -234,6 +82,15 @@ button.secondary{
     </div>
 
     <p id="msg" class="notice"></p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0;">Quick paste plan</h3>
+    <p class="muted" style="margin:6px 0 0;">
+      Paste your notes-style plan here. It will place timed lines into the board.
+    </p>
+    <textarea id="bulkText" placeholder="Paste your plan here..."></textarea>
+    <button id="importBtn">Import into whiteboard</button>
   </div>
 
   <div class="board-wrap">
@@ -271,61 +128,55 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient(
   "https://grgagroautlpphjsjpjh.supabase.co",
   "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true,
-      storage:localStorage
-    }
-  }
+  { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, storage:localStorage } }
 );
 
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-const START_HOUR = 8;
+const START_HOUR = 7;
 const END_HOUR = 23;
 
 const boardEl = document.getElementById("board");
 const weekStartEl = document.getElementById("weekStart");
 const msgEl = document.getElementById("msg");
+const bulkTextEl = document.getElementById("bulkText");
 
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const modalSub = document.getElementById("modalSub");
 const slotText = document.getElementById("slotText");
 const taskSelect = document.getElementById("taskSelect");
-const pullTaskBtn = document.getElementById("pullTaskBtn");
-const saveSlotBtn = document.getElementById("saveSlotBtn");
-const doneSlotBtn = document.getElementById("doneSlotBtn");
-const deleteSlotBtn = document.getElementById("deleteSlotBtn");
 
 let user = null;
 let slots = [];
 let tasks = [];
 let active = null;
 
-function setMsg(text){
-  msgEl.textContent = text;
-}
+function setMsg(text){ msgEl.textContent = text; }
 
 function todayMonday(){
   const d = new Date();
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  return monday.toISOString().split("T")[0];
+  return new Date(d.setDate(diff)).toISOString().split("T")[0];
 }
 
 function makeTimes(){
   const times = [];
-  for(let h = START_HOUR; h <= END_HOUR; h++){
+  for(let h=START_HOUR; h<=END_HOUR; h++){
     times.push(`${String(h).padStart(2,"0")}:00`);
     times.push(`${String(h).padStart(2,"0")}:30`);
   }
   return times;
 }
 
-function slotFor(day, time){
+function nearestHalf(hour, minute){
+  let m = minute >= 45 ? 60 : minute >= 15 ? 30 : 0;
+  let h = hour;
+  if(m === 60){ h += 1; m = 0; }
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
+function slotFor(day,time){
   return slots.find(s => s.day_name === day && s.slot_time === time);
 }
 
@@ -335,15 +186,10 @@ async function getUser(){
 }
 
 function renderTaskOptions(){
-  const openTasks = tasks
-    .filter(t => !t.done)
-    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-
+  const openTasks = tasks.filter(t => !t.done);
   taskSelect.innerHTML = `
     <option value="">Pull from To Do...</option>
-    ${openTasks.map(t => `
-      <option value="${t.id}">${t.category || "Life"} — ${t.title}</option>
-    `).join("")}
+    ${openTasks.map(t => `<option value="${t.id}">${t.category || "Life"} — ${t.title}</option>`).join("")}
   `;
 }
 
@@ -359,10 +205,9 @@ function render(){
     html += `<div class="cell time">${time}</div>`;
 
     DAYS.forEach(day => {
-      const slot = slotFor(day, time);
-
+      const slot = slotFor(day,time);
       html += `
-        <div class="cell slot" onclick="openSlot('${day}', '${time}')">
+        <div class="cell slot" onclick="openSlot('${day}','${time}')">
           ${
             slot?.text
               ? `<div class="slot-content ${slot.done ? "done" : ""} ${slot.task_id ? "linked" : ""}">${slot.text}</div>`
@@ -384,59 +229,38 @@ async function load(){
     return;
   }
 
-  if(!weekStartEl.value){
-    weekStartEl.value = todayMonday();
-  }
+  if(!weekStartEl.value) weekStartEl.value = todayMonday();
 
-  const [slotsRes, tasksRes] = await Promise.all([
-    supabase
-      .from("weekly_slots")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("week_start", weekStartEl.value),
-
-    supabase
-      .from("tasks")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending:false })
+  const [slotsRes,tasksRes] = await Promise.all([
+    supabase.from("weekly_slots").select("*").eq("user_id",user.id).eq("week_start",weekStartEl.value),
+    supabase.from("tasks").select("*").eq("user_id",user.id).order("created_at",{ascending:false})
   ]);
 
-  if(slotsRes.error){
-    setMsg(slotsRes.error.message);
-    return;
-  }
-
-  if(tasksRes.error){
-    setMsg(tasksRes.error.message);
-    return;
-  }
+  if(slotsRes.error) return setMsg(slotsRes.error.message);
+  if(tasksRes.error) return setMsg(tasksRes.error.message);
 
   slots = slotsRes.data || [];
   tasks = tasksRes.data || [];
-
   render();
 }
 
-window.openSlot = function(day, time){
-  const existing = slotFor(day, time);
+window.openSlot = function(day,time){
+  const existing = slotFor(day,time);
 
   active = {
-    day,
-    time,
-    id: existing?.id || null,
-    done: existing?.done || false,
-    task_id: existing?.task_id || null
+    day,time,
+    id:existing?.id || null,
+    done:existing?.done || false,
+    task_id:existing?.task_id || null
   };
 
   modalTitle.textContent = `${day} ${time}`;
   modalSub.textContent = weekStartEl.value;
   slotText.value = existing?.text || "";
-  doneSlotBtn.textContent = existing?.done ? "Undo" : "Mark done";
+  document.getElementById("doneSlotBtn").textContent = existing?.done ? "Undo" : "Mark done";
 
   renderTaskOptions();
   taskSelect.value = existing?.task_id || "";
-
   modal.style.display = "flex";
 };
 
@@ -445,10 +269,9 @@ window.closeModal = function(){
   active = null;
 };
 
-pullTaskBtn.onclick = function(){
+document.getElementById("pullTaskBtn").onclick = function(){
   const taskId = taskSelect.value;
   if(!taskId) return;
-
   const task = tasks.find(t => t.id === taskId);
   if(!task) return;
 
@@ -456,37 +279,21 @@ pullTaskBtn.onclick = function(){
   active.task_id = task.id;
 };
 
-saveSlotBtn.onclick = async function(){
+document.getElementById("saveSlotBtn").onclick = async function(){
   if(!active) return;
 
   const text = slotText.value.trim();
   const taskId = taskSelect.value || active.task_id || null;
 
   if(active.id){
-    const { error } = await supabase
-      .from("weekly_slots")
-      .update({
-        text,
-        task_id: taskId
-      })
-      .eq("id", active.id);
-
+    const { error } = await supabase.from("weekly_slots").update({ text, task_id:taskId }).eq("id",active.id);
     if(error) return setMsg(error.message);
   } else {
     if(!text) return;
-
-    const { error } = await supabase
-      .from("weekly_slots")
-      .insert([{
-        user_id:user.id,
-        week_start:weekStartEl.value,
-        day_name:active.day,
-        slot_time:active.time,
-        text,
-        done:false,
-        task_id:taskId
-      }]);
-
+    const { error } = await supabase.from("weekly_slots").insert([{
+      user_id:user.id, week_start:weekStartEl.value, day_name:active.day,
+      slot_time:active.time, text, done:false, task_id:taskId
+    }]);
     if(error) return setMsg(error.message);
   }
 
@@ -494,24 +301,16 @@ saveSlotBtn.onclick = async function(){
   await load();
 };
 
-doneSlotBtn.onclick = async function(){
+document.getElementById("doneSlotBtn").onclick = async function(){
   if(!active?.id) return;
 
   const newDone = !active.done;
 
-  const slotUpdate = await supabase
-    .from("weekly_slots")
-    .update({ done: newDone })
-    .eq("id", active.id);
-
+  const slotUpdate = await supabase.from("weekly_slots").update({done:newDone}).eq("id",active.id);
   if(slotUpdate.error) return setMsg(slotUpdate.error.message);
 
   if(active.task_id){
-    const taskUpdate = await supabase
-      .from("tasks")
-      .update({ done: newDone })
-      .eq("id", active.task_id);
-
+    const taskUpdate = await supabase.from("tasks").update({done:newDone}).eq("id",active.task_id);
     if(taskUpdate.error) return setMsg(taskUpdate.error.message);
   }
 
@@ -519,21 +318,201 @@ doneSlotBtn.onclick = async function(){
   await load();
 };
 
-deleteSlotBtn.onclick = async function(){
+document.getElementById("deleteSlotBtn").onclick = async function(){
   if(!active?.id){
     closeModal();
     return;
   }
 
-  const { error } = await supabase
-    .from("weekly_slots")
-    .delete()
-    .eq("id", active.id);
-
+  const { error } = await supabase.from("weekly_slots").delete().eq("id",active.id);
   if(error) return setMsg(error.message);
 
   closeModal();
   await load();
+};
+
+function parseDay(line){
+  const clean = line.toLowerCase();
+  return DAYS.find(day => clean.startsWith(day.toLowerCase())) || null;
+}
+
+function cleanBullet(line){
+  return line
+    .replace(/^[-*•]\s*/,"")
+    .replace(/^\[[ xX]\]\s*/,"")
+    .trim();
+}
+
+function parseTimedLine(line){
+  const cleaned = cleanBullet(line);
+
+  let match = cleaned.match(/^(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?\s*[–-]\s*(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?\s*(?:→|-|:)?\s*(.*)$/i);
+
+  if(match){
+    return {
+      hour:Number(match[1]),
+      minute:Number(match[2] || 0),
+      text:(match[5] || "").trim()
+    };
+  }
+
+  match = cleaned.match(/^(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?\s*(?:→|-|:)?\s*(.*)$/i);
+
+  if(match){
+    return {
+      hour:Number(match[1]),
+      minute:Number(match[2] || 0),
+      text:(match[3] || "").trim()
+    };
+  }
+
+  if(cleaned.toLowerCase().startsWith("goal")){
+    return { hour:23, minute:0, text:cleaned };
+  }
+
+  return null;
+}
+
+function normaliseHour(dayState, hour, minute, text){
+  let h = hour;
+
+  const lower = text.toLowerCase();
+  const morningWords = ["wake","breakfast","morning","start work","check car","food"];
+  const isMorningText = morningWords.some(w => lower.includes(w));
+
+  if(dayState.mode === "morning" || isMorningText){
+    // keep as AM
+  } else if(h < 7){
+    h += 12;
+  } else if(dayState.lastHour >= 12 && h < 12){
+    h += 12;
+  }
+
+  const decimal = h + (minute / 60);
+  if(decimal < dayState.lastHour && h < 12){
+    h += 12;
+  }
+
+  return { hour:h, minute };
+}
+
+function parseBulkPlan(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+
+  let currentDay = null;
+  let dayState = { lastHour:0, mode:"normal" };
+
+  for(const raw of lines){
+    const maybeDay = parseDay(raw);
+
+    if(maybeDay){
+      currentDay = maybeDay;
+      dayState = { lastHour:0, mode:"normal" };
+      continue;
+    }
+
+    if(!currentDay) continue;
+
+    const lower = raw.toLowerCase();
+
+    if(lower.includes("morning")){
+      dayState.mode = "morning";
+      dayState.lastHour = Math.max(dayState.lastHour, 7);
+      continue;
+    }
+
+    if(lower.includes("evening")){
+      dayState.mode = "evening";
+      dayState.lastHour = Math.max(dayState.lastHour, 18);
+      continue;
+    }
+
+    if(lower.includes("⸻")) continue;
+
+    if(lower.startsWith("* 30 mins") || lower.startsWith("- 30 mins")){
+      const textOnly = cleanBullet(raw).replace(/^30 mins\s*(→|-|:)?\s*/i,"").trim();
+      const next = dayState.lastHour + 0.5;
+      const hour = Math.floor(next);
+      const minute = next % 1 ? 30 : 0;
+      const slotTime = nearestHalf(hour,minute);
+      parsed.push({ day:currentDay, time:slotTime, text:textOnly });
+      dayState.lastHour = hour + minute / 60;
+      continue;
+    }
+
+    const timed = parseTimedLine(raw);
+    if(!timed || !timed.text) continue;
+
+    const normal = normaliseHour(dayState, timed.hour, timed.minute, timed.text);
+    const slotTime = nearestHalf(normal.hour, normal.minute);
+
+    const hourNum = Number(slotTime.split(":")[0]);
+    if(hourNum < START_HOUR || hourNum > END_HOUR) continue;
+
+    parsed.push({ day:currentDay, time:slotTime, text:timed.text });
+    dayState.lastHour = normal.hour + normal.minute / 60;
+  }
+
+  return parsed;
+}
+
+async function saveImportedSlot(item){
+  const existing = slots.find(s => s.day_name === item.day && s.slot_time === item.time);
+
+  if(existing){
+    const combined = existing.text ? `${existing.text}\n${item.text}` : item.text;
+
+    const { error } = await supabase
+      .from("weekly_slots")
+      .update({ text:combined })
+      .eq("id",existing.id);
+
+    if(error) throw error;
+
+    existing.text = combined;
+  } else {
+    const { data, error } = await supabase
+      .from("weekly_slots")
+      .insert([{
+        user_id:user.id,
+        week_start:weekStartEl.value,
+        day_name:item.day,
+        slot_time:item.time,
+        text:item.text,
+        done:false,
+        task_id:null
+      }])
+      .select()
+      .single();
+
+    if(error) throw error;
+    slots.push(data);
+  }
+}
+
+document.getElementById("importBtn").onclick = async function(){
+  const text = bulkTextEl.value.trim();
+  if(!text) return setMsg("Paste your plan first.");
+
+  const parsed = parseBulkPlan(text);
+
+  if(!parsed.length){
+    setMsg("No timed items found. Use lines like: * 5:00–5:30 → eat");
+    return;
+  }
+
+  try{
+    for(const item of parsed){
+      await saveImportedSlot(item);
+    }
+
+    bulkTextEl.value = "";
+    setMsg(`Imported ${parsed.length} items.`);
+    await load();
+  } catch(err){
+    setMsg(err.message);
+  }
 };
 
 document.getElementById("loadWeekBtn").onclick = load;
@@ -545,16 +524,14 @@ document.getElementById("clearWeekBtn").onclick = async function(){
   const { error } = await supabase
     .from("weekly_slots")
     .delete()
-    .eq("user_id", user.id)
-    .eq("week_start", weekStartEl.value);
+    .eq("user_id",user.id)
+    .eq("week_start",weekStartEl.value);
 
   if(error) return setMsg(error.message);
-
   await load();
 };
 
 load();
 </script>
-
 </body>
 </html>
