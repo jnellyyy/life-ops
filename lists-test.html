@@ -24,7 +24,6 @@
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
 html,body{max-width:100%;overflow-x:hidden}
 
 body{
@@ -37,11 +36,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
 }
 
-.page{
-  width:100%;
-  max-width:1180px;
-  margin:0 auto;
-}
+.page{width:100%;max-width:1180px;margin:0 auto}
 
 .top{
   display:flex;
@@ -86,10 +81,7 @@ h1{
   margin-top:34px;
 }
 
-.note-card{
-  min-width:0;
-  cursor:pointer;
-}
+.note-card{min-width:0;cursor:pointer}
 
 .preview{
   width:100%;
@@ -113,6 +105,13 @@ h1{
   text-overflow:ellipsis;
 }
 
+.preview-section{
+  font-size:10px;
+  font-weight:800;
+  color:#fff;
+  margin-top:5px;
+}
+
 .preview-line{
   font-size:10px;
   color:#c7c7cc;
@@ -120,13 +119,6 @@ h1{
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-}
-
-.preview-section{
-  font-size:10px;
-  font-weight:800;
-  color:#fff;
-  margin-top:5px;
 }
 
 .note-title{
@@ -248,6 +240,12 @@ button{
 .secondary{background:rgba(255,255,255,.10)}
 .danger{background:rgba(239,68,68,.22)}
 
+.row-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
 .section-title{
   margin-top:18px;
   margin-bottom:6px;
@@ -255,7 +253,6 @@ button{
   font-weight:900;
   color:#fff;
   text-transform:lowercase;
-  letter-spacing:.01em;
 }
 
 .item-row{
@@ -294,6 +291,12 @@ button{
   color:var(--muted);
 }
 
+.item-date{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
 .delete-small{
   width:auto;
   padding:7px 10px;
@@ -323,6 +326,7 @@ button{
   .grid{grid-template-columns:repeat(2, minmax(0, 1fr));gap:24px 14px}
   .preview{min-height:110px}
   .note-title{font-size:18px}
+  .row-2{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -366,12 +370,23 @@ admin
 • both client emails received
 • docusign contract sent"></textarea>
 
+      <div class="row-2">
+        <input id="sectionReminderDate" type="date">
+        <input id="sectionReminderTime" type="time">
+      </div>
+
       <button class="secondary" onclick="importSection()">Import section</button>
 
       <div id="itemsWrap" style="margin-top:16px;"></div>
 
       <input id="newSectionName" placeholder="Section e.g. admin / payments / gear">
       <input id="newItemText" placeholder="Add checklist item">
+
+      <div class="row-2">
+        <input id="itemReminderDate" type="date">
+        <input id="itemReminderTime" type="time">
+      </div>
+
       <button onclick="addItem()">Add item</button>
 
       <button class="danger" onclick="deleteList()">Delete whole list</button>
@@ -402,8 +417,12 @@ const countEl = document.getElementById("count");
 const modal = document.getElementById("modal");
 const listTitle = document.getElementById("listTitle");
 const quickPasteList = document.getElementById("quickPasteList");
+const sectionReminderDate = document.getElementById("sectionReminderDate");
+const sectionReminderTime = document.getElementById("sectionReminderTime");
 const newSectionName = document.getElementById("newSectionName");
 const newItemText = document.getElementById("newItemText");
+const itemReminderDate = document.getElementById("itemReminderDate");
+const itemReminderTime = document.getElementById("itemReminderTime");
 const itemsWrap = document.getElementById("itemsWrap");
 const searchEl = document.getElementById("search");
 const statusEl = document.getElementById("status");
@@ -411,6 +430,7 @@ const statusEl = document.getElementById("status");
 let user = null;
 let lists = [];
 let items = [];
+let reminders = [];
 let activeId = null;
 
 function setStatus(text){
@@ -427,6 +447,11 @@ function formatDate(value){
   return new Date(value).toLocaleDateString("en-GB");
 }
 
+function formatReminder(reminder){
+  if(!reminder) return "";
+  return `${reminder.reminder_date || ""}${reminder.reminder_time ? " • " + String(reminder.reminder_time).slice(0,5) : ""}`;
+}
+
 function cleanBullet(line){
   return line
     .replace(/^[-*•◦▪▫‣]\s*/, "")
@@ -436,6 +461,10 @@ function cleanBullet(line){
 
 function itemsFor(listId){
   return items.filter(i => i.list_id === listId);
+}
+
+function reminderForItem(itemId){
+  return reminders.find(r => r.source === "list" && r.source_id === itemId);
 }
 
 function groupItems(listId){
@@ -456,7 +485,7 @@ async function load(){
     return;
   }
 
-  const [listsRes, itemsRes] = await Promise.all([
+  const [listsRes, itemsRes, remindersRes] = await Promise.all([
     supabase
       .from("lists")
       .select("*")
@@ -467,7 +496,13 @@ async function load(){
       .from("list_items")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending:true })
+      .order("created_at", { ascending:true }),
+
+    supabase
+      .from("reminders")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("source", "list")
   ]);
 
   if(listsRes.error){
@@ -480,8 +515,15 @@ async function load(){
     return;
   }
 
+  if(remindersRes.error){
+    alert(remindersRes.error.message);
+    return;
+  }
+
   lists = listsRes.data || [];
   items = itemsRes.data || [];
+  reminders = remindersRes.data || [];
+
   render();
 }
 
@@ -551,19 +593,24 @@ function renderActiveItems(){
   itemsWrap.innerHTML = sections.map(section => `
     <div class="section-title">${section}</div>
     ${
-      grouped[section].map(item => `
-        <div class="item-row" onclick="toggleItem('${item.id}', ${item.done ? "false" : "true"})">
-          <div class="check ${item.done ? "done" : ""}">
-            ${item.done ? "✓" : ""}
-          </div>
+      grouped[section].map(item => {
+        const rem = reminderForItem(item.id);
 
-          <div class="item-text ${item.done ? "done" : ""}">
-            ${item.text || ""}
-          </div>
+        return `
+          <div class="item-row" onclick="toggleItem('${item.id}', ${item.done ? "false" : "true"})">
+            <div class="check ${item.done ? "done" : ""}">
+              ${item.done ? "✓" : ""}
+            </div>
 
-          <button class="delete-small" onclick="event.stopPropagation(); deleteItem('${item.id}')">Delete</button>
-        </div>
-      `).join("")
+            <div class="item-text ${item.done ? "done" : ""}">
+              ${item.text || ""}
+              ${rem ? `<div class="item-date">⏰ ${formatReminder(rem)}</div>` : ""}
+            </div>
+
+            <button class="delete-small" onclick="event.stopPropagation(); deleteItem('${item.id}')">Delete</button>
+          </div>
+        `;
+      }).join("")
     }
   `).join("");
 }
@@ -572,8 +619,12 @@ window.openNew = function(){
   activeId = null;
   listTitle.value = "";
   quickPasteList.value = "";
+  sectionReminderDate.value = "";
+  sectionReminderTime.value = "";
   newSectionName.value = "";
   newItemText.value = "";
+  itemReminderDate.value = "";
+  itemReminderTime.value = "";
   setStatus("");
   renderActiveItems();
   modal.style.display = "flex";
@@ -587,8 +638,12 @@ window.openList = function(id){
   activeId = id;
   listTitle.value = list.title || "";
   quickPasteList.value = "";
+  sectionReminderDate.value = "";
+  sectionReminderTime.value = "";
   newSectionName.value = "";
   newItemText.value = "";
+  itemReminderDate.value = "";
+  itemReminderTime.value = "";
   setStatus("");
   renderActiveItems();
   modal.style.display = "flex";
@@ -678,16 +733,41 @@ window.importSection = async function(){
     done:false
   }));
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("list_items")
-    .insert(itemsToInsert);
+    .insert(itemsToInsert)
+    .select();
 
   if(error){
     setStatus(error.message);
     return;
   }
 
+  if(sectionReminderDate.value){
+    const remindersToInsert = (data || []).map(item => ({
+      user_id:user.id,
+      source:"list",
+      source_id:item.id,
+      title:`${listTitle.value || "List"} — ${section}: ${item.text}`,
+      reminder_date:sectionReminderDate.value,
+      reminder_time:sectionReminderTime.value || null,
+      done:false
+    }));
+
+    const remInsert = await supabase
+      .from("reminders")
+      .insert(remindersToInsert);
+
+    if(remInsert.error){
+      setStatus(remInsert.error.message);
+      return;
+    }
+  }
+
   quickPasteList.value = "";
+  sectionReminderDate.value = "";
+  sectionReminderTime.value = "";
+
   setStatus(`Section "${section}" imported.`);
   await load();
   renderActiveItems();
@@ -708,7 +788,7 @@ window.addItem = async function(){
     return;
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("list_items")
     .insert([{
       user_id:user.id,
@@ -716,14 +796,38 @@ window.addItem = async function(){
       section,
       text,
       done:false
-    }]);
+    }])
+    .select()
+    .single();
 
   if(error){
     setStatus(error.message);
     return;
   }
 
+  if(itemReminderDate.value){
+    const remInsert = await supabase
+      .from("reminders")
+      .insert([{
+        user_id:user.id,
+        source:"list",
+        source_id:data.id,
+        title:`${listTitle.value || "List"} — ${section}: ${text}`,
+        reminder_date:itemReminderDate.value,
+        reminder_time:itemReminderTime.value || null,
+        done:false
+      }]);
+
+    if(remInsert.error){
+      setStatus(remInsert.error.message);
+      return;
+    }
+  }
+
   newItemText.value = "";
+  itemReminderDate.value = "";
+  itemReminderTime.value = "";
+
   setStatus("Item added.");
   await load();
   renderActiveItems();
@@ -741,6 +845,12 @@ window.toggleItem = async function(id, done){
     return;
   }
 
+  await supabase
+    .from("reminders")
+    .update({ done })
+    .eq("source", "list")
+    .eq("source_id", id);
+
   await load();
   renderActiveItems();
 }
@@ -756,6 +866,12 @@ window.deleteItem = async function(id){
     return;
   }
 
+  await supabase
+    .from("reminders")
+    .delete()
+    .eq("source", "list")
+    .eq("source_id", id);
+
   await load();
   renderActiveItems();
 }
@@ -768,6 +884,16 @@ window.deleteList = async function(){
 
   const ok = confirm("Delete this whole list?");
   if(!ok) return;
+
+  const itemIds = itemsFor(activeId).map(item => item.id);
+
+  if(itemIds.length){
+    await supabase
+      .from("reminders")
+      .delete()
+      .eq("source", "list")
+      .in("source_id", itemIds);
+  }
 
   const { error } = await supabase
     .from("lists")
