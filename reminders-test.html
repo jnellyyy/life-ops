@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pace Reminders</title>
+
+<link rel="manifest" href="/Pace/site.webmanifest">
+<link rel="apple-touch-icon" href="/Pace/icon-180.png">
+<link rel="icon" href="/Pace/icon-32.png">
+<meta name="theme-color" content="#0f1115">
+
+<style>
+:root{
+  --bg:#0f1115;
+  --panel:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.12);
+  --text:#f5f7fb;
+  --muted:#a7afbe;
+  --accent:#ff3b30;
+  --green:#22c55e;
+  --amber:#f59e0b;
+  --red:#ef4444;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:18px;
+  background:linear-gradient(180deg,#0f1115,#171a20);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+}
+
+.wrap{max-width:980px;margin:0 auto}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:18px;
+  margin-top:16px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.back-btn{
+  padding:10px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:#fff;
+  font:inherit;
+}
+
+button{
+  background:var(--accent);
+  border:none;
+  font-weight:800;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 160px 130px;
+  gap:10px;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.tab{
+  width:auto;
+  padding:8px 11px;
+  margin:0;
+  background:rgba(255,255,255,.08);
+  font-size:13px;
+}
+
+.tab.active{background:var(--accent)}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.item:last-child{border-bottom:none}
+
+.title{font-weight:800}
+.meta{color:var(--muted);font-size:13px;margin-top:4px}
+
+.badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.overdue{background:rgba(239,68,68,.25);color:#fecaca}
+.today{background:rgba(245,158,11,.25);color:#fde68a}
+.soon{background:rgba(96,165,250,.25);color:#bfdbfe}
+.done{opacity:.55;text-decoration:line-through}
+
+.small-btn{
+  width:auto;
+  padding:8px 10px;
+  margin:0;
+  border-radius:11px;
+  background:rgba(255,255,255,.10);
+  font-size:12px;
+}
+
+.danger{background:rgba(239,68,68,.22)}
+.notice{color:#bbb;min-height:18px;margin-top:10px}
+
+@media(max-width:760px){
+  .row{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="topbar">
+      <div>
+        <h2 style="margin:0;">Reminders</h2>
+        <p style="margin:6px 0 0;color:#a7afbe;">Dates, appointments and things you cannot forget.</p>
+      </div>
+      <a href="dashboard.html" class="back-btn">← Dashboard</a>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0;">Add reminder</h3>
+
+    <div class="row">
+      <input id="titleInput" placeholder="Reminder e.g. Pay Electroverse">
+      <input id="dateInput" type="date">
+      <input id="timeInput" type="time">
+    </div>
+
+    <button id="addBtn">Add reminder</button>
+    <p id="msg" class="notice"></p>
+  </div>
+
+  <div class="card">
+    <div id="list"></div>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  "https://grgagroautlpphjsjpjh.supabase.co",
+  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storage:localStorage
+    }
+  }
+);
+
+const tabs = ["Today","Upcoming","Overdue","Done","All"];
+
+let user = null;
+let reminders = [];
+let activeTab = "Today";
+
+const tabsEl = document.getElementById("tabs");
+const listEl = document.getElementById("list");
+const msgEl = document.getElementById("msg");
+const titleInput = document.getElementById("titleInput");
+const dateInput = document.getElementById("dateInput");
+const timeInput = document.getElementById("timeInput");
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function setMsg(text){
+  msgEl.textContent = text;
+}
+
+function formatDate(date,time){
+  if(!date) return "";
+  const d = new Date(date + "T00:00:00").toLocaleDateString("en-GB");
+  return time ? `${d} • ${String(time).slice(0,5)}` : d;
+}
+
+function statusOf(r){
+  const t = today();
+
+  if(r.done) return "done";
+  if(r.reminder_date < t) return "overdue";
+  if(r.reminder_date === t) return "today";
+  return "soon";
+}
+
+function statusLabel(r){
+  const s = statusOf(r);
+  if(s === "overdue") return "Overdue";
+  if(s === "today") return "Today";
+  if(s === "done") return "Done";
+  return "Upcoming";
+}
+
+function renderTabs(){
+  tabsEl.innerHTML = tabs.map(t => `
+    <button class="tab ${activeTab === t ? "active" : ""}" onclick="setTab('${t}')">${t}</button>
+  `).join("");
+}
+
+window.setTab = function(tab){
+  activeTab = tab;
+  render();
+}
+
+function filtered(){
+  return reminders.filter(r => {
+    const s = statusOf(r);
+    if(activeTab === "All") return true;
+    if(activeTab === "Today") return s === "today";
+    if(activeTab === "Upcoming") return s === "soon";
+    if(activeTab === "Overdue") return s === "overdue";
+    if(activeTab === "Done") return s === "done";
+  }).sort((a,b) => {
+    if(Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+    return `${a.reminder_date || ""} ${a.reminder_time || ""}`.localeCompare(`${b.reminder_date || ""} ${b.reminder_time || ""}`);
+  });
+}
+
+function render(){
+  renderTabs();
+
+  const rows = filtered();
+
+  if(!rows.length){
+    listEl.innerHTML = `<p style="color:#a7afbe;">No reminders here.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = rows.map(r => {
+    const s = statusOf(r);
+    return `
+      <div class="item">
+        <div>
+          <div class="title ${r.done ? "done" : ""}">${r.title}</div>
+          <div class="meta">${formatDate(r.reminder_date,r.reminder_time)}${r.source ? ` • ${r.source}` : ""}</div>
+          <span class="badge ${s}">${statusLabel(r)}</span>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <button class="small-btn" onclick="toggleReminder('${r.id}', ${r.done ? "false" : "true"})">${r.done ? "Undo" : "Done"}</button>
+          <button class="small-btn danger" onclick="deleteReminder('${r.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function load(){
+  const { data } = await supabase.auth.getUser();
+  user = data.user;
+
+  if(!user){
+    window.location.href = "index.html";
+    return;
+  }
+
+  const { data: rows, error } = await supabase
+    .from("reminders")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("reminder_date", { ascending:true })
+    .order("reminder_time", { ascending:true });
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  reminders = rows || [];
+  render();
+}
+
+document.getElementById("addBtn").onclick = async () => {
+  const title = titleInput.value.trim();
+  const date = dateInput.value;
+  const time = timeInput.value || null;
+
+  if(!title || !date){
+    setMsg("Add a title and date.");
+    return;
+  }
+
+  const { error } = await supabase.from("reminders").insert([{
+    user_id:user.id,
+    source:"manual",
+    title,
+    reminder_date:date,
+    reminder_time:time
+  }]);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  titleInput.value = "";
+  dateInput.value = "";
+  timeInput.value = "";
+
+  setMsg("Reminder added.");
+  await load();
+};
+
+window.toggleReminder = async function(id, done){
+  const { error } = await supabase
+    .from("reminders")
+    .update({ done })
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  await load();
+}
+
+window.deleteReminder = async function(id){
+  const { error } = await supabase
+    .from("reminders")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    setMsg(error.message);
+    return;
+  }
+
+  await load();
+}
+
+load();
+</script>
+</body>
+</html>
