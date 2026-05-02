@@ -123,4 +123,614 @@ h1{
   align-items:center;
   gap:14px;
   padding:16px;
-  border-bottom:
+  border-bottom:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+
+.source-row:last-child{border-bottom:none}
+
+.source-icon{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  flex:0 0 auto;
+}
+
+.source-main{flex:1}
+
+.source-name{
+  font-size:19px;
+  font-weight:700;
+}
+
+.source-count{
+  color:var(--muted);
+  font-size:17px;
+}
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:24px;
+  margin-top:18px;
+  overflow:hidden;
+}
+
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.panel-title{
+  font-size:21px;
+  font-weight:800;
+}
+
+.reminder-item{
+  display:flex;
+  gap:12px;
+  padding:15px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.reminder-item:last-child{border-bottom:none}
+
+.check{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  flex:0 0 auto;
+  margin-top:1px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.check.done{
+  background:var(--green);
+}
+
+.rem-title{
+  font-size:16px;
+  line-height:1.35;
+  font-weight:650;
+}
+
+.rem-title.done{
+  text-decoration:line-through;
+  color:var(--muted);
+}
+
+.rem-meta{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+}
+
+.badge{
+  display:inline-block;
+  margin-top:7px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.badge.overdue{background:rgba(255,59,48,.22);color:#ffb4ad}
+.badge.today-badge{background:rgba(255,159,10,.22);color:#ffd89a}
+.badge.upcoming{background:rgba(64,156,255,.22);color:#b9dcff}
+.badge.done-badge{background:rgba(52,199,89,.22);color:#b7f5c7}
+
+.actions{
+  margin-left:auto;
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+
+.small-btn{
+  width:auto;
+  padding:8px 10px;
+  margin:0;
+  border-radius:11px;
+  border:none;
+  background:rgba(255,255,255,.10);
+  color:white;
+  font-weight:700;
+}
+
+.danger{
+  background:rgba(255,59,48,.22);
+}
+
+.add-form{
+  display:none;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:16px;
+  margin-top:18px;
+}
+
+input,button{
+  width:100%;
+  padding:13px;
+  margin-top:10px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#24262b;
+  color:white;
+  font:inherit;
+}
+
+button{
+  background:var(--red);
+  border:none;
+  font-weight:800;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.empty{
+  color:var(--muted);
+  padding:16px;
+}
+
+.notice{
+  color:var(--muted);
+  min-height:18px;
+  font-size:13px;
+  margin-top:10px;
+}
+
+@media(max-width:650px){
+  body{padding:18px;padding-bottom:110px}
+  h1{font-size:42px}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .summary-card{min-height:96px;padding:17px}
+  .summary-card h2{font-size:19px}
+  .row{grid-template-columns:1fr}
+}
+
+@media(max-width:360px){
+  .summary-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="top">
+    <a href="dashboard.html" class="circle-btn">‹</a>
+    <button class="circle-btn" onclick="toggleAddForm()">＋</button>
+  </div>
+
+  <h1>Reminders</h1>
+
+  <div class="summary-grid">
+    <div class="summary-card today" onclick="setView('Today')">
+      <div class="num" id="todayCount">0</div>
+      <h2>Today</h2>
+    </div>
+
+    <div class="summary-card scheduled" onclick="setView('Scheduled')">
+      <div class="num" id="scheduledCount">0</div>
+      <h2>Scheduled</h2>
+    </div>
+
+    <div class="summary-card all" onclick="setView('All')">
+      <div class="num" id="allCount">0</div>
+      <h2>All</h2>
+    </div>
+
+    <div class="summary-card overdue" onclick="setView('Overdue')">
+      <div class="num" id="overdueCount">0</div>
+      <h2>Overdue</h2>
+    </div>
+
+    <div class="summary-card completed" onclick="setView('Completed')">
+      <div class="num" id="completedCount">0</div>
+      <h2>Completed</h2>
+    </div>
+
+    <div class="summary-card manual" onclick="toggleAddForm()">
+      <div class="num">＋</div>
+      <h2>Add</h2>
+    </div>
+  </div>
+
+  <div class="add-form" id="addForm">
+    <h3 style="margin:0;">Add manual reminder</h3>
+
+    <input id="titleInput" placeholder="Reminder title">
+    <div class="row">
+      <input id="dateInput" type="date">
+      <input id="timeInput" type="time">
+    </div>
+
+    <button onclick="addManualReminder()">Save reminder</button>
+    <div id="msg" class="notice"></div>
+  </div>
+
+  <h2 class="section-title">My Lists</h2>
+
+  <div class="list-card">
+    <div class="source-row" onclick="setSource('to do')">
+      <div class="source-icon" style="background:#409cff;">✅</div>
+      <div class="source-main"><div class="source-name">To Do</div></div>
+      <div class="source-count" id="todoCount">0 ›</div>
+    </div>
+
+    <div class="source-row" onclick="setSource('list')">
+      <div class="source-icon" style="background:#ff2d55;">🧾</div>
+      <div class="source-main"><div class="source-name">Lists</div></div>
+      <div class="source-count" id="listCount">0 ›</div>
+    </div>
+
+    <div class="source-row" onclick="setSource('booking')">
+      <div class="source-icon" style="background:#ff9f0a;">📆</div>
+      <div class="source-main"><div class="source-name">Bookings</div></div>
+      <div class="source-count" id="bookingCount">0 ›</div>
+    </div>
+
+    <div class="source-row" onclick="setSource('manual')">
+      <div class="source-icon" style="background:#8e8e93;">⏰</div>
+      <div class="source-main"><div class="source-name">Manual</div></div>
+      <div class="source-count" id="manualCount">0 ›</div>
+    </div>
+
+    <div class="source-row" onclick="setSource('creator')">
+      <div class="source-icon" style="background:#34c759;">🎬</div>
+      <div class="source-main"><div class="source-name">Creators</div></div>
+      <div class="source-count" id="creatorCount">0 ›</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title" id="viewTitle">Today</div>
+      <button class="small-btn" onclick="setView('Today')">Reset</button>
+    </div>
+    <div id="reminderList"></div>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  "https://grgagroautlpphjsjpjh.supabase.co",
+  "sb_publishable_bMxF7jf1q1EwpacieP62DQ_i8D9JPbn",
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storage:localStorage
+    }
+  }
+);
+
+let user = null;
+let reminders = [];
+let bookingReminders = [];
+let allRows = [];
+let currentView = "Today";
+let currentSource = null;
+
+const addForm = document.getElementById("addForm");
+const reminderList = document.getElementById("reminderList");
+const viewTitle = document.getElementById("viewTitle");
+const msg = document.getElementById("msg");
+
+function today(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function formatDate(date,time){
+  if(!date) return "";
+  const formatted = new Date(date + "T00:00:00").toLocaleDateString("en-GB");
+  return time ? `${formatted} • ${String(time).slice(0,5)}` : formatted;
+}
+
+function statusOf(row){
+  const t = today();
+
+  if(row.done) return "done";
+  if(row.reminder_date < t) return "overdue";
+  if(row.reminder_date === t) return "today";
+  return "upcoming";
+}
+
+function sourceLabel(source){
+  if(source === "to do") return "To Do";
+  if(source === "list") return "List";
+  if(source === "booking") return "Booking";
+  if(source === "creator") return "Creator";
+  return "Manual";
+}
+
+function badge(row){
+  const s = statusOf(row);
+
+  if(s === "overdue") return `<span class="badge overdue">Overdue</span>`;
+  if(s === "today") return `<span class="badge today-badge">Today</span>`;
+  if(s === "done") return `<span class="badge done-badge">Completed</span>`;
+  return `<span class="badge upcoming">Upcoming</span>`;
+}
+
+function updateCounts(){
+  const activeRows = allRows.filter(r => !r.done);
+
+  document.getElementById("todayCount").textContent = allRows.filter(r => statusOf(r) === "today").length;
+  document.getElementById("scheduledCount").textContent = activeRows.filter(r => r.reminder_date >= today()).length;
+  document.getElementById("allCount").textContent = allRows.length;
+  document.getElementById("overdueCount").textContent = allRows.filter(r => statusOf(r) === "overdue").length;
+  document.getElementById("completedCount").textContent = allRows.filter(r => r.done).length;
+
+  document.getElementById("todoCount").textContent = `${activeRows.filter(r => r.source === "to do").length} ›`;
+  document.getElementById("listCount").textContent = `${activeRows.filter(r => r.source === "list").length} ›`;
+  document.getElementById("bookingCount").textContent = `${activeRows.filter(r => r.source === "booking").length} ›`;
+  document.getElementById("manualCount").textContent = `${activeRows.filter(r => r.source === "manual").length} ›`;
+  document.getElementById("creatorCount").textContent = `${activeRows.filter(r => r.source === "creator").length} ›`;
+}
+
+function filteredRows(){
+  let rows = [...allRows];
+
+  if(currentSource){
+    rows = rows.filter(r => r.source === currentSource);
+  } else {
+    if(currentView === "Today") rows = rows.filter(r => statusOf(r) === "today");
+    if(currentView === "Scheduled") rows = rows.filter(r => !r.done && r.reminder_date >= today());
+    if(currentView === "Overdue") rows = rows.filter(r => statusOf(r) === "overdue");
+    if(currentView === "Completed") rows = rows.filter(r => r.done);
+  }
+
+  rows.sort((a,b) => {
+    if(Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+    return `${a.reminder_date || ""} ${a.reminder_time || ""}`.localeCompare(`${b.reminder_date || ""} ${b.reminder_time || ""}`);
+  });
+
+  return rows;
+}
+
+function render(){
+  updateCounts();
+
+  const rows = filteredRows();
+  viewTitle.textContent = currentSource ? sourceLabel(currentSource) : currentView;
+
+  if(!rows.length){
+    reminderList.innerHTML = `<div class="empty">No reminders here.</div>`;
+    return;
+  }
+
+  reminderList.innerHTML = rows.map(row => `
+    <div class="reminder-item">
+      <div class="check ${row.done ? "done" : ""}" onclick="toggleDone('${row.id}', ${row.done ? "false" : "true"}, '${row.source}')">
+        ${row.done ? "✓" : ""}
+      </div>
+
+      <div style="flex:1;min-width:0;">
+        <div class="rem-title ${row.done ? "done" : ""}">${row.title}</div>
+        <div class="rem-meta">
+          ${formatDate(row.reminder_date,row.reminder_time)} • ${sourceLabel(row.source)}
+        </div>
+        ${badge(row)}
+      </div>
+
+      <div class="actions">
+        ${row.synthetic ? "" : `<button class="small-btn danger" onclick="deleteReminder('${row.id}')">Delete</button>`}
+      </div>
+    </div>
+  `).join("");
+}
+
+window.setView = function(view){
+  currentView = view;
+  currentSource = null;
+  render();
+}
+
+window.setSource = function(source){
+  currentSource = source;
+  render();
+}
+
+window.toggleAddForm = function(){
+  addForm.style.display = addForm.style.display === "block" ? "none" : "block";
+}
+
+async function getUser(){
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+async function loadReminderRows(){
+  const { data, error } = await supabase
+    .from("reminders")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if(error){
+    msg.textContent = error.message;
+    return [];
+  }
+
+  return data || [];
+}
+
+async function loadBookingRows(){
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if(error){
+    msg.textContent = error.message;
+    return [];
+  }
+
+  const rows = [];
+
+  (data || []).forEach(b => {
+    if(b.due_date){
+      rows.push({
+        id:`booking-due-${b.id}`,
+        source:"booking",
+        source_id:b.id,
+        title:`${b.client_name || "Booking"} — balance/payment due`,
+        reminder_date:b.due_date,
+        reminder_time:null,
+        done:false,
+        synthetic:true
+      });
+    }
+
+    if(b.status === "Postponed"){
+      if(b.new_event_date){
+        rows.push({
+          id:`booking-new-${b.id}`,
+          source:"booking",
+          source_id:b.id,
+          title:`${b.client_name || "Booking"} — new event date`,
+          reminder_date:b.new_event_date,
+          reminder_time:null,
+          done:false,
+          synthetic:true
+        });
+      }
+    } else if(b.event_date){
+      rows.push({
+        id:`booking-event-${b.id}`,
+        source:"booking",
+        source_id:b.id,
+        title:`${b.client_name || "Booking"} — event date`,
+        reminder_date:b.event_date,
+        reminder_time:null,
+        done:false,
+        synthetic:true
+      });
+    }
+  });
+
+  return rows;
+}
+
+async function load(){
+  user = await getUser();
+
+  if(!user){
+    window.location.href = "index.html";
+    return;
+  }
+
+  const reminderRows = await loadReminderRows();
+  const bookingRows = await loadBookingRows();
+
+  reminders = reminderRows;
+  bookingReminders = bookingRows;
+  allRows = [...reminderRows, ...bookingRows];
+
+  render();
+}
+
+window.addManualReminder = async function(){
+  const title = document.getElementById("titleInput").value.trim();
+  const date = document.getElementById("dateInput").value;
+  const time = document.getElementById("timeInput").value || null;
+
+  if(!title || !date){
+    msg.textContent = "Add a title and date.";
+    return;
+  }
+
+  const { error } = await supabase.from("reminders").insert([{
+    user_id:user.id,
+    source:"manual",
+    title,
+    reminder_date:date,
+    reminder_time:time,
+    done:false
+  }]);
+
+  if(error){
+    msg.textContent = error.message;
+    return;
+  }
+
+  document.getElementById("titleInput").value = "";
+  document.getElementById("dateInput").value = "";
+  document.getElementById("timeInput").value = "";
+  msg.textContent = "Reminder added.";
+
+  await load();
+}
+
+window.toggleDone = async function(id, done, source){
+  if(id.startsWith("booking-")){
+    msg.textContent = "Booking reminders are pulled from bookings. Edit the booking to remove it.";
+    return;
+  }
+
+  const { error } = await supabase
+    .from("reminders")
+    .update({ done })
+    .eq("id", id);
+
+  if(error){
+    msg.textContent = error.message;
+    return;
+  }
+
+  if(source === "to do"){
+    const row = reminders.find(r => r.id === id);
+    if(row?.source_id){
+      await supabase.from("tasks").update({ done }).eq("id", row.source_id);
+    }
+  }
+
+  if(source === "list"){
+    const row = reminders.find(r => r.id === id);
+    if(row?.source_id){
+      await supabase.from("list_items").update({ done }).eq("id", row.source_id);
+    }
+  }
+
+  await load();
+}
+
+window.deleteReminder = async function(id){
+  const { error } = await supabase
+    .from("reminders")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    msg.textContent = error.message;
+    return;
+  }
+
+  await load();
+}
+
+load();
+</script>
+</body>
+</html>
