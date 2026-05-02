@@ -15,7 +15,6 @@
   --bg1:#0f1115;
   --bg2:#171a20;
   --panel:rgba(255,255,255,0.06);
-  --panel2:rgba(255,255,255,0.09);
   --line:rgba(255,255,255,0.12);
   --text:#f5f7fb;
   --muted:#a7afbe;
@@ -94,6 +93,12 @@ button{
   gap:10px;
 }
 
+.row-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
 .filters{
   display:flex;
   gap:8px;
@@ -109,9 +114,7 @@ button{
   font-size:13px;
 }
 
-.filter-btn.active{
-  background:var(--accent);
-}
+.filter-btn.active{background:var(--accent)}
 
 .task{
   display:flex;
@@ -137,9 +140,7 @@ button{
   cursor:pointer;
 }
 
-.check.done{
-  background:var(--green);
-}
+.check.done{background:var(--green)}
 
 .task-main{flex:1;min-width:0}
 
@@ -163,6 +164,7 @@ button{
   display:flex;
   gap:6px;
   flex-wrap:wrap;
+  margin-top:8px;
 }
 
 .small-btn{
@@ -194,7 +196,7 @@ button{
 }
 
 @media(max-width:700px){
-  .row{grid-template-columns:1fr;}
+  .row,.row-2{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -227,6 +229,11 @@ button{
       </select>
     </div>
 
+    <div class="row-2">
+      <input id="reminderDateInput" type="date">
+      <input id="reminderTimeInput" type="time">
+    </div>
+
     <button id="addBtn">Add task</button>
     <p id="msg" class="notice"></p>
 
@@ -257,6 +264,8 @@ const supabase = createClient(
 
 const taskInput = document.getElementById("taskInput");
 const categoryInput = document.getElementById("categoryInput");
+const reminderDateInput = document.getElementById("reminderDateInput");
+const reminderTimeInput = document.getElementById("reminderTimeInput");
 const addBtn = document.getElementById("addBtn");
 const tasksEl = document.getElementById("tasks");
 const msgEl = document.getElementById("msg");
@@ -274,6 +283,11 @@ function setMsg(text){
 async function getUser(){
   const { data } = await supabase.auth.getUser();
   return data.user;
+}
+
+function formatReminder(task){
+  if(!task.reminder_date && !task.reminder_time) return "";
+  return `${task.reminder_date || ""}${task.reminder_time ? " • " + String(task.reminder_time).slice(0,5) : ""}`;
 }
 
 function renderFilters(){
@@ -324,9 +338,12 @@ function render(){
         <div class="task-title ${task.done ? "done" : ""}">
           ${task.title || ""}
         </div>
-        <div class="task-meta">${task.category || "Life"}</div>
 
-        <div class="actions" style="margin-top:8px;">
+        <div class="task-meta">
+          ${task.category || "Life"}
+        </div>
+
+        <div class="actions">
           <button class="small-btn" onclick="toggleEdit('${task.id}')">Edit</button>
           <button class="small-btn danger" onclick="deleteTask('${task.id}')">Delete</button>
         </div>
@@ -371,27 +388,53 @@ async function load(){
 addBtn.addEventListener("click", async () => {
   const title = taskInput.value.trim();
   const category = categoryInput.value;
+  const reminderDate = reminderDateInput.value;
+  const reminderTime = reminderTimeInput.value || null;
 
   if(!title){
     setMsg("Type a task first.");
     return;
   }
 
-  const { error } = await supabase
+  const { data: taskData, error } = await supabase
     .from("tasks")
     .insert([{
       user_id:user.id,
       title,
       category,
       done:false
-    }]);
+    }])
+    .select()
+    .single();
 
   if(error){
     setMsg(error.message);
     return;
   }
 
+  if(reminderDate){
+    const reminderInsert = await supabase
+      .from("reminders")
+      .insert([{
+        user_id:user.id,
+        source:"to do",
+        source_id:taskData.id,
+        title,
+        reminder_date:reminderDate,
+        reminder_time:reminderTime,
+        done:false
+      }]);
+
+    if(reminderInsert.error){
+      setMsg(reminderInsert.error.message);
+      return;
+    }
+  }
+
   taskInput.value = "";
+  reminderDateInput.value = "";
+  reminderTimeInput.value = "";
+
   setMsg("Task added.");
   await load();
 });
@@ -410,6 +453,12 @@ window.toggleTask = async function(id, done){
     setMsg(error.message);
     return;
   }
+
+  await supabase
+    .from("reminders")
+    .update({ done })
+    .eq("source", "to do")
+    .eq("source_id", id);
 
   await load();
 }
@@ -439,6 +488,12 @@ window.saveEdit = async function(id){
     return;
   }
 
+  await supabase
+    .from("reminders")
+    .update({ title })
+    .eq("source", "to do")
+    .eq("source_id", id);
+
   setMsg("Task updated.");
   await load();
 }
@@ -453,6 +508,12 @@ window.deleteTask = async function(id){
     setMsg(error.message);
     return;
   }
+
+  await supabase
+    .from("reminders")
+    .delete()
+    .eq("source", "to do")
+    .eq("source_id", id);
 
   setMsg("Task deleted.");
   await load();
