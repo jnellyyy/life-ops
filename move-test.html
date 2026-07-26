@@ -174,7 +174,8 @@ select{
   align-items:start;
 }
 
-.planCard{
+.planCard,
+.checklistCard{
   grid-column:1 / -1;
 }
 
@@ -444,6 +445,46 @@ select{
   color:#bfdbfe;
 }
 
+.checkSummary{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.checkStat{
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.055);
+  border-radius:16px;
+  padding:10px;
+}
+
+.checkStat span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+}
+
+.checkStat strong{
+  display:block;
+  margin-top:6px;
+  font-size:19px;
+  line-height:1.05;
+  letter-spacing:-.04em;
+}
+
+.row.checkDone{
+  opacity:.66;
+  border-color:rgba(34,197,94,0.30);
+}
+
+.row.checkDone strong{
+  text-decoration:line-through;
+  text-decoration-thickness:2px;
+  text-decoration-color:rgba(187,247,208,0.65);
+}
+
 .empty{
   color:var(--muted);
   border:1px dashed rgba(255,255,255,0.13);
@@ -498,7 +539,8 @@ select{
   }
 
   .formGrid,
-  .row{
+  .row,
+  .checkSummary{
     grid-template-columns:1fr;
   }
 
@@ -594,7 +636,7 @@ select{
 
           <div class="plannerGrid">
             <div class="field">
-              <label>need by</label>
+              <label>move date</label>
               <input id="planTargetDate" type="date">
             </div>
             <div class="field">
@@ -765,6 +807,47 @@ select{
 
       <div class="list" id="billList"></div>
     </section>
+
+    <section class="card checklistCard">
+      <div class="cardHead">
+        <div class="cardTitle">
+          <div class="icon">✓</div>
+          <h2>Move checklist</h2>
+        </div>
+        <div class="pill" id="checklistPill">0 open</div>
+      </div>
+
+      <div class="checkSummary" id="checklistSummary"></div>
+
+      <div class="formGrid">
+        <div class="field">
+          <label>task</label>
+          <input id="checkTask" type="text" placeholder="Tell council tax, book clean, return keys">
+        </div>
+        <div class="field">
+          <label>area</label>
+          <select id="checkCategory">
+            <option value="oldPlace">Old place</option>
+            <option value="tellPeople">Tell people</option>
+            <option value="utilities">Utilities</option>
+            <option value="packing">Packing</option>
+            <option value="moveDay">Move day</option>
+            <option value="newPlace">New place</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>due</label>
+          <input id="checkDue" type="date">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primaryBtn" id="saveCheckBtn">save task</button>
+        <button type="button" class="softBtn" id="clearCheckBtn">clear</button>
+      </div>
+
+      <div class="list" id="checklistList"></div>
+    </section>
   </main>
 </div>
 
@@ -773,6 +856,24 @@ select{
 <script>
 const STORAGE_KEY = "pace_finance_v3";
 const PAYDAY_DAY = 20;
+const MOVE_DATE = "2026-08-28";
+const MOVE_CHECKLIST_VERSION = 1;
+const DEFAULT_MOVE_CHECKLIST = [
+  { key:"confirm-move-out", text:"Confirm move-out date and key return with old place", category:"oldPlace", dueDate:"2026-08-01" },
+  { key:"final-rent-balance", text:"Check final rent/account balance for old place", category:"oldPlace", dueDate:"2026-08-01" },
+  { key:"book-clean", text:"Book or plan end-of-tenancy clean", category:"oldPlace", dueDate:"2026-08-21" },
+  { key:"meter-photos", text:"Take final meter readings and photos", category:"oldPlace", dueDate:"2026-08-28" },
+  { key:"return-keys", text:"Return keys and ask for closing confirmation", category:"oldPlace", dueDate:"2026-08-28" },
+  { key:"council-tax", text:"Tell council tax you are moving", category:"tellPeople", dueDate:"2026-08-20" },
+  { key:"energy", text:"Tell energy supplier the moving date", category:"utilities", dueDate:"2026-08-20" },
+  { key:"water", text:"Tell water supplier the moving date", category:"utilities", dueDate:"2026-08-20" },
+  { key:"broadband", text:"Arrange, cancel or move broadband", category:"utilities", dueDate:"2026-08-14" },
+  { key:"address-updates", text:"Update bank, credit accounts, BNPL and phone address", category:"tellPeople", dueDate:"2026-08-25" },
+  { key:"mail-redirect", text:"Set up Royal Mail redirect", category:"tellPeople", dueDate:"2026-08-14" },
+  { key:"essentials-box", text:"Pack essentials bag and first-night box", category:"packing", dueDate:"2026-08-27" },
+  { key:"transport-help", text:"Confirm transport or help for move day", category:"moveDay", dueDate:"2026-08-24" },
+  { key:"new-place-photos", text:"Check new place inventory/photos and report issues", category:"newPlace", dueDate:"2026-08-28" }
+];
 
 const els = {
   monthInput:document.getElementById("monthInput"),
@@ -827,6 +928,14 @@ const els = {
   applyBillsBtn:document.getElementById("applyBillsBtn"),
   clearBillBtn:document.getElementById("clearBillBtn"),
   billList:document.getElementById("billList"),
+  checklistPill:document.getElementById("checklistPill"),
+  checklistSummary:document.getElementById("checklistSummary"),
+  checkTask:document.getElementById("checkTask"),
+  checkCategory:document.getElementById("checkCategory"),
+  checkDue:document.getElementById("checkDue"),
+  saveCheckBtn:document.getElementById("saveCheckBtn"),
+  clearCheckBtn:document.getElementById("clearCheckBtn"),
+  checklistList:document.getElementById("checklistList"),
   toast:document.getElementById("toast")
 };
 
@@ -839,10 +948,11 @@ let state = {
   billPaid:{},
   billFunded:{},
   allocations:{},
-  movePrivate:{ items:[], bills:[], plan:{} }
+  movePrivate:{ items:[], bills:[], plan:{}, checklist:[] }
 };
 let editingItemId = null;
 let editingBillId = null;
+let editingCheckId = null;
 
 function uid(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -1023,6 +1133,63 @@ function getAllocationData(){
   return state.allocations[state.selectedMonth];
 }
 
+function defaultChecklistItem(task){
+  return {
+    id:`move-${task.key}`,
+    key:task.key,
+    text:task.text,
+    category:task.category,
+    dueDate:task.dueDate,
+    done:false,
+    note:""
+  };
+}
+
+function seedMoveChecklist(){
+  const data = getMoveData();
+
+  if(data.checklistVersion >= MOVE_CHECKLIST_VERSION){
+    return;
+  }
+
+  const existingKeys = new Set(data.checklist.map(item => item.key).filter(Boolean));
+  const existingText = new Set(data.checklist.map(item => String(item.text || "").toLowerCase().trim()));
+
+  DEFAULT_MOVE_CHECKLIST.forEach(task => {
+    if(existingKeys.has(task.key) || existingText.has(task.text.toLowerCase())){
+      return;
+    }
+
+    data.checklist.push(defaultChecklistItem(task));
+  });
+
+  data.checklistVersion = MOVE_CHECKLIST_VERSION;
+}
+
+function checklistCategoryLabel(category){
+  return {
+    oldPlace:"Old place",
+    tellPeople:"Tell people",
+    utilities:"Utilities",
+    packing:"Packing",
+    moveDay:"Move day",
+    newPlace:"New place"
+  }[category] || "Move";
+}
+
+function checklistDueLabel(dueDate){
+  if(!dueDate){
+    return "No due date";
+  }
+
+  const days = daysUntilDate(dueDate);
+  if(days <= 1){
+    return `${formatShortDate(dueDate)} · due now`;
+  }
+
+  return `${formatShortDate(dueDate)} · ${days} days left`;
+}
+
 function defaultState(parsed = {}){
   return {
     selectedMonth:parsed.selectedMonth || getCurrentMonth(),
@@ -1034,7 +1201,7 @@ function defaultState(parsed = {}){
     billFunded:parsed.billFunded || {},
     allocations:parsed.allocations || {},
     cleared:parsed.cleared || {},
-    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{} },
+    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{}, checklist:[] },
     planVersion:Number(parsed.planVersion) || 0,
     julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
     augustPlanVersion:Number(parsed.augustPlanVersion) || 0
@@ -1048,7 +1215,7 @@ function load(){
     state = defaultState();
   }
 
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{} };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{}, checklist:[] };
   state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
     id:item.id || uid(),
     name:item.name || "Move item",
@@ -1075,11 +1242,21 @@ function load(){
     active:Boolean(bill.active)
   }));
   state.movePrivate.plan = {
-    targetDate:state.movePrivate.plan?.targetDate || "",
+    targetDate:state.movePrivate.plan?.targetDate || MOVE_DATE,
     incomeBudget:numberValue(state.movePrivate.plan?.incomeBudget),
     deliverooEarned:numberValue(state.movePrivate.plan?.deliverooEarned),
     workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays)))
   };
+  state.movePrivate.checklist = (state.movePrivate.checklist || []).map(item => ({
+    id:item.id || uid(),
+    key:item.key || "",
+    text:item.text || item.name || "Move task",
+    category:item.category || "oldPlace",
+    dueDate:item.dueDate || "",
+    done:Boolean(item.done),
+    note:item.note || ""
+  }));
+  seedMoveChecklist();
 }
 
 function save(){
@@ -1094,10 +1271,11 @@ function getMonthData(){
 }
 
 function getMoveData(){
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{} };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{}, checklist:[] };
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
   state.movePrivate.plan = state.movePrivate.plan || {};
+  state.movePrivate.checklist = state.movePrivate.checklist || [];
   return state.movePrivate;
 }
 
@@ -1124,7 +1302,7 @@ function getMovePlan(){
   data.plan = data.plan || {};
 
   return {
-    targetDate:data.plan.targetDate || "",
+    targetDate:data.plan.targetDate || MOVE_DATE,
     incomeBudget:numberValue(data.plan.incomeBudget),
     deliverooEarned:numberValue(data.plan.deliverooEarned),
     workDays:Math.max(0, Math.round(numberValue(data.plan.workDays)))
@@ -1249,6 +1427,14 @@ function clearBillForm(){
   els.billAccount.value = "HSBC";
   els.billPot.value = "Protected bills";
   els.saveBillBtn.textContent = "save bill";
+}
+
+function clearCheckForm(){
+  editingCheckId = null;
+  els.checkTask.value = "";
+  els.checkCategory.value = "oldPlace";
+  els.checkDue.value = "";
+  els.saveCheckBtn.textContent = "save task";
 }
 
 function saveItem(){
@@ -1511,6 +1697,64 @@ function setItemStatus(id, status){
   showToast(status === "bought" ? "Marked bought." : "Status updated.");
 }
 
+function saveCheck(){
+  const data = getMoveData();
+  const text = els.checkTask.value.trim();
+
+  if(!text){
+    showToast("Add the checklist task.");
+    return;
+  }
+
+  const task = {
+    text,
+    category:els.checkCategory.value,
+    dueDate:els.checkDue.value
+  };
+
+  if(editingCheckId){
+    const existing = data.checklist.find(item => item.id === editingCheckId);
+    if(existing) Object.assign(existing, task);
+  }else{
+    data.checklist.push({ id:uid(), key:"", done:false, note:"", ...task });
+  }
+
+  save();
+  clearCheckForm();
+  render();
+  showToast("Checklist task saved.");
+}
+
+function editCheck(id){
+  const task = getMoveData().checklist.find(item => item.id === id);
+  if(!task) return;
+
+  editingCheckId = id;
+  els.checkTask.value = task.text || "";
+  els.checkCategory.value = task.category || "oldPlace";
+  els.checkDue.value = task.dueDate || "";
+  els.saveCheckBtn.textContent = "update task";
+  els.checkTask.focus();
+}
+
+function deleteCheck(id){
+  const data = getMoveData();
+  data.checklist = data.checklist.filter(item => item.id !== id);
+  save();
+  render();
+  showToast("Checklist task deleted.");
+}
+
+function toggleCheck(id){
+  const task = getMoveData().checklist.find(item => item.id === id);
+  if(!task) return;
+
+  task.done = !task.done;
+  save();
+  render();
+  showToast(task.done ? "Checklist task done." : "Checklist task reopened.");
+}
+
 function inferBillCategory(name, type){
   const text = `${name || ""} ${type || ""}`.toLowerCase();
   if(/phone|broadband|internet|ee/.test(text)) return "phone";
@@ -1696,6 +1940,7 @@ function render(){
   renderWeeklyPlan(snap);
   renderItems(snap.data.items);
   renderBills(snap.data.bills);
+  renderChecklist(snap.data.checklist);
 }
 
 function renderPotBreakdown(snap){
@@ -1841,6 +2086,69 @@ function renderBills(bills){
     });
 }
 
+function renderChecklist(checklist){
+  const tasks = checklist || [];
+  const openTasks = tasks.filter(task => !task.done);
+  const doneTasks = tasks.filter(task => task.done);
+  const nextTask = openTasks
+    .slice()
+    .sort((a,b) => String(a.dueDate || "9999").localeCompare(String(b.dueDate || "9999")))[0];
+
+  els.checklistPill.textContent = `${openTasks.length} open`;
+  els.checklistSummary.innerHTML = `
+    <div class="checkStat">
+      <span>Move date</span>
+      <strong>${formatShortDate(getMovePlan().targetDate || MOVE_DATE)}</strong>
+    </div>
+    <div class="checkStat">
+      <span>Checklist progress</span>
+      <strong>${doneTasks.length}/${tasks.length} done</strong>
+    </div>
+    <div class="checkStat">
+      <span>Next admin thing</span>
+      <strong>${nextTask ? escapeHtml(nextTask.text) : "Nothing open"}</strong>
+    </div>
+  `;
+  els.checklistList.innerHTML = "";
+
+  if(!tasks.length){
+    els.checklistList.innerHTML = `<div class="empty">No move checklist tasks yet.</div>`;
+    return;
+  }
+
+  tasks
+    .slice()
+    .sort((a,b) => {
+      if(Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+      const dateCompare = String(a.dueDate || "9999").localeCompare(String(b.dueDate || "9999"));
+      if(dateCompare !== 0) return dateCompare;
+      return String(a.text).localeCompare(String(b.text));
+    })
+    .forEach(task => {
+      const row = document.createElement("div");
+      row.className = task.done ? "row checkDone" : "row";
+      row.innerHTML = `
+        <div>
+          <strong>${escapeHtml(task.text)}</strong>
+          <small>
+            ${escapeHtml(checklistCategoryLabel(task.category))}
+            <span class="statusText">• ${task.done ? "done" : checklistDueLabel(task.dueDate)}</span>
+          </small>
+        </div>
+        <div class="right">
+          <div class="amount">${task.done ? "Done" : escapeHtml(formatShortDate(task.dueDate || MOVE_DATE))}</div>
+          <small>${task.done ? "Closed out" : "Tap done when sorted"}</small>
+          <div class="rowActions">
+            <button type="button" class="miniBtn" data-toggle-check="${task.id}">${task.done ? "undo" : "done"}</button>
+            <button type="button" class="miniBtn" data-edit-check="${task.id}">edit</button>
+            <button type="button" class="miniBtn danger" data-delete-check="${task.id}">delete</button>
+          </div>
+        </div>
+      `;
+      els.checklistList.appendChild(row);
+    });
+}
+
 function showToast(message){
   els.toast.textContent = message;
   els.toast.classList.add("show");
@@ -1866,6 +2174,8 @@ els.sendAllDeliverooBtn.addEventListener("click", sendAllRemainingToDeliveroo);
 els.saveBillBtn.addEventListener("click", saveBill);
 els.clearBillBtn.addEventListener("click", clearBillForm);
 els.applyBillsBtn.addEventListener("click", applyBills);
+els.saveCheckBtn.addEventListener("click", saveCheck);
+els.clearCheckBtn.addEventListener("click", clearCheckForm);
 
 document.addEventListener("click", event => {
   const editItemId = event.target.getAttribute("data-edit-item");
@@ -1876,6 +2186,9 @@ document.addEventListener("click", event => {
   const editBillId = event.target.getAttribute("data-edit-bill");
   const deleteBillId = event.target.getAttribute("data-delete-bill");
   const applyBillId = event.target.getAttribute("data-apply-bill");
+  const toggleCheckId = event.target.getAttribute("data-toggle-check");
+  const editCheckId = event.target.getAttribute("data-edit-check");
+  const deleteCheckId = event.target.getAttribute("data-delete-check");
 
   if(editItemId) editItem(editItemId);
   if(deleteItemId) deleteItem(deleteItemId);
@@ -1885,9 +2198,13 @@ document.addEventListener("click", event => {
   if(editBillId) editBill(editBillId);
   if(deleteBillId) deleteBill(deleteBillId);
   if(applyBillId) applyBill(applyBillId);
+  if(toggleCheckId) toggleCheck(toggleCheckId);
+  if(editCheckId) editCheck(editCheckId);
+  if(deleteCheckId) deleteCheck(deleteCheckId);
 });
 
 load();
+save();
 render();
 </script>
 </body>
