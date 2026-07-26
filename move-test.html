@@ -876,6 +876,19 @@ const DEFAULT_MOVE_CHECKLIST = [
   { key:"new-place-photos", text:"Check new place inventory/photos and report issues", category:"newPlace", dueDate:"2026-08-28" }
 ];
 
+const AUGUST_MOVE_FUNDS_VERSION = 1;
+const AUGUST_MOVE_FUNDS = {
+  source:"August 20 workbook",
+  salary:1826.55,
+  commitmentsTo20:860.52,
+  leftAfterPersonalCosts:966.03,
+  saferMoveFund:881.65,
+  cashFreedByMove:857.08,
+  alternativeIfOldHomeStops:1169.24,
+  knownRevolutBalance:3.38,
+  note:"Reserve all August BNPL before moving spend. New-property costs are still TBC until confirmed."
+};
+
 const els = {
   monthInput:document.getElementById("monthInput"),
   costTotal:document.getElementById("costTotal"),
@@ -949,7 +962,7 @@ let state = {
   billPaid:{},
   billFunded:{},
   allocations:{},
-  movePrivate:{ items:[], bills:[], plan:{}, checklist:[] }
+  movePrivate:{ items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 }
 };
 let editingItemId = null;
 let editingBillId = null;
@@ -1167,6 +1180,23 @@ function seedMoveChecklist(){
   data.checklistVersion = MOVE_CHECKLIST_VERSION;
 }
 
+function seedMoveFundsPlan(){
+  const data = getMoveData();
+  data.plan = data.plan || {};
+
+  if(data.fundsVersion >= AUGUST_MOVE_FUNDS_VERSION){
+    return;
+  }
+
+  if(numberValue(data.plan.incomeBudget) <= 0){
+    data.plan.incomeBudget = AUGUST_MOVE_FUNDS.saferMoveFund;
+  }
+
+  data.plan.targetDate = data.plan.targetDate || MOVE_DATE;
+  data.plan.fundsForecast = { ...AUGUST_MOVE_FUNDS };
+  data.fundsVersion = AUGUST_MOVE_FUNDS_VERSION;
+}
+
 function checklistCategoryLabel(category){
   return {
     oldPlace:"Old place",
@@ -1202,7 +1232,7 @@ function defaultState(parsed = {}){
     billFunded:parsed.billFunded || {},
     allocations:parsed.allocations || {},
     cleared:parsed.cleared || {},
-    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{}, checklist:[] },
+    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 },
     planVersion:Number(parsed.planVersion) || 0,
     julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
     augustPlanVersion:Number(parsed.augustPlanVersion) || 0
@@ -1216,7 +1246,7 @@ function load(){
     state = defaultState();
   }
 
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{}, checklist:[] };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 };
   state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
     id:item.id || uid(),
     name:item.name || "Move item",
@@ -1246,8 +1276,11 @@ function load(){
     targetDate:state.movePrivate.plan?.targetDate || MOVE_DATE,
     incomeBudget:numberValue(state.movePrivate.plan?.incomeBudget),
     deliverooEarned:numberValue(state.movePrivate.plan?.deliverooEarned),
-    workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays)))
+    workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays))),
+    fundsForecast:state.movePrivate.plan?.fundsForecast || null
   };
+  state.movePrivate.fundsVersion = Number(state.movePrivate.fundsVersion) || 0;
+  state.movePrivate.checklistVersion = Number(state.movePrivate.checklistVersion) || 0;
   state.movePrivate.checklist = (state.movePrivate.checklist || []).map(item => ({
     id:item.id || uid(),
     key:item.key || "",
@@ -1258,6 +1291,7 @@ function load(){
     note:item.note || ""
   }));
   seedMoveChecklist();
+  seedMoveFundsPlan();
 }
 
 function save(){
@@ -1272,11 +1306,13 @@ function getMonthData(){
 }
 
 function getMoveData(){
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{}, checklist:[] };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 };
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
   state.movePrivate.plan = state.movePrivate.plan || {};
   state.movePrivate.checklist = state.movePrivate.checklist || [];
+  state.movePrivate.fundsVersion = Number(state.movePrivate.fundsVersion) || 0;
+  state.movePrivate.checklistVersion = Number(state.movePrivate.checklistVersion) || 0;
   return state.movePrivate;
 }
 
@@ -1306,7 +1342,8 @@ function getMovePlan(){
     targetDate:data.plan.targetDate || MOVE_DATE,
     incomeBudget:numberValue(data.plan.incomeBudget),
     deliverooEarned:numberValue(data.plan.deliverooEarned),
-    workDays:Math.max(0, Math.round(numberValue(data.plan.workDays)))
+    workDays:Math.max(0, Math.round(numberValue(data.plan.workDays))),
+    fundsForecast:data.plan.fundsForecast || null
   };
 }
 
@@ -1513,7 +1550,8 @@ function savePlan(notify = true){
     targetDate:els.planTargetDate.value,
     incomeBudget:numberValue(els.planIncomeBudget.value),
     deliverooEarned:numberValue(els.planDeliverooEarned.value),
-    workDays
+    workDays,
+    fundsForecast:data.plan?.fundsForecast || null
   };
 
   const allocation = getAllocationData();
@@ -1927,9 +1965,11 @@ function render(){
     ? `${money(snap.finance.income)} income minus ${money(snap.finance.fixedTotal + snap.finance.nonMoveTrickleTotal + snap.finance.spendTotal)} already planned.`
     : "Add income in Finance for this cycle.";
   els.incomeBudgetSummary.textContent = money(snap.incomeBudget);
-  els.incomeBudgetMeta.textContent = snap.suggestedIncomeBudget > 0
-    ? `${money(snap.suggestedIncomeBudget)} suggested safe buffer.`
-    : "No safe salary buffer showing yet.";
+  els.incomeBudgetMeta.textContent = snap.plan.fundsForecast
+    ? `${snap.plan.fundsForecast.source}: ${money(snap.plan.fundsForecast.saferMoveFund)} safer fund after BNPL reserve.`
+    : snap.suggestedIncomeBudget > 0
+      ? `${money(snap.suggestedIncomeBudget)} suggested safe buffer.`
+      : "No safe salary buffer showing yet.";
   els.dailyTarget.textContent = money(snap.dailyTarget);
   els.dailyTargetMeta.textContent = `${snap.workDays} work day${snap.workDays === 1 ? "" : "s"} left.`;
   els.newBillsSummary.textContent = money(snap.monthlyTotal);
@@ -1967,8 +2007,19 @@ function renderWeeklyPlan(snap){
   const afterIncome = Math.max(snap.deduction - snap.incomeBudget,0);
   const afterEarned = Math.max(afterIncome - snap.deliverooEarned,0);
   const bufferLeft = snap.finance.availableBuffer - snap.incomeBudget;
+  const forecast = snap.plan.fundsForecast;
+  const forecastRow = forecast ? `
+    <div class="breakdownRow">
+      <div class="breakdownLine">
+        <span>${escapeHtml(forecast.source)}</span>
+        <strong>${money(forecast.saferMoveFund)}</strong>
+      </div>
+      <small>${money(forecast.leftAfterPersonalCosts)} left after personal costs; ${money(forecast.cashFreedByMove)} freed by the move. ${escapeHtml(forecast.note)}</small>
+    </div>
+  ` : "";
 
   els.weeklyPlan.innerHTML = `
+    ${forecastRow}
     <div class="breakdownRow">
       <div class="breakdownLine">
         <span>Remaining move cost</span>
