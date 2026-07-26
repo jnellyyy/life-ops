@@ -23,6 +23,8 @@
   --muted:#a7afbe;
   --pink:#ff5ba7;
   --purple:#a78bfa;
+  --blue:#60a5fa;
+  --teal:#2dd4bf;
   --green:#22c55e;
   --amber:#f59e0b;
   --red:#fb7185;
@@ -172,6 +174,106 @@ select{
   align-items:start;
 }
 
+.planCard{
+  grid-column:1 / -1;
+}
+
+.planLayout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,.82fr);
+  gap:14px;
+  align-items:start;
+}
+
+.miniMetrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+
+.miniMetric{
+  min-height:104px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.055);
+  border-radius:18px;
+  padding:12px;
+  display:grid;
+  align-content:space-between;
+  gap:8px;
+}
+
+.miniMetric span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+}
+
+.miniMetric strong{
+  display:block;
+  font-size:24px;
+  line-height:1;
+  letter-spacing:-.05em;
+}
+
+.miniMetric small{
+  color:var(--muted);
+  line-height:1.35;
+}
+
+.plannerGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+.breakdown{
+  display:grid;
+  gap:9px;
+}
+
+.breakdownTitle{
+  margin:0;
+  font-size:13px;
+  color:#ffc2e6;
+  letter-spacing:-.02em;
+}
+
+.breakdownRow{
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.055);
+  border-radius:16px;
+  padding:10px;
+}
+
+.breakdownLine{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+}
+
+.breakdownLine strong{
+  white-space:nowrap;
+}
+
+.progress{
+  width:100%;
+  height:7px;
+  border-radius:999px;
+  margin-top:8px;
+  background:rgba(255,255,255,0.10);
+  overflow:hidden;
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--pink),var(--purple));
+}
+
 .card{
   padding:16px;
   min-width:0;
@@ -265,13 +367,26 @@ select{
 
 .row{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-columns:minmax(0,1fr) minmax(168px,auto);
   gap:12px;
   align-items:center;
   border:1px solid rgba(255,255,255,0.10);
   background:rgba(255,255,255,0.055);
   border-radius:18px;
   padding:11px;
+}
+
+.row.inPot{
+  border-color:rgba(34,197,94,0.34);
+}
+
+.row.bought{
+  opacity:.68;
+}
+
+.row.deliveroo{
+  border-color:rgba(245,158,11,0.38);
+  background:rgba(245,158,11,0.08);
 }
 
 .row strong{
@@ -360,7 +475,10 @@ select{
 @media(max-width:900px){
   .topbar,
   .metrics,
-  .grid{
+  .grid,
+  .planLayout,
+  .miniMetrics,
+  .plannerGrid{
     grid-template-columns:1fr;
   }
 
@@ -414,28 +532,98 @@ select{
 
   <section class="metrics">
     <div class="metric">
-      <span>Move costs</span>
+      <span>Furniture/setup total</span>
       <strong id="costTotal">£0.00</strong>
-      <small id="itemCount">0 items</small>
+      <small id="itemCount">0 items planned</small>
     </div>
     <div class="metric">
-      <span>Deduction if bought</span>
+      <span>Still to fund</span>
       <strong id="deductionTotal">£0.00</strong>
-      <small>Open items minus money already in pot.</small>
+      <small id="fundingMeta">Open items minus money already in pot.</small>
     </div>
     <div class="metric">
-      <span>New fixed bills</span>
+      <span>Deliveroo needed</span>
       <strong id="monthlyTotal">£0.00</strong>
-      <small id="billCount">0 bills</small>
+      <small id="deliverooMeta">After income budget and earned money.</small>
     </div>
     <div class="metric">
-      <span>Left after move</span>
+      <span>Weekly target</span>
       <strong id="leftAfterMove">£0.00</strong>
-      <small id="leftAfterMoveMeta">Based on selected finance cycle.</small>
+      <small id="leftAfterMoveMeta">Based on your target date.</small>
     </div>
   </section>
 
   <main class="grid">
+    <section class="card planCard">
+      <div class="cardHead">
+        <div class="cardTitle">
+          <div class="icon">🎯</div>
+          <h2>Move funding plan</h2>
+        </div>
+        <div class="pill" id="planPill">not set</div>
+      </div>
+
+      <div class="planLayout">
+        <div>
+          <div class="miniMetrics">
+            <div class="miniMetric">
+              <span>Finance buffer</span>
+              <strong id="financeBuffer">£0.00</strong>
+              <small id="financeBufferMeta">After current bills, payments and spending.</small>
+            </div>
+            <div class="miniMetric">
+              <span>Budget from income</span>
+              <strong id="incomeBudgetSummary">£0.00</strong>
+              <small id="incomeBudgetMeta">What salary will cover for the move.</small>
+            </div>
+            <div class="miniMetric">
+              <span>Daily Deliveroo</span>
+              <strong id="dailyTarget">£0.00</strong>
+              <small id="dailyTargetMeta">Per planned work day.</small>
+            </div>
+            <div class="miniMetric">
+              <span>New fixed bills</span>
+              <strong id="newBillsSummary">£0.00</strong>
+              <small id="billCount">0 bills</small>
+            </div>
+          </div>
+
+          <div class="plannerGrid">
+            <div class="field">
+              <label>need by</label>
+              <input id="planTargetDate" type="date">
+            </div>
+            <div class="field">
+              <label>budget from income</label>
+              <input id="planIncomeBudget" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label>Deliveroo earned</label>
+              <input id="planDeliverooEarned" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label>work days left</label>
+              <input id="planWorkDays" type="number" min="1" step="1" placeholder="days">
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="primaryBtn" id="savePlanBtn">save funding plan</button>
+            <button type="button" class="softBtn" id="useBufferBtn">use suggested buffer</button>
+            <button type="button" class="softBtn" id="applyIncomeBudgetBtn">send income budget to pots</button>
+            <button type="button" class="softBtn" id="sendAllDeliverooBtn">send remaining to Deliveroo</button>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <h3 class="breakdownTitle">Pot split</h3>
+          <div id="potBreakdown"></div>
+          <h3 class="breakdownTitle">Weekly plan</h3>
+          <div id="weeklyPlan"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="card">
       <div class="cardHead">
         <div class="cardTitle">
@@ -574,8 +762,28 @@ const els = {
   monthlyTotal:document.getElementById("monthlyTotal"),
   leftAfterMove:document.getElementById("leftAfterMove"),
   leftAfterMoveMeta:document.getElementById("leftAfterMoveMeta"),
+  fundingMeta:document.getElementById("fundingMeta"),
+  deliverooMeta:document.getElementById("deliverooMeta"),
   itemCount:document.getElementById("itemCount"),
   billCount:document.getElementById("billCount"),
+  planPill:document.getElementById("planPill"),
+  financeBuffer:document.getElementById("financeBuffer"),
+  financeBufferMeta:document.getElementById("financeBufferMeta"),
+  incomeBudgetSummary:document.getElementById("incomeBudgetSummary"),
+  incomeBudgetMeta:document.getElementById("incomeBudgetMeta"),
+  dailyTarget:document.getElementById("dailyTarget"),
+  dailyTargetMeta:document.getElementById("dailyTargetMeta"),
+  newBillsSummary:document.getElementById("newBillsSummary"),
+  planTargetDate:document.getElementById("planTargetDate"),
+  planIncomeBudget:document.getElementById("planIncomeBudget"),
+  planDeliverooEarned:document.getElementById("planDeliverooEarned"),
+  planWorkDays:document.getElementById("planWorkDays"),
+  savePlanBtn:document.getElementById("savePlanBtn"),
+  useBufferBtn:document.getElementById("useBufferBtn"),
+  applyIncomeBudgetBtn:document.getElementById("applyIncomeBudgetBtn"),
+  sendAllDeliverooBtn:document.getElementById("sendAllDeliverooBtn"),
+  potBreakdown:document.getElementById("potBreakdown"),
+  weeklyPlan:document.getElementById("weeklyPlan"),
   costPill:document.getElementById("costPill"),
   billPill:document.getElementById("billPill"),
   itemName:document.getElementById("itemName"),
@@ -604,7 +812,12 @@ let state = {
   selectedMonth:getCurrentMonth(),
   months:{},
   fixedBills:[],
-  movePrivate:{ items:[], bills:[] }
+  spends:[],
+  trickles:[],
+  billPaid:{},
+  billFunded:{},
+  allocations:{},
+  movePrivate:{ items:[], bills:[], plan:{} }
 };
 let editingItemId = null;
 let editingBillId = null;
@@ -674,6 +887,120 @@ function getCycleDateForDay(monthValue, dueDay){
   return dateKeyFromDate(target);
 }
 
+function getCycleStartDate(monthValue = state.selectedMonth){
+  const [year, month] = String(monthValue || getCurrentMonth()).split("-").map(Number);
+  return new Date(year, month - 1, PAYDAY_DAY);
+}
+
+function getCycleEndDate(monthValue = state.selectedMonth){
+  const start = getCycleStartDate(monthValue);
+  return new Date(start.getFullYear(), start.getMonth() + 1, PAYDAY_DAY - 1);
+}
+
+function payCycleKeyFromDate(dateValue, fallback = state.selectedMonth){
+  const date = new Date(`${dateValue}T00:00:00`);
+
+  if(Number.isNaN(date.getTime())){
+    return fallback;
+  }
+
+  const cycle = new Date(date.getFullYear(), date.getMonth(), 1);
+  if(date.getDate() < PAYDAY_DAY) cycle.setMonth(cycle.getMonth() - 1);
+  return monthKeyFromDate(cycle);
+}
+
+function datedItemBelongsToSelectedCycle(item, dateField){
+  const dateValue = item?.[dateField];
+
+  if(!dateValue){
+    return item?.month === state.selectedMonth;
+  }
+
+  return payCycleKeyFromDate(dateValue, item.month || state.selectedMonth) === state.selectedMonth;
+}
+
+function daysUntilDate(dateValue){
+  const date = new Date(`${dateValue}T00:00:00`);
+
+  if(Number.isNaN(date.getTime())){
+    return 1;
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return Math.max(1, Math.ceil((date - today) / 86400000));
+}
+
+function weeksUntilDate(dateValue){
+  return Math.max(1, Math.ceil(daysUntilDate(dateValue) / 7));
+}
+
+function billPaidKey(id){
+  return `${state.selectedMonth}:${id}`;
+}
+
+function getMonthFixedBills(){
+  return (state.fixedBills || []).filter(bill => bill.month === state.selectedMonth);
+}
+
+function getMonthSpends(){
+  return (state.spends || []).filter(spend => datedItemBelongsToSelectedCycle(spend, "date"));
+}
+
+function getMonthTrickles(){
+  return (state.trickles || []).filter(trickle => datedItemBelongsToSelectedCycle(trickle, "dueDate"));
+}
+
+function isMoveTargetTrickle(trickle){
+  return String(trickle?.kind || "").startsWith("move-item:");
+}
+
+function getFinanceSummary(){
+  const monthData = getMonthData();
+  const income = numberValue(monthData.income) + numberValue(monthData.startingBalance);
+  const fixedTotal = getMonthFixedBills().reduce((sum,bill) => sum + numberValue(bill.amount),0);
+  const spendTotal = getMonthSpends().reduce((sum,spend) => sum + numberValue(spend.amount),0);
+  const nonMoveTrickles = getMonthTrickles().filter(trickle => !trickle.paid && !isMoveTargetTrickle(trickle));
+  const nonMoveTrickleTotal = nonMoveTrickles.reduce((sum,trickle) => sum + numberValue(trickle.amount),0);
+  const availableBuffer = income - fixedTotal - spendTotal - nonMoveTrickleTotal;
+
+  return {
+    income,
+    fixedTotal,
+    spendTotal,
+    nonMoveTrickleTotal,
+    availableBuffer,
+    suggestedMoveBudget:Math.max(0, availableBuffer)
+  };
+}
+
+function getAllocationData(){
+  state.allocations = state.allocations || {};
+
+  if(!state.allocations[state.selectedMonth]){
+    state.allocations[state.selectedMonth] = {
+      bills:0,
+      debt:0,
+      bnpl:0,
+      commute:0,
+      savings:0,
+      emergency:0,
+      business:0,
+      move:0,
+      furniture:0,
+      homeSetup:0,
+      fun:0,
+      misc:0,
+      transferBuffer:0,
+      deliverooEarned:0,
+      deliverooDays:0,
+      note:""
+    };
+  }
+
+  return state.allocations[state.selectedMonth];
+}
+
 function defaultState(parsed = {}){
   return {
     selectedMonth:parsed.selectedMonth || getCurrentMonth(),
@@ -685,7 +1012,7 @@ function defaultState(parsed = {}){
     billFunded:parsed.billFunded || {},
     allocations:parsed.allocations || {},
     cleared:parsed.cleared || {},
-    movePrivate:parsed.movePrivate || { items:[], bills:[] },
+    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{} },
     planVersion:Number(parsed.planVersion) || 0,
     julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
     augustPlanVersion:Number(parsed.augustPlanVersion) || 0
@@ -699,7 +1026,7 @@ function load(){
     state = defaultState();
   }
 
-  state.movePrivate = state.movePrivate || { items:[], bills:[] };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{} };
   state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
     id:item.id || uid(),
     name:item.name || "Move item",
@@ -707,7 +1034,9 @@ function load(){
     saved:numberValue(item.saved),
     pot:item.pot || item.source || "Move pot",
     status:item.status || "needed",
-    dueDate:item.dueDate || ""
+    dueDate:item.dueDate || "",
+    financeTarget:Boolean(item.financeTarget),
+    targetMode:item.targetMode || ""
   }));
   state.movePrivate.bills = (state.movePrivate.bills || []).map(bill => ({
     id:bill.id || uid(),
@@ -720,6 +1049,12 @@ function load(){
     pot:bill.pot || (bill.account === "Revolut" ? "Bills pot" : "Protected bills"),
     active:Boolean(bill.active)
   }));
+  state.movePrivate.plan = {
+    targetDate:state.movePrivate.plan?.targetDate || "",
+    incomeBudget:numberValue(state.movePrivate.plan?.incomeBudget),
+    deliverooEarned:numberValue(state.movePrivate.plan?.deliverooEarned),
+    workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays)))
+  };
 }
 
 function save(){
@@ -734,9 +1069,10 @@ function getMonthData(){
 }
 
 function getMoveData(){
-  state.movePrivate = state.movePrivate || { items:[], bills:[] };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{} };
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
+  state.movePrivate.plan = state.movePrivate.plan || {};
   return state.movePrivate;
 }
 
@@ -750,28 +1086,118 @@ function statusLabel(status){
 }
 
 function itemRemaining(item){
-  if(item.status === "bought" || item.status === "later") return 0;
+  if(item.status === "bought" || item.status === "later" || item.status === "inPot") return 0;
   return Math.max(numberValue(item.cost) - numberValue(item.saved),0);
+}
+
+function getOpenMoveItems(){
+  return getMoveData().items.filter(item => item.status !== "bought" && item.status !== "later");
+}
+
+function getMovePlan(){
+  const data = getMoveData();
+  data.plan = data.plan || {};
+
+  return {
+    targetDate:data.plan.targetDate || "",
+    incomeBudget:numberValue(data.plan.incomeBudget),
+    deliverooEarned:numberValue(data.plan.deliverooEarned),
+    workDays:Math.max(0, Math.round(numberValue(data.plan.workDays)))
+  };
+}
+
+function getPlanTargetDate(items = getOpenMoveItems(), plan = getMovePlan()){
+  if(plan.targetDate){
+    return plan.targetDate;
+  }
+
+  const datedItems = items
+    .map(item => item.dueDate)
+    .filter(Boolean)
+    .sort();
+
+  if(datedItems.length){
+    return datedItems[datedItems.length - 1];
+  }
+
+  return dateKeyFromDate(getCycleEndDate(state.selectedMonth));
+}
+
+function potKeyFromName(value){
+  const text = String(value || "").toLowerCase();
+  if(text.includes("furniture")) return "furniture";
+  if(text.includes("home")) return "homeSetup";
+  if(text.includes("emergency")) return "emergency";
+  if(text.includes("misc")) return "misc";
+  return "move";
+}
+
+function potLabelFromKey(key){
+  return {
+    move:"Move",
+    furniture:"Furniture",
+    homeSetup:"Home Setup",
+    emergency:"Emergency",
+    misc:"Miscellaneous"
+  }[key] || "Move";
+}
+
+function potBreakdown(items = getMoveData().items){
+  const byPot = new Map();
+
+  items.forEach(item => {
+    const pot = item.pot || "Move pot";
+    const current = byPot.get(pot) || { pot, cost:0, saved:0, remaining:0, count:0 };
+    current.cost += numberValue(item.cost);
+    current.saved += Math.min(numberValue(item.saved), numberValue(item.cost));
+    current.remaining += itemRemaining(item);
+    current.count += 1;
+    byPot.set(pot, current);
+  });
+
+  return [...byPot.values()].sort((a,b) => b.remaining - a.remaining || String(a.pot).localeCompare(String(b.pot)));
 }
 
 function snapshot(){
   const data = getMoveData();
-  const openItems = data.items.filter(item => item.status !== "bought" && item.status !== "later");
+  const openItems = getOpenMoveItems();
   const costTotal = data.items.reduce((sum,item) => sum + numberValue(item.cost),0);
   const savedTotal = data.items.reduce((sum,item) => sum + Math.min(numberValue(item.saved), numberValue(item.cost)),0);
   const deduction = openItems.reduce((sum,item) => sum + itemRemaining(item),0);
   const monthlyTotal = data.bills.reduce((sum,bill) => sum + numberValue(bill.amount),0);
-  const income = numberValue(getMonthData().income);
+  const finance = getFinanceSummary();
+  const plan = getMovePlan();
+  const targetDate = getPlanTargetDate(openItems, plan);
+  const suggestedIncomeBudget = Math.min(finance.suggestedMoveBudget, deduction);
+  const incomeBudget = Math.min(plan.incomeBudget, deduction);
+  const deliverooEarned = Math.min(plan.deliverooEarned, Math.max(deduction - incomeBudget,0));
+  const deliverooNeeded = Math.max(deduction - incomeBudget - deliverooEarned,0);
+  const workDays = plan.workDays || daysUntilDate(targetDate);
+  const weeklyTarget = deliverooNeeded / weeksUntilDate(targetDate);
+  const dailyTarget = deliverooNeeded / Math.max(1, workDays);
+  const bufferAfterMoveBudget = finance.availableBuffer - incomeBudget;
 
   return {
     data,
+    plan,
+    finance,
+    openItems,
     costTotal,
     savedTotal,
     deduction,
     monthlyTotal,
-    income,
-    leftAfterMove:income - deduction,
-    leftAfterBills:income - monthlyTotal
+    targetDate,
+    suggestedIncomeBudget,
+    incomeBudget,
+    deliverooEarned,
+    deliverooNeeded,
+    workDays,
+    weeklyTarget,
+    dailyTarget,
+    bufferAfterMoveBudget,
+    leftAfterMove:finance.income - deduction,
+    leftAfterBills:finance.income - monthlyTotal,
+    pots:potBreakdown(data.items)
   };
 }
 
@@ -852,9 +1278,203 @@ function editItem(id){
 function deleteItem(id){
   const data = getMoveData();
   data.items = data.items.filter(item => item.id !== id);
+  state.trickles = (state.trickles || []).filter(trickle => trickle.kind !== `move-item:${id}`);
   save();
   render();
   showToast("Move cost deleted.");
+}
+
+function savePlan(notify = true){
+  const data = getMoveData();
+  const workDays = Math.max(0, Math.round(numberValue(els.planWorkDays.value)));
+
+  data.plan = {
+    targetDate:els.planTargetDate.value,
+    incomeBudget:numberValue(els.planIncomeBudget.value),
+    deliverooEarned:numberValue(els.planDeliverooEarned.value),
+    workDays
+  };
+
+  const allocation = getAllocationData();
+  allocation.deliverooEarned = data.plan.deliverooEarned;
+  if(workDays) allocation.deliverooDays = workDays;
+
+  save();
+  render();
+  if(notify){
+    showToast("Move funding plan saved.");
+  }
+}
+
+function useSuggestedBuffer(){
+  const snap = snapshot();
+  const data = getMoveData();
+  data.plan = data.plan || {};
+  data.plan.incomeBudget = snap.suggestedIncomeBudget;
+  save();
+  render();
+  showToast("Suggested income budget added.");
+}
+
+function distributeIncomeBudgetByItem(amount){
+  const result = new Map();
+  let remainingBudget = Math.max(0, numberValue(amount));
+
+  getOpenMoveItems()
+    .slice()
+    .sort((a,b) => String(a.dueDate || "9999").localeCompare(String(b.dueDate || "9999")))
+    .forEach(item => {
+      if(remainingBudget <= 0) return;
+      const funded = Math.min(itemRemaining(item), remainingBudget);
+      result.set(item.id, funded);
+      remainingBudget -= funded;
+    });
+
+  return result;
+}
+
+function distributeIncomeBudgetByPot(amount){
+  const byItem = distributeIncomeBudgetByItem(amount);
+  const result = {};
+
+  getOpenMoveItems().forEach(item => {
+    const funded = numberValue(byItem.get(item.id));
+    if(funded <= 0) return;
+    const key = potKeyFromName(item.pot);
+    result[key] = numberValue(result[key]) + funded;
+  });
+
+  return result;
+}
+
+function applyIncomeBudgetToFinancePots(){
+  savePlan(false);
+  const snap = snapshot();
+
+  if(snap.incomeBudget <= 0){
+    showToast("Add a budget from income first.");
+    return;
+  }
+
+  const allocation = getAllocationData();
+  const split = distributeIncomeBudgetByPot(snap.incomeBudget);
+  ["move","furniture","homeSetup","emergency","misc"].forEach(key => {
+    allocation[key] = numberValue(split[key]);
+  });
+
+  save();
+  render();
+  showToast("Move income budget sent to Finance pots.");
+}
+
+function moveTargetDueDate(item){
+  return item.dueDate || snapshot().targetDate;
+}
+
+function upsertMoveItemAsDeliverooTarget(item, incomeCovered = 0){
+  const amount = Math.max(itemRemaining(item) - numberValue(incomeCovered),0);
+  const kind = `move-item:${item.id}`;
+
+  if(amount <= 0){
+    state.trickles = (state.trickles || []).filter(trickle => trickle.kind !== kind);
+    item.financeTarget = false;
+    item.targetMode = "";
+    return false;
+  }
+
+  const dueDate = moveTargetDueDate(item);
+  const existing = (state.trickles || []).find(trickle => trickle.kind === kind);
+  const data = {
+    name:`Move: ${item.name}`,
+    amount,
+    priority:item.status === "needed" ? "must" : "soon",
+    dueDate,
+    account:"Revolut",
+    source:item.pot || "Move pot",
+    month:payCycleKeyFromDate(dueDate, state.selectedMonth),
+    paid:false,
+    funded:false,
+    deliveroo:true,
+    kind,
+    note:"From The Move page"
+  };
+
+  if(existing){
+    Object.assign(existing, data);
+  }else{
+    state.trickles = state.trickles || [];
+    state.trickles.push({ id:uid(), ...data });
+  }
+
+  item.financeTarget = true;
+  item.targetMode = "deliveroo";
+  return true;
+}
+
+function sendItemToDeliveroo(id){
+  savePlan(false);
+  const item = getMoveData().items.find(entry => entry.id === id);
+
+  if(!item){
+    return;
+  }
+
+  const coveredByIncome = distributeIncomeBudgetByItem(snapshot().incomeBudget).get(item.id) || 0;
+
+  if(!upsertMoveItemAsDeliverooTarget(item, coveredByIncome)){
+    showToast("This item has no remaining amount.");
+    return;
+  }
+
+  save();
+  render();
+  showToast("Move item sent to Deliveroo plan.");
+}
+
+function sendAllRemainingToDeliveroo(){
+  savePlan(false);
+  const incomeCoveredByItem = distributeIncomeBudgetByItem(snapshot().incomeBudget);
+  let count = 0;
+
+  getOpenMoveItems().forEach(item => {
+    if(upsertMoveItemAsDeliverooTarget(item, incomeCoveredByItem.get(item.id) || 0)){
+      count += 1;
+    }
+  });
+
+  if(!count){
+    showToast("No remaining move items to send.");
+    return;
+  }
+
+  save();
+  render();
+  showToast(`${count} move target${count === 1 ? "" : "s"} sent to Deliveroo.`);
+}
+
+function setItemStatus(id, status){
+  const item = getMoveData().items.find(entry => entry.id === id);
+
+  if(!item) return;
+
+  item.status = status;
+
+  if(status === "inPot"){
+    item.saved = numberValue(item.cost);
+    item.financeTarget = false;
+    item.targetMode = "";
+    state.trickles = (state.trickles || []).filter(trickle => trickle.kind !== `move-item:${id}`);
+  }
+
+  if(status === "bought"){
+    state.trickles = (state.trickles || []).filter(trickle => trickle.kind !== `move-item:${id}`);
+    item.financeTarget = false;
+    item.targetMode = "";
+  }
+
+  save();
+  render();
+  showToast(status === "bought" ? "Marked bought." : "Status updated.");
 }
 
 function inferBillCategory(name, type){
@@ -1001,21 +1621,96 @@ function applyBills(){
   showToast(`${added} added, ${updated} updated in finance.`);
 }
 
+function setInputValueUnlessEditing(input, value){
+  if(document.activeElement === input) return;
+  input.value = value || "";
+}
+
 function render(){
   const snap = snapshot();
   els.monthInput.value = state.selectedMonth;
   els.costTotal.textContent = money(snap.costTotal);
   els.deductionTotal.textContent = money(snap.deduction);
-  els.monthlyTotal.textContent = money(snap.monthlyTotal);
-  els.leftAfterMove.textContent = money(snap.leftAfterMove);
-  els.leftAfterMove.style.color = snap.leftAfterMove < 0 ? "#fecaca" : "#bbf7d0";
-  els.leftAfterMoveMeta.textContent = snap.income ? `${money(snap.income)} income minus open move costs.` : "Add income in Finance for this cycle.";
+  els.monthlyTotal.textContent = money(snap.deliverooNeeded);
+  els.leftAfterMove.textContent = money(snap.weeklyTarget);
+  els.leftAfterMove.style.color = snap.weeklyTarget > 0 ? "#fde68a" : "#bbf7d0";
+  els.fundingMeta.textContent = `${money(snap.savedTotal)} already in pots. ${money(snap.incomeBudget)} budgeted from income.`;
+  els.deliverooMeta.textContent = `${money(snap.deliverooEarned)} earned already. ${money(snap.dailyTarget)} per work day.`;
+  els.leftAfterMoveMeta.textContent = `${weeksUntilDate(snap.targetDate)} week${weeksUntilDate(snap.targetDate) === 1 ? "" : "s"} until ${formatShortDate(snap.targetDate)}.`;
   els.itemCount.textContent = snap.data.items.length === 1 ? "1 item" : `${snap.data.items.length} items`;
   els.billCount.textContent = snap.data.bills.length === 1 ? "1 bill" : `${snap.data.bills.length} bills`;
   els.costPill.textContent = `${snap.data.items.length} saved`;
   els.billPill.textContent = `${snap.data.bills.length} planned`;
+  els.planPill.textContent = snap.deliverooNeeded > 0 ? `${money(snap.deliverooNeeded)} to earn` : "covered";
+  els.financeBuffer.textContent = money(Math.max(snap.finance.availableBuffer,0));
+  els.financeBuffer.style.color = snap.finance.availableBuffer < 0 ? "#fecaca" : "#bbf7d0";
+  els.financeBufferMeta.textContent = snap.finance.income
+    ? `${money(snap.finance.income)} income minus ${money(snap.finance.fixedTotal + snap.finance.nonMoveTrickleTotal + snap.finance.spendTotal)} already planned.`
+    : "Add income in Finance for this cycle.";
+  els.incomeBudgetSummary.textContent = money(snap.incomeBudget);
+  els.incomeBudgetMeta.textContent = snap.suggestedIncomeBudget > 0
+    ? `${money(snap.suggestedIncomeBudget)} suggested safe buffer.`
+    : "No safe salary buffer showing yet.";
+  els.dailyTarget.textContent = money(snap.dailyTarget);
+  els.dailyTargetMeta.textContent = `${snap.workDays} work day${snap.workDays === 1 ? "" : "s"} left.`;
+  els.newBillsSummary.textContent = money(snap.monthlyTotal);
+  setInputValueUnlessEditing(els.planTargetDate, snap.plan.targetDate || snap.targetDate);
+  setInputValueUnlessEditing(els.planIncomeBudget, snap.plan.incomeBudget || "");
+  setInputValueUnlessEditing(els.planDeliverooEarned, snap.plan.deliverooEarned || "");
+  setInputValueUnlessEditing(els.planWorkDays, snap.plan.workDays || "");
+  renderPotBreakdown(snap);
+  renderWeeklyPlan(snap);
   renderItems(snap.data.items);
   renderBills(snap.data.bills);
+}
+
+function renderPotBreakdown(snap){
+  if(!snap.pots.length){
+    els.potBreakdown.innerHTML = `<div class="empty">Add furniture or setup costs to see the split.</div>`;
+    return;
+  }
+
+  const maxRemaining = Math.max(1, ...snap.pots.map(pot => pot.remaining));
+  els.potBreakdown.innerHTML = snap.pots.map(pot => `
+    <div class="breakdownRow">
+      <div class="breakdownLine">
+        <span>${escapeHtml(pot.pot)} · ${pot.count} item${pot.count === 1 ? "" : "s"}</span>
+        <strong>${money(pot.remaining)} left</strong>
+      </div>
+      <small>${money(pot.cost)} total · ${money(pot.saved)} already in pot</small>
+      <div class="progress"><span style="width:${Math.min(100, (pot.remaining / maxRemaining) * 100)}%;"></span></div>
+    </div>
+  `).join("");
+}
+
+function renderWeeklyPlan(snap){
+  const afterIncome = Math.max(snap.deduction - snap.incomeBudget,0);
+  const afterEarned = Math.max(afterIncome - snap.deliverooEarned,0);
+  const bufferLeft = snap.finance.availableBuffer - snap.incomeBudget;
+
+  els.weeklyPlan.innerHTML = `
+    <div class="breakdownRow">
+      <div class="breakdownLine">
+        <span>Remaining move cost</span>
+        <strong>${money(snap.deduction)}</strong>
+      </div>
+      <small>${money(snap.incomeBudget)} from income leaves ${money(afterIncome)} for Deliveroo/extra money.</small>
+    </div>
+    <div class="breakdownRow">
+      <div class="breakdownLine">
+        <span>Deliveroo gap</span>
+        <strong>${money(afterEarned)}</strong>
+      </div>
+      <small>${money(snap.dailyTarget)} per work day · ${money(snap.weeklyTarget)} per week.</small>
+    </div>
+    <div class="breakdownRow">
+      <div class="breakdownLine">
+        <span>Buffer after move budget</span>
+        <strong style="color:${bufferLeft < 0 ? "#fecaca" : "#bbf7d0"};">${money(bufferLeft)}</strong>
+      </div>
+      <small>${bufferLeft < 0 ? "This salary budget is above the safe buffer." : "This is what remains before more variable spending."}</small>
+    </div>
+  `;
 }
 
 function renderItems(items){
@@ -1037,7 +1732,11 @@ function renderItems(items){
     .forEach(item => {
       const row = document.createElement("div");
       const remaining = itemRemaining(item);
-      row.className = "row";
+      const classes = ["row"];
+      if(item.status === "inPot") classes.push("inPot");
+      if(item.status === "bought") classes.push("bought");
+      if(item.targetMode === "deliveroo") classes.push("deliveroo");
+      row.className = classes.join(" ");
       row.innerHTML = `
         <div>
           <strong>${escapeHtml(item.name)}</strong>
@@ -1045,12 +1744,16 @@ function renderItems(items){
             ${escapeHtml(item.pot || "Move pot")}
             <span class="statusText">• ${escapeHtml(statusLabel(item.status))}</span>
             ${item.dueDate ? " • " + escapeHtml(formatShortDate(item.dueDate)) : ""}
+            ${item.targetMode === "deliveroo" ? " • in Deliveroo plan" : ""}
           </small>
         </div>
         <div class="right">
           <div class="amount">${money(item.cost)}</div>
           <small>${money(item.saved)} in pot · ${money(remaining)} left</small>
           <div class="rowActions">
+            <button type="button" class="miniBtn" data-item-in-pot="${item.id}">money in pot</button>
+            <button type="button" class="miniBtn" data-send-deliveroo="${item.id}">Deliveroo</button>
+            <button type="button" class="miniBtn" data-item-bought="${item.id}">bought</button>
             <button type="button" class="miniBtn" data-edit-item="${item.id}">edit</button>
             <button type="button" class="miniBtn danger" data-delete-item="${item.id}">delete</button>
           </div>
@@ -1114,6 +1817,10 @@ els.billAccount.addEventListener("change", () => {
 
 els.saveItemBtn.addEventListener("click", saveItem);
 els.clearItemBtn.addEventListener("click", clearItemForm);
+els.savePlanBtn.addEventListener("click", () => savePlan());
+els.useBufferBtn.addEventListener("click", useSuggestedBuffer);
+els.applyIncomeBudgetBtn.addEventListener("click", applyIncomeBudgetToFinancePots);
+els.sendAllDeliverooBtn.addEventListener("click", sendAllRemainingToDeliveroo);
 els.saveBillBtn.addEventListener("click", saveBill);
 els.clearBillBtn.addEventListener("click", clearBillForm);
 els.applyBillsBtn.addEventListener("click", applyBills);
@@ -1121,12 +1828,18 @@ els.applyBillsBtn.addEventListener("click", applyBills);
 document.addEventListener("click", event => {
   const editItemId = event.target.getAttribute("data-edit-item");
   const deleteItemId = event.target.getAttribute("data-delete-item");
+  const itemInPotId = event.target.getAttribute("data-item-in-pot");
+  const itemBoughtId = event.target.getAttribute("data-item-bought");
+  const sendDeliverooId = event.target.getAttribute("data-send-deliveroo");
   const editBillId = event.target.getAttribute("data-edit-bill");
   const deleteBillId = event.target.getAttribute("data-delete-bill");
   const applyBillId = event.target.getAttribute("data-apply-bill");
 
   if(editItemId) editItem(editItemId);
   if(deleteItemId) deleteItem(deleteItemId);
+  if(itemInPotId) setItemStatus(itemInPotId, "inPot");
+  if(itemBoughtId) setItemStatus(itemBoughtId, "bought");
+  if(sendDeliverooId) sendItemToDeliveroo(sendDeliverooId);
   if(editBillId) editBill(editBillId);
   if(deleteBillId) deleteBill(deleteBillId);
   if(applyBillId) applyBill(applyBillId);

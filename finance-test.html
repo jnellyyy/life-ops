@@ -3523,7 +3523,8 @@ let state = {
   cleared: {},
   movePrivate: {
     items: [],
-    bills: []
+    bills: [],
+    plan:{}
   },
   planVersion:0,
   julyPlanVersion:0,
@@ -3747,7 +3748,7 @@ function load(){
       }));
     });
 
-    state.movePrivate = state.movePrivate || { items: [], bills: [] };
+    state.movePrivate = state.movePrivate || { items: [], bills: [], plan:{} };
     state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
       id:item.id || uid(),
       name:item.name || "Move item",
@@ -3755,7 +3756,9 @@ function load(){
       saved:numberValue(item.saved),
       pot:item.pot || item.source || "Move pot",
       status:item.status || "needed",
-      dueDate:item.dueDate || ""
+      dueDate:item.dueDate || "",
+      financeTarget:Boolean(item.financeTarget),
+      targetMode:item.targetMode || ""
     }));
     state.movePrivate.bills = (state.movePrivate.bills || []).map(bill => ({
       id:bill.id || uid(),
@@ -3768,6 +3771,12 @@ function load(){
       pot:bill.pot || (bill.account === "Revolut" ? "Bills pot" : "Protected bills"),
       active:Boolean(bill.active)
     }));
+    state.movePrivate.plan = {
+      targetDate:state.movePrivate.plan?.targetDate || "",
+      incomeBudget:numberValue(state.movePrivate.plan?.incomeBudget),
+      deliverooEarned:numberValue(state.movePrivate.plan?.deliverooEarned),
+      workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays)))
+    };
 
   }catch(error){
     state.selectedMonth = getCurrentMonth();
@@ -3776,7 +3785,7 @@ function load(){
     state.billFunded = {};
     state.allocations = {};
     state.cleared = {};
-    state.movePrivate = { items: [], bills: [] };
+    state.movePrivate = { items: [], bills: [], plan:{} };
     state.planVersion = 0;
     state.julyPlanVersion = 0;
     state.augustPlanVersion = 0;
@@ -4339,11 +4348,12 @@ function deleteClearedItem(id){
 
 function getMovePrivateData(){
   if(!state.movePrivate){
-    state.movePrivate = { items: [], bills: [] };
+    state.movePrivate = { items: [], bills: [], plan:{} };
   }
 
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
+  state.movePrivate.plan = state.movePrivate.plan || {};
 
   return state.movePrivate;
 }
@@ -4360,7 +4370,7 @@ function getMoveItemStatusLabel(status){
 }
 
 function getMoveItemRemaining(item){
-  if(item.status === "bought" || item.status === "later") return 0;
+  if(item.status === "bought" || item.status === "later" || item.status === "inPot") return 0;
   return Math.max(numberValue(item.cost) - numberValue(item.saved),0);
 }
 
