@@ -249,6 +249,43 @@ textarea{
   gap:12px;
 }
 
+.forecastNotice{
+  border:1px solid rgba(96,165,250,0.28);
+  background:
+    radial-gradient(circle at top right, rgba(96,165,250,0.14), transparent 35%),
+    rgba(15,17,24,0.78);
+  border-radius:22px;
+  padding:13px 15px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  box-shadow:var(--shadow);
+}
+
+.forecastNotice[hidden]{
+  display:none;
+}
+
+.forecastNotice strong{
+  display:block;
+  color:#bfdbfe;
+  font-size:14px;
+  letter-spacing:-0.01em;
+}
+
+.forecastNotice span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.forecastNotice .hubSoft{
+  min-height:40px;
+}
+
 .hubTile,
 .hubCard{
   border:1px solid var(--line);
@@ -1736,6 +1773,7 @@ textarea{
   }
 
   .hubTopCards,
+  .forecastNotice,
   .hubBoard{
     grid-template-columns:1fr 1fr;
   }
@@ -1765,6 +1803,7 @@ textarea{
 
   .hubHeader,
   .hubTopCards,
+  .forecastNotice,
   .hubBoard,
   .hubOverview{
     grid-template-columns:1fr;
@@ -1935,7 +1974,7 @@ textarea{
             <span id="hubUpdatedDate">Updated today</span>
             <button type="button" id="hubRefreshBtn" aria-label="Refresh finance hub">↻</button>
           </div>
-          <button type="button" class="hubSoft" id="hubLoadJulyPlanBtn">set up August move plan</button>
+          <button type="button" class="hubSoft" id="hubLoadJulyPlanBtn">set up August move forecast</button>
           <a class="hubSoft" href="move-test.html">move page</a>
           <button type="button" class="hubSoft" id="hubSyncRemindersBtn">sync reminders</button>
           <button type="button" class="hubSoft" id="hubDownloadCalendarBtn">phone calendar</button>
@@ -1999,6 +2038,14 @@ textarea{
           <div class="hubProtectedText" id="hubProtectedText">Add income and bills to see what is covered.</div>
           <div class="hubSafePill" id="hubSafePill">Checking...</div>
         </article>
+      </div>
+
+      <div class="forecastNotice" id="forecastNotice" hidden>
+        <div>
+          <strong id="forecastNoticeTitle">Move forecast</strong>
+          <span id="forecastNoticeCopy">This cycle is a forecast. Add TBC bills when confirmed.</span>
+        </div>
+        <button type="button" class="hubSoft" id="forecastReloadBtn">reload forecast</button>
       </div>
 
       <div class="hubBoard">
@@ -2422,7 +2469,7 @@ textarea{
           <button type="button" class="btn btnSoft" id="resetMonthBtn">reset month</button>
           <button type="button" class="btn btnSoft" id="clearMonthFullSetupBtn">clear this month</button>
           <button type="button" class="btn btnSoft" id="restorePlanBtn">load June plan</button>
-          <button type="button" class="btn btnSoft" id="loadJulyPlanBtn">set up August move plan</button>
+          <button type="button" class="btn btnSoft" id="loadJulyPlanBtn">set up August move forecast</button>
         </div>
 
         <div class="actions">
@@ -3087,6 +3134,13 @@ const EMAIL_ACTIONS_KEY = "pace_email_command_v1";
 const HAD_SAVED_FINANCE = Boolean(localStorage.getItem(STORAGE_KEY));
 const PAYDAY_DAY = 20;
 const DAY_MS = 86400000;
+const MOVE_DATE = "2026-08-28";
+const OLD_PLACE_PAYMENT_PATTERNS = [
+  /cityrise/i,
+  /rotherham/i,
+  /old\s+rent/i,
+  /old\s+council/i
+];
 
 const els = {
   hubMonthLabel: document.getElementById("hubMonthLabel"),
@@ -3097,6 +3151,10 @@ const els = {
   hubNextMonthBtn: document.getElementById("hubNextMonthBtn"),
   hubMonthInput: document.getElementById("hubMonthInput"),
   hubLoadJulyPlanBtn: document.getElementById("hubLoadJulyPlanBtn"),
+  forecastNotice: document.getElementById("forecastNotice"),
+  forecastNoticeTitle: document.getElementById("forecastNoticeTitle"),
+  forecastNoticeCopy: document.getElementById("forecastNoticeCopy"),
+  forecastReloadBtn: document.getElementById("forecastReloadBtn"),
   hubSyncRemindersBtn: document.getElementById("hubSyncRemindersBtn"),
   hubDownloadCalendarBtn: document.getElementById("hubDownloadCalendarBtn"),
   hubIncomeInput: document.getElementById("hubIncomeInput"),
@@ -3450,7 +3508,7 @@ const JULY_PLAN = {
 const AUGUST_PLAN = {
   month:"2026-08",
   income:1826.55,
-  planVersion:1,
+  planVersion:2,
   allocations:{
     bills:100.34,
     debt:382.53,
@@ -3467,17 +3525,17 @@ const AUGUST_PLAN = {
     transferBuffer:0,
     deliverooEarned:0,
     deliverooDays:31,
-    note:"August move cycle: known commitments are £1,730.54, leaving about £96.01 before Council Tax, Klarna, Clearpay, moving costs, food or emergency. Anything above that needs extra income."
+    note:"Move forecast for 20 Aug to 19 Sep: old Cityrise/Rotherham bills are not copied. Known forecast commitments are £1,730.54, leaving about £96.01 before Doncaster Council Tax, BNPL, food, furniture, moving costs or emergency."
   },
   fixedBills:[
     { name:"Rent - Doncaster", amount:700, dueDay:20, type:"standingOrder", category:"home", account:"HSBC", pot:"Protected bills" },
     { name:"Sheffield Credit Union", amount:200, dueDay:20, type:"standingOrder", category:"debt", account:"HSBC", pot:"Protected bills" },
     { name:"Credit Spring", amount:144, dueDay:20, type:"directDebit", category:"debt", account:"HSBC", pot:"Protected bills" },
-    { name:"Utilities - E.ON currently", amount:106.21, dueDay:20, type:"directDebit", category:"home", account:"HSBC", pot:"Protected bills" },
-    { name:"Council Tax - Doncaster Band A TBC", amount:0, dueDay:20, type:"directDebit", category:"home", account:"HSBC", pot:"Protected bills" },
+    { name:"Energy / utilities estimate", amount:106.21, dueDay:20, type:"directDebit", category:"home", account:"HSBC", pot:"Protected bills" },
+    { name:"Doncaster Council Tax TBC", amount:0, dueDay:20, type:"directDebit", category:"home", account:"HSBC", pot:"Protected bills" },
     { name:"EE phone", amount:37.46, dueDay:20, type:"directDebit", category:"phone", account:"HSBC", pot:"Protected bills" },
-    { name:"Water", amount:54.37, dueDay:20, type:"directDebit", category:"home", account:"Revolut", pot:"Bills pot" },
-    { name:"Broadband", amount:27.99, dueDay:20, type:"directDebit", category:"phone", account:"Revolut", pot:"Bills pot" },
+    { name:"Water - new home estimate", amount:54.37, dueDay:20, type:"directDebit", category:"home", account:"Revolut", pot:"Bills pot" },
+    { name:"Broadband - new home estimate", amount:27.99, dueDay:20, type:"directDebit", category:"phone", account:"Revolut", pot:"Bills pot" },
     { name:"Zero Deposit", amount:17.98, dueDay:20, type:"directDebit", category:"home", account:"Revolut", pot:"Bills pot" },
     { name:"Very", amount:288, dueDay:20, type:"manualPayment", category:"debt", account:"Revolut", pot:"Debt pot" },
     { name:"Zable", amount:60, dueDay:20, type:"manualPayment", category:"debt", account:"Revolut", pot:"Debt pot" },
@@ -3485,6 +3543,7 @@ const AUGUST_PLAN = {
     { name:"EV charging / Birmingham", amount:60, dueDay:20, type:"manualPayment", category:"transport", account:"Revolut", pot:"Commute pot" }
   ],
   placeholders:[
+    { name:"Doncaster Council Tax", source:"Protected bills", priority:"must", note:"TBC after move - add amount when confirmed." },
     { name:"Klarna August TBC", source:"BNPL pot", priority:"must", note:"Monthly instalments vary - add amount when Klarna confirms." },
     { name:"Clearpay August TBC", source:"BNPL pot", priority:"must", note:"Monthly instalments vary - add amount when Clearpay confirms." },
     { name:"Bed", source:"Furniture pot", priority:"must", note:"Moving cost - add target amount." },
@@ -3524,7 +3583,8 @@ let state = {
   movePrivate: {
     items: [],
     bills: [],
-    plan:{}
+    plan:{ targetDate:MOVE_DATE, incomeBudget:0, deliverooEarned:0, workDays:0 },
+    checklist:[]
   },
   planVersion:0,
   julyPlanVersion:0,
@@ -3643,6 +3703,18 @@ function getToday(){
   return dateKeyFromDate(new Date());
 }
 
+function isMoveForecastMonth(monthValue = state.selectedMonth){
+  return monthValue === AUGUST_PLAN.month;
+}
+
+function isOldPlacePaymentName(name){
+  return OLD_PLACE_PAYMENT_PATTERNS.some(pattern => pattern.test(String(name || "")));
+}
+
+function getMoveForecastDate(){
+  return state.movePrivate?.plan?.targetDate || MOVE_DATE;
+}
+
 function money(value){
   return new Intl.NumberFormat("en-GB", {
     style:"currency",
@@ -3693,7 +3765,7 @@ function load(){
       billFunded: parsed.billFunded || {},
       allocations: parsed.allocations || {},
       cleared: parsed.cleared || {},
-      movePrivate: parsed.movePrivate || { items: [], bills: [] },
+      movePrivate: parsed.movePrivate || { items: [], bills: [], plan:{}, checklist:[] },
       planVersion:Number(parsed.planVersion) || 0,
       julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
       augustPlanVersion:Number(parsed.augustPlanVersion) || 0
@@ -3748,7 +3820,7 @@ function load(){
       }));
     });
 
-    state.movePrivate = state.movePrivate || { items: [], bills: [], plan:{} };
+    state.movePrivate = state.movePrivate || { items: [], bills: [], plan:{}, checklist:[] };
     state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
       id:item.id || uid(),
       name:item.name || "Move item",
@@ -3775,11 +3847,20 @@ function load(){
       active:Boolean(bill.active)
     }));
     state.movePrivate.plan = {
-      targetDate:state.movePrivate.plan?.targetDate || "",
+      targetDate:state.movePrivate.plan?.targetDate || MOVE_DATE,
       incomeBudget:numberValue(state.movePrivate.plan?.incomeBudget),
       deliverooEarned:numberValue(state.movePrivate.plan?.deliverooEarned),
       workDays:Math.max(0, Math.round(numberValue(state.movePrivate.plan?.workDays)))
     };
+    state.movePrivate.checklist = (state.movePrivate.checklist || []).map(item => ({
+      id:item.id || uid(),
+      key:item.key || "",
+      text:item.text || item.name || "Move task",
+      category:item.category || "oldPlace",
+      dueDate:item.dueDate || "",
+      done:Boolean(item.done),
+      note:item.note || ""
+    }));
 
   }catch(error){
     state.selectedMonth = getCurrentMonth();
@@ -3788,7 +3869,7 @@ function load(){
     state.billFunded = {};
     state.allocations = {};
     state.cleared = {};
-    state.movePrivate = { items: [], bills: [], plan:{} };
+    state.movePrivate = { items: [], bills: [], plan:{ targetDate:MOVE_DATE, incomeBudget:0, deliverooEarned:0, workDays:0 }, checklist:[] };
     state.planVersion = 0;
     state.julyPlanVersion = 0;
     state.augustPlanVersion = 0;
@@ -4351,12 +4432,13 @@ function deleteClearedItem(id){
 
 function getMovePrivateData(){
   if(!state.movePrivate){
-    state.movePrivate = { items: [], bills: [], plan:{} };
+    state.movePrivate = { items: [], bills: [], plan:{}, checklist:[] };
   }
 
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
   state.movePrivate.plan = state.movePrivate.plan || {};
+  state.movePrivate.checklist = state.movePrivate.checklist || [];
 
   return state.movePrivate;
 }
@@ -4857,31 +4939,33 @@ function shouldAutoLoadJulyPlan(){
 }
 
 function buildAugustTrickles(){
-  const fixedItems = AUGUST_PLAN.fixedBills.map(bill => {
-    const dueDate = getCycleDateForDay(AUGUST_PLAN.month, bill.dueDay);
+  const fixedItems = AUGUST_PLAN.fixedBills
+    .filter(bill => numberValue(bill.amount) > 0)
+    .map(bill => {
+      const dueDate = getCycleDateForDay(AUGUST_PLAN.month, bill.dueDay);
 
-    return {
-      name:bill.name,
-      amount:bill.amount,
-      priority:"must",
-      dueDate,
-      account:bill.account,
-      source:bill.pot,
-      paid:false,
-      funded:false,
-      deliveroo:false,
-      kind:"august-fixed",
-      note:`${getBillTypeLabel(bill.type)} due ${formatShortDate(dueDate)}`
-    };
-  });
+      return {
+        name:bill.name,
+        amount:bill.amount,
+        priority:"must",
+        dueDate,
+        account:bill.account,
+        source:bill.pot,
+        paid:false,
+        funded:false,
+        deliveroo:false,
+        kind:"august-fixed",
+        note:`${getBillTypeLabel(bill.type)} due ${formatShortDate(dueDate)}`
+      };
+    });
 
-  const moveDate = getCycleStartKey(AUGUST_PLAN.month);
+  const moveDate = getMoveForecastDate();
   const placeholderItems = AUGUST_PLAN.placeholders.map(item => ({
     name:item.name,
     amount:0,
     priority:item.priority,
     dueDate:moveDate,
-    account:"Revolut",
+    account:item.source === "Protected bills" ? "HSBC" : "Revolut",
     source:item.source,
     paid:false,
     funded:false,
@@ -4895,7 +4979,7 @@ function buildAugustTrickles(){
 
 function loadAugustPlan(askFirst = true){
   if(askFirst){
-    const confirmed = confirm("Set up the August moving budget? This replaces only August's saved fixed and dated template items. June, July and spending history stay unchanged.");
+    const confirmed = confirm("Set up the August move forecast? This replaces August's forecast fixed bills and removes old-place August items like Cityrise/Rotherham. July and spending history stay unchanged.");
 
     if(!confirmed) return;
   }
@@ -4905,6 +4989,7 @@ function loadAugustPlan(askFirst = true){
     income:AUGUST_PLAN.income,
     startingBalance:0
   };
+  getMovePrivateData().plan.targetDate = getMovePrivateData().plan.targetDate || MOVE_DATE;
 
   state.fixedBills = state.fixedBills.filter(bill => bill.month !== AUGUST_PLAN.month);
   state.fixedBills.push(...AUGUST_PLAN.fixedBills.map(bill => ({
@@ -4933,7 +5018,10 @@ function loadAugustPlan(askFirst = true){
 
     if(!affectedCycleMonths.has(cycleMonth)) return true;
     if(plannedKeys.has(key)) return false;
-    return !(String(trickle.kind || "").startsWith("august-") && cycleMonth === AUGUST_PLAN.month);
+    return !(
+      cycleMonth === AUGUST_PLAN.month
+      && (String(trickle.kind || "").startsWith("august-") || isOldPlacePaymentName(trickle.name))
+    );
   });
 
   state.trickles.push(...augustTrickles.map(trickle => ({
@@ -4945,18 +5033,20 @@ function loadAugustPlan(askFirst = true){
 
   save();
   render();
-  showToast("August move plan is ready. Add TBC amounts as soon as you know them.");
+  showToast("August move forecast is ready. TBC bills stay open until confirmed.");
 }
 
 function shouldAutoLoadAugustPlan(){
   const hasAugustBills = state.fixedBills.some(bill => bill.month === AUGUST_PLAN.month);
+  const hasOldPlaceAugustBills = state.fixedBills.some(bill => bill.month === AUGUST_PLAN.month && isOldPlacePaymentName(bill.name));
+  const hasOldPlaceAugustPayments = state.trickles.some(trickle => getItemPayCycleMonth(trickle, "dueDate", trickle.month) === AUGUST_PLAN.month && isOldPlacePaymentName(trickle.name));
   const augustTrickles = buildAugustTrickles();
   const hasAugustPayments = augustTrickles.every(planItem => state.trickles.some(trickle =>
     trickle.kind === planItem.kind
     && normalizePaymentName(trickle.name) === normalizePaymentName(planItem.name)
     && trickle.dueDate === planItem.dueDate
   ));
-  return state.augustPlanVersion !== AUGUST_PLAN.planVersion || !hasAugustBills || !hasAugustPayments;
+  return state.augustPlanVersion !== AUGUST_PLAN.planVersion || !hasAugustBills || !hasAugustPayments || hasOldPlaceAugustBills || hasOldPlaceAugustPayments;
 }
 
 function shouldAutoLoadJunePlan(){
@@ -5401,6 +5491,10 @@ function getStructuredPaymentLabel(section){
 
 function addOrUpdateStructuredFixedBill(cycleMonth, item, stats){
   if(!item.name || item.amount <= 0) return null;
+  if(isMoveForecastMonth(cycleMonth) && isOldPlacePaymentName(item.name)){
+    stats.ignored += 1;
+    return null;
+  }
 
   const meta = getStructuredFixedBillMeta(item.name);
   const existing = state.fixedBills.find(bill =>
@@ -5452,6 +5546,10 @@ function findStructuredTrickle(cycleMonth, entry){
 
 function addOrUpdateStructuredTrickle(cycleMonth, entry, stats){
   if(!entry.name) return null;
+  if(isMoveForecastMonth(cycleMonth) && isOldPlacePaymentName(entry.name)){
+    stats.ignored += 1;
+    return null;
+  }
 
   const existing = findStructuredTrickle(cycleMonth, entry);
   const data = {
@@ -6450,6 +6548,22 @@ function renderHubSchedule(snapshot){
     : `<div class="empty">No BNPL items waiting this pay cycle.</div>`;
 }
 
+function renderForecastNotice(snapshot){
+  if(!isMoveForecastMonth()){
+    els.forecastNotice.hidden = true;
+    return;
+  }
+
+  const needsReload = shouldAutoLoadAugustPlan();
+  els.forecastNotice.hidden = false;
+  els.forecastNoticeTitle.textContent = needsReload
+    ? "Move forecast needs reload"
+    : `Move forecast · ${formatCycleRangeLabel(AUGUST_PLAN.month)}`;
+  els.forecastNoticeCopy.textContent = needsReload
+    ? "Tap reload forecast to replace old-place August items with the new Doncaster forecast. This keeps custom payments and spending history."
+    : `This uses your new-place forecast only: Doncaster rent, main debts, phone, estimated utilities/water/broadband, commute and known debt payments. Old Cityrise/Rotherham bills are excluded. Buffer before TBC items: ${money(snapshot.buffer)}. Add Doncaster Council Tax, BNPL, food and move costs when confirmed.`;
+}
+
 function renderFinanceHub(){
   const snapshot = getHubMoneySnapshot();
   const hsbcPercent = percentOf(snapshot.hsbcStay, snapshot.income);
@@ -6462,6 +6576,7 @@ function renderFinanceHub(){
   els.clearMonthFullBtn.textContent = `clear ${monthName}`;
   els.clearMonthFullSetupBtn.textContent = `clear ${monthName}`;
   els.hubUpdatedDate.textContent = formatUpdatedLabel();
+  els.hubLoadJulyPlanBtn.textContent = state.selectedMonth === AUGUST_PLAN.month ? "reload August forecast" : "set up August move forecast";
   els.hubIncomeAmount.textContent = money(snapshot.income);
   setInputValueUnlessEditing(els.hubIncomeInput, snapshot.monthData.income);
   setInputValueUnlessEditing(els.hubBalanceInput, snapshot.monthData.startingBalance);
@@ -6485,8 +6600,10 @@ function renderFinanceHub(){
     ? `About ${money(snapshot.deliverooDaily)} per work day from Deliveroo.`
     : "Mark payments for Deliveroo to build a target.";
 
-  if(state.selectedMonth === AUGUST_PLAN.month){
-    els.hubProtectedText.textContent = `Known August costs leave ${money(snapshot.buffer)} before Council Tax, BNPL and moving costs.`;
+  renderForecastNotice(snapshot);
+
+  if(isMoveForecastMonth()){
+    els.hubProtectedText.textContent = `Forecast costs leave ${money(snapshot.buffer)} before Doncaster Council Tax, BNPL, food and move costs.`;
     els.hubSafePill.textContent = snapshot.buffer < 0 ? `${money(Math.abs(snapshot.buffer))} gap` : `${money(snapshot.buffer)} before TBC`;
   }else{
     els.hubProtectedText.textContent = snapshot.protectedBills > 0
@@ -6943,6 +7060,7 @@ els.hubRefreshBtn.addEventListener("click", () => {
 els.restorePlanBtn.addEventListener("click", loadJunePlan);
 els.loadJulyPlanBtn.addEventListener("click", loadAugustPlan);
 els.hubLoadJulyPlanBtn.addEventListener("click", loadAugustPlan);
+els.forecastReloadBtn.addEventListener("click", loadAugustPlan);
 els.downloadJulyCalendarBtn.addEventListener("click", downloadPaymentCalendar);
 els.hubDownloadCalendarBtn.addEventListener("click", downloadPaymentCalendar);
 
