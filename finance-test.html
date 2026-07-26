@@ -3757,6 +3757,9 @@ function load(){
       pot:item.pot || item.source || "Move pot",
       status:item.status || "needed",
       dueDate:item.dueDate || "",
+      deliveryDate:item.deliveryDate || "",
+      deliveryWindow:item.deliveryWindow || item.deliveryTime || "",
+      deliveryNote:item.deliveryNote || "",
       financeTarget:Boolean(item.financeTarget),
       targetMode:item.targetMode || ""
     }));

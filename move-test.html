@@ -440,6 +440,10 @@ select{
   color:#fde7b0;
 }
 
+.deliveryText{
+  color:#bfdbfe;
+}
+
 .empty{
   color:var(--muted);
   border:1px dashed rgba(255,255,255,0.13);
@@ -669,8 +673,23 @@ select{
           </select>
         </div>
         <div class="field">
-          <label>date</label>
+          <label>need by</label>
           <input id="itemDate" type="date">
+        </div>
+      </div>
+
+      <div class="formGrid" style="margin-top:10px;">
+        <div class="field">
+          <label>delivery date</label>
+          <input id="itemDeliveryDate" type="date">
+        </div>
+        <div class="field">
+          <label>delivery time/window</label>
+          <input id="itemDeliveryWindow" type="text" placeholder="8am-1pm / after 6">
+        </div>
+        <div class="field">
+          <label>delivery note</label>
+          <input id="itemDeliveryNote" type="text" placeholder="tracking, courier, safe place">
         </div>
       </div>
 
@@ -792,6 +811,9 @@ const els = {
   itemPot:document.getElementById("itemPot"),
   itemStatus:document.getElementById("itemStatus"),
   itemDate:document.getElementById("itemDate"),
+  itemDeliveryDate:document.getElementById("itemDeliveryDate"),
+  itemDeliveryWindow:document.getElementById("itemDeliveryWindow"),
+  itemDeliveryNote:document.getElementById("itemDeliveryNote"),
   saveItemBtn:document.getElementById("saveItemBtn"),
   clearItemBtn:document.getElementById("clearItemBtn"),
   itemList:document.getElementById("itemList"),
@@ -1035,6 +1057,9 @@ function load(){
     pot:item.pot || item.source || "Move pot",
     status:item.status || "needed",
     dueDate:item.dueDate || "",
+    deliveryDate:item.deliveryDate || "",
+    deliveryWindow:item.deliveryWindow || item.deliveryTime || "",
+    deliveryNote:item.deliveryNote || "",
     financeTarget:Boolean(item.financeTarget),
     targetMode:item.targetMode || ""
   }));
@@ -1209,6 +1234,9 @@ function clearItemForm(){
   els.itemPot.value = "Move pot";
   els.itemStatus.value = "needed";
   els.itemDate.value = "";
+  els.itemDeliveryDate.value = "";
+  els.itemDeliveryWindow.value = "";
+  els.itemDeliveryNote.value = "";
   els.saveItemBtn.textContent = "save cost";
 }
 
@@ -1244,7 +1272,10 @@ function saveItem(){
     saved:numberValue(els.itemSaved.value),
     pot:els.itemPot.value,
     status:els.itemStatus.value,
-    dueDate:els.itemDate.value
+    dueDate:els.itemDate.value,
+    deliveryDate:els.itemDeliveryDate.value,
+    deliveryWindow:els.itemDeliveryWindow.value.trim(),
+    deliveryNote:els.itemDeliveryNote.value.trim()
   };
 
   if(editingItemId){
@@ -1271,6 +1302,9 @@ function editItem(id){
   els.itemPot.value = item.pot || "Move pot";
   els.itemStatus.value = item.status || "needed";
   els.itemDate.value = item.dueDate || "";
+  els.itemDeliveryDate.value = item.deliveryDate || "";
+  els.itemDeliveryWindow.value = item.deliveryWindow || "";
+  els.itemDeliveryNote.value = item.deliveryNote || "";
   els.saveItemBtn.textContent = "update cost";
   els.itemName.focus();
 }
@@ -1727,11 +1761,18 @@ function renderItems(items){
       const statusOrder = { needed:0, inPot:1, later:2, bought:3 };
       const statusCompare = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
       if(statusCompare !== 0) return statusCompare;
-      return String(a.dueDate || "9999").localeCompare(String(b.dueDate || "9999"));
+      return String(a.deliveryDate || a.dueDate || "9999").localeCompare(String(b.deliveryDate || b.dueDate || "9999"));
     })
     .forEach(item => {
       const row = document.createElement("div");
       const remaining = itemRemaining(item);
+      const deliveryParts = [];
+      if(item.deliveryDate) deliveryParts.push(formatShortDate(item.deliveryDate));
+      if(item.deliveryWindow) deliveryParts.push(item.deliveryWindow);
+      if(item.deliveryNote) deliveryParts.push(item.deliveryNote);
+      const deliveryMeta = deliveryParts.length
+        ? `<span class="deliveryText"> • Delivery: ${escapeHtml(deliveryParts.join(" · "))}</span>`
+        : "";
       const classes = ["row"];
       if(item.status === "inPot") classes.push("inPot");
       if(item.status === "bought") classes.push("bought");
@@ -1745,6 +1786,7 @@ function renderItems(items){
             <span class="statusText">• ${escapeHtml(statusLabel(item.status))}</span>
             ${item.dueDate ? " • " + escapeHtml(formatShortDate(item.dueDate)) : ""}
             ${item.targetMode === "deliveroo" ? " • in Deliveroo plan" : ""}
+            ${deliveryMeta}
           </small>
         </div>
         <div class="right">
