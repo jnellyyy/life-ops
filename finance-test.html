@@ -461,6 +461,41 @@ textarea{
   gap:8px;
 }
 
+.payPhaseHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid rgba(255,255,255,0.10);
+  border-radius:16px;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.045);
+}
+
+.payPhaseHeader strong{
+  display:block;
+  font-size:13px;
+  color:#ffb3d8;
+}
+
+.payPhaseHeader small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.35;
+}
+
+.payPhaseHeader span{
+  flex:0 0 auto;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:999px;
+  padding:5px 8px;
+  color:#bfdbfe;
+  font-size:11px;
+  font-weight:900;
+}
+
 .hubPayRow,
 .hubPotRow,
 .hubPlanRow,
@@ -564,6 +599,11 @@ textarea{
   gap:7px;
 }
 
+.hubQuickActions .statusRail,
+.hubScheduleRow .statusRail{
+  min-width:0;
+}
+
 .hubQuickActions .iconBtn{
   min-height:34px;
   padding:7px 9px;
@@ -573,6 +613,52 @@ textarea{
   border-color:rgba(34,197,94,0.42);
   background:rgba(34,197,94,0.18);
   color:#bbf7d0;
+}
+
+.statusRail{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  min-width:min(100%,280px);
+}
+
+.statusOption{
+  min-height:34px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,0.065);
+  color:var(--muted);
+  padding:7px 10px;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.statusOption.active{
+  color:#111318;
+  border-color:transparent;
+}
+
+.statusOption.active.unpaid{
+  background:#fecaca;
+}
+
+.statusOption.active.funded{
+  background:#93c5fd;
+}
+
+.statusOption.active.deliveroo{
+  background:#fbbf24;
+}
+
+.statusOption.active.paid{
+  background:#86efac;
+}
+
+.transactionTools{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
 }
 
 .hubPotRow{
@@ -1239,6 +1325,8 @@ textarea{
 
 .billButtons{
   display:flex;
+  align-items:center;
+  flex-wrap:wrap;
   gap:8px;
   margin-top:10px;
 }
@@ -1274,7 +1362,7 @@ textarea{
 .transaction{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:flex-start;
   gap:12px;
   padding:13px;
   border-radius:18px;
@@ -1297,6 +1385,8 @@ textarea{
 .transactionRight{
   display:flex;
   align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
   gap:10px;
 }
 
@@ -1850,7 +1940,8 @@ textarea{
     justify-self:start;
   }
 
-  .hubScheduleRow .completeBtn{
+  .hubScheduleRow .completeBtn,
+  .hubScheduleRow .statusRail{
     grid-column:2;
     justify-self:start;
   }
@@ -1868,6 +1959,17 @@ textarea{
 
   .hubDayPill{
     text-align:left;
+  }
+
+  .transaction{
+    flex-direction:column;
+  }
+
+  .transactionRight,
+  .billButtons,
+  .statusRail{
+    width:100%;
+    justify-content:flex-start;
   }
 
   .monthRow{
@@ -1961,7 +2063,7 @@ textarea{
 
         <div class="hubTitle">
           <h2>Janelle's Finance Hub</h2>
-          <p id="hubMonthLabel">Monthly overview</p>
+          <p id="hubMonthLabel">Pay cycle overview</p>
         </div>
 
         <div class="hubControls">
@@ -2660,7 +2762,7 @@ textarea{
         <div class="sectionTitle">
           <div>
             <h2>pay order</h2>
-            <p>Outstanding Revolut payments, grouped in a logical order: essentials, debt, BNPL, then commute.</p>
+            <p>This runs payday-to-payday. Things due on the 1st-19th still belong to the previous payday's money.</p>
           </div>
           <span class="pill" id="payOrderCountPill">0 left</span>
         </div>
@@ -2820,7 +2922,7 @@ textarea{
         <div class="sectionTitle">
           <div>
             <h2>mid-month trickles</h2>
-            <p>Catch the extra things that appear after the main bills are paid.</p>
+            <p>Extra things that appear after payday, placed into the right side of the 20-to-19 cycle.</p>
           </div>
           <span class="pill" id="trickleCountPill">0 trickles</span>
         </div>
@@ -4117,7 +4219,8 @@ function getPaymentCalendarRows(){
       date:item.dueDate,
       account:item.account || "Unassigned",
       pot:item.source || "Unassigned",
-      status:item.funded ? "money in pot" : item.deliveroo ? "use Deliveroo" : "not paid"
+      status:item.funded ? "money ready" : item.deliveroo ? "use Deliveroo" : "not paid",
+      phase:payCyclePhaseText(item.dueDate)
     });
   });
 
@@ -4135,7 +4238,8 @@ function getPaymentCalendarRows(){
       date,
       account:bill.account || "Unassigned",
       pot:bill.pot || "Unassigned",
-      status:isBillFunded(bill.id) ? "money in account" : "not paid"
+      status:isBillFunded(bill.id) ? "money ready" : "not paid",
+      phase:payCyclePhaseText(date)
     });
   });
 
@@ -4175,7 +4279,7 @@ function downloadPaymentCalendar(){
   rows.forEach(row => {
     const dateStamp = row.date.replaceAll("-", "");
     const summary = `Pace: ${row.name} ${money(row.amount)} due`;
-    const description = `${row.account} to ${row.pot}. Status: ${row.status}.`;
+    const description = `${row.account} to ${row.pot}. Status: ${row.status}. Cycle: ${row.phase}.`;
 
     lines.push(
       "BEGIN:VEVENT",
@@ -4573,9 +4677,35 @@ function deleteBill(id){
   showToast("Bill deleted.");
 }
 
-function toggleBillPaid(id){
+function applyTrickleStatus(trickle, status){
+  trickle.paid = status === "paid";
+  trickle.funded = status === "funded";
+  trickle.deliveroo = status === "deliveroo";
+}
+
+function syncBillsFromTrickle(trickle){
+  getMonthBills()
+    .filter(bill => normalizePaymentName(bill.name) === normalizePaymentName(trickle.name))
+    .forEach(bill => {
+      state.billPaid[billPaidKey(bill.id)] = Boolean(trickle.paid);
+      state.billFunded[billPaidKey(bill.id)] = Boolean(trickle.funded);
+
+      if(trickle.paid){
+        state.billFunded[billPaidKey(bill.id)] = false;
+      }
+    });
+}
+
+function syncTricklesFromBill(bill, status){
+  matchingTrickles(bill.name).forEach(trickle => {
+    applyTrickleStatus(trickle, status);
+  });
+}
+
+function setBillStatus(id, status){
   const key = billPaidKey(id);
-  state.billPaid[key] = !state.billPaid[key];
+  state.billPaid[key] = status === "paid";
+  state.billFunded[key] = status === "funded";
 
   if(state.billPaid[key]){
     state.billFunded[key] = false;
@@ -4584,39 +4714,22 @@ function toggleBillPaid(id){
   const bill = state.fixedBills.find(item => item.id === id);
 
   if(bill){
-    matchingTrickles(bill.name).forEach(trickle => {
-      trickle.paid = state.billPaid[key];
-
-      if(trickle.paid){
-        trickle.funded = false;
-        trickle.deliveroo = false;
-      }
-    });
+    syncTricklesFromBill(bill, status);
   }
 
   save();
   render();
-  showToast(state.billPaid[key] ? "Marked paid." : "Marked unpaid.");
+  showToast(statusToast(status));
+}
+
+function toggleBillPaid(id){
+  const key = billPaidKey(id);
+  setBillStatus(id, state.billPaid[key] ? "unpaid" : "paid");
 }
 
 function toggleBillFunded(id){
   const key = billPaidKey(id);
-  state.billPaid[key] = false;
-  state.billFunded[key] = !state.billFunded[key];
-
-  const bill = state.fixedBills.find(item => item.id === id);
-
-  if(bill){
-    matchingTrickles(bill.name).forEach(trickle => {
-      trickle.paid = false;
-      trickle.deliveroo = false;
-      trickle.funded = state.billFunded[key];
-    });
-  }
-
-  save();
-  render();
-  showToast(state.billFunded[key] ? "Money marked in account." : "Funding removed.");
+  setBillStatus(id, state.billFunded[key] ? "unpaid" : "funded");
 }
 
 function editBill(id){
@@ -4771,23 +4884,20 @@ function toggleTricklePaid(id){
 
   if(!trickle) return;
 
-  trickle.paid = !trickle.paid;
+  setTrickleStatus(id, trickle.paid ? "unpaid" : "paid");
+}
 
-  if(trickle.paid){
-    trickle.funded = false;
-    trickle.deliveroo = false;
-  }
+function setTrickleStatus(id, status){
+  const trickle = state.trickles.find(item => item.id === id);
 
-  getMonthBills()
-    .filter(bill => normalizePaymentName(bill.name) === normalizePaymentName(trickle.name))
-    .forEach(bill => {
-      state.billPaid[billPaidKey(bill.id)] = trickle.paid;
-      state.billFunded[billPaidKey(bill.id)] = false;
-    });
+  if(!trickle) return;
+
+  applyTrickleStatus(trickle, status);
+  syncBillsFromTrickle(trickle);
 
   save();
   render();
-  showToast(trickle.paid ? "Marked paid." : "Marked unpaid.");
+  showToast(statusToast(status));
 }
 
 function toggleTrickleDeliveroo(id){
@@ -4795,12 +4905,7 @@ function toggleTrickleDeliveroo(id){
 
   if(!trickle) return;
 
-  trickle.paid = false;
-  trickle.funded = false;
-  trickle.deliveroo = !trickle.deliveroo;
-  save();
-  render();
-  showToast(trickle.deliveroo ? "Marked for Deliveroo." : "Removed from Deliveroo target.");
+  setTrickleStatus(id, trickle.deliveroo ? "unpaid" : "deliveroo");
 }
 
 function toggleTrickleFunded(id){
@@ -4808,20 +4913,7 @@ function toggleTrickleFunded(id){
 
   if(!trickle) return;
 
-  trickle.paid = false;
-  trickle.deliveroo = false;
-  trickle.funded = !trickle.funded;
-
-  getMonthBills()
-    .filter(bill => normalizePaymentName(bill.name) === normalizePaymentName(trickle.name))
-    .forEach(bill => {
-      state.billPaid[billPaidKey(bill.id)] = false;
-      state.billFunded[billPaidKey(bill.id)] = trickle.funded;
-    });
-
-  save();
-  render();
-  showToast(trickle.funded ? "Money marked in pot." : "Funding removed.");
+  setTrickleStatus(id, trickle.funded ? "unpaid" : "funded");
 }
 
 function deleteTrickle(id){
@@ -6089,7 +6181,7 @@ function renderBills(){
       const paid = isBillPaid(bill.id);
       const funded = isBillFunded(bill.id);
       const statusClass = paid ? "paid" : funded ? "funded" : "unpaid";
-      const statusLabel = paid ? "paid" : funded ? "money in account" : "not paid";
+      const statusLabel = paid ? "paid" : funded ? "money ready" : "not paid";
       const item = document.createElement("div");
       item.className = `billItem ${statusClass}`;
 
@@ -6101,16 +6193,18 @@ function renderBills(){
               ${getBillTypeEmoji(bill.type)} due ${formatShortDate(getBillDueDate(bill))} • ${escapeHtml(bill.category)}
               <span class="statusChip ${statusClass}">${statusLabel}</span>
             </div>
+            <div class="billMeta">${escapeHtml(payCyclePhaseText(getBillDueDate(bill)))}</div>
             <div class="accountRoute">${escapeHtml(bill.account || "Unassigned")} → ${escapeHtml(bill.pot || "Unassigned")}</div>
           </div>
           <div class="billAmount">${money(bill.amount)}</div>
         </div>
 
         <div class="billButtons">
-          <button type="button" class="iconBtn" data-toggle-bill-funded="${bill.id}">${funded ? "remove funding" : "money in account"}</button>
-          <button type="button" class="iconBtn" data-toggle-bill-paid="${bill.id}">${paid ? "unpaid" : "paid"}</button>
-          <button type="button" class="iconBtn" data-edit-bill="${bill.id}">edit</button>
-          <button type="button" class="iconBtn danger" data-delete-bill="${bill.id}">delete</button>
+          ${renderBillStatusRail(bill, paid, funded)}
+          <div class="transactionTools">
+            <button type="button" class="iconBtn" data-edit-bill="${bill.id}">edit</button>
+            <button type="button" class="iconBtn danger" data-delete-bill="${bill.id}">delete</button>
+          </div>
         </div>
       `;
 
@@ -6208,7 +6302,7 @@ function getTrickleStatus(item){
   }
 
   if(item.funded){
-    return { className:"funded", label:"money in pot" };
+    return { className:"funded", label:"money ready" };
   }
 
   if(item.deliveroo){
@@ -6216,6 +6310,61 @@ function getTrickleStatus(item){
   }
 
   return { className:"unpaid", label:"not paid" };
+}
+
+function getPaymentStatusKey(item){
+  if(item?.paid) return "paid";
+  if(item?.funded) return "funded";
+  if(item?.deliveroo) return "deliveroo";
+  return "unpaid";
+}
+
+function getBillStatusKey(paid, funded){
+  if(paid) return "paid";
+  if(funded) return "funded";
+  return "unpaid";
+}
+
+function renderStatusRail(id, current, type, options){
+  return `
+    <div class="statusRail" role="group" aria-label="Payment status">
+      ${options.map(option => `
+        <button
+          type="button"
+          class="statusOption ${option.key} ${current === option.key ? "active" : ""}"
+          data-set-${type}-status="${escapeHtml(id)}"
+          data-status-value="${option.key}"
+          aria-pressed="${current === option.key ? "true" : "false"}"
+        >${escapeHtml(option.label)}</button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderTrickleStatusRail(item){
+  return renderStatusRail(item.id, getPaymentStatusKey(item), "trickle", [
+    { key:"unpaid", label:"To pay" },
+    { key:"funded", label:"Money ready" },
+    { key:"deliveroo", label:"Deliveroo" },
+    { key:"paid", label:"Paid" }
+  ]);
+}
+
+function renderBillStatusRail(bill, paid, funded){
+  return renderStatusRail(bill.id, getBillStatusKey(paid, funded), "bill", [
+    { key:"unpaid", label:"To pay" },
+    { key:"funded", label:"Money ready" },
+    { key:"paid", label:"Paid" }
+  ]);
+}
+
+function statusToast(status){
+  return {
+    unpaid:"Moved back to To pay.",
+    funded:"Marked money ready.",
+    deliveroo:"Marked for Deliveroo.",
+    paid:"Marked paid."
+  }[status] || "Status updated.";
 }
 
 function formatMonthName(monthValue){
@@ -6241,6 +6390,85 @@ function formatMonthLabel(monthValue){
   if(name === "this cycle") return "Pay cycle";
 
   return `${name} pay cycle`;
+}
+
+function getCycleCalendarMonthEndKey(monthValue){
+  const start = getCycleStartDate(monthValue);
+  return dateKeyFromDate(new Date(start.getFullYear(), start.getMonth() + 1, 0));
+}
+
+function getCycleNextMonthStartKey(monthValue){
+  const end = getCycleEndDate(monthValue);
+  return dateKeyFromDate(new Date(end.getFullYear(), end.getMonth(), 1));
+}
+
+function getPayCyclePhase(dateValue){
+  const date = parseDateKey(dateValue);
+
+  if(!date) return "undated";
+
+  return date.getDate() < PAYDAY_DAY ? "before-next-payday" : "after-payday";
+}
+
+function getPayCyclePhaseConfig(phase, monthValue = state.selectedMonth){
+  const configs = {
+    "after-payday":{
+      order:0,
+      label:"Payday to month end",
+      range:`${formatShortDate(getCycleStartKey(monthValue))} to ${formatShortDate(getCycleCalendarMonthEndKey(monthValue))}`,
+      detail:"fresh pay, protect the essentials first"
+    },
+    "before-next-payday":{
+      order:1,
+      label:"1-19 before next payday",
+      range:`${formatShortDate(getCycleNextMonthStartKey(monthValue))} to ${formatShortDate(getCycleEndKey(monthValue))}`,
+      detail:"still paid from this cycle's money"
+    },
+    undated:{
+      order:2,
+      label:"No date set",
+      range:"add a due date",
+      detail:"Pace can place it once the date is known"
+    }
+  };
+
+  return configs[phase] || configs.undated;
+}
+
+function getPayCyclePhaseGroups(items, dateField = "dueDate"){
+  const grouped = new Map();
+
+  items.forEach(item => {
+    const phase = getPayCyclePhase(item?.[dateField]);
+    const config = getPayCyclePhaseConfig(phase);
+
+    if(!grouped.has(phase)){
+      grouped.set(phase, { phase, ...config, items:[] });
+    }
+
+    grouped.get(phase).items.push(item);
+  });
+
+  return [...grouped.values()]
+    .sort((a,b) => a.order - b.order)
+    .filter(group => group.items.length);
+}
+
+function renderPayPhaseHeader(group){
+  return `
+    <div class="payPhaseHeader">
+      <div>
+        <strong>${escapeHtml(group.label)}</strong>
+        <small>${escapeHtml(group.range)} · ${escapeHtml(group.detail)}</small>
+      </div>
+      <span>${group.items.length} item${group.items.length === 1 ? "" : "s"}</span>
+    </div>
+  `;
+}
+
+function payCyclePhaseText(dateValue){
+  const phase = getPayCyclePhaseConfig(getPayCyclePhase(dateValue));
+  return `${phase.label} · ${phase.range}`;
 }
 
 function formatUpdatedLabel(){
@@ -6292,7 +6520,7 @@ function hubTagForPayment(item){
   const source = String(item.source || item.pot || "").toLowerCase();
 
   if(item.paid) return { label:"Paid", className:"paid" };
-  if(item.funded) return { label:"In pot", className:"funded" };
+  if(item.funded) return { label:"Ready", className:"funded" };
   if(item.deliveroo) return { label:"Deliveroo", className:"deliveroo" };
   if(source.includes("bill")) return { label:"Bills", className:"bills" };
   if(source.includes("debt")) return { label:"Debt", className:"debt" };
@@ -6430,28 +6658,30 @@ function renderHubPayments(rows){
     return;
   }
 
-  rows.slice(0,7).forEach(item => {
-    const due = compactDueLabel(item.dueDate);
-    const tag = hubTagForPayment(item);
-    const row = document.createElement("div");
-    row.className = "hubPayRow";
-    row.innerHTML = `
-      <div class="hubDateBox">${escapeHtml(due.top)}<small>${escapeHtml(due.bottom)}</small></div>
-      <div class="hubRowIcon">${escapeHtml(hubIconForPayment(item))}</div>
-      <div class="hubRowMain">
-        <strong>${escapeHtml(item.name)}</strong>
-        <small>${escapeHtml(friendlyDueText(item.dueDate))}</small>
-      </div>
-      <div class="hubAmount">${money(item.amount)}</div>
-      <div class="hubTag ${tag.className}">${escapeHtml(tag.label)}</div>
-      <div class="hubQuickActions">
-        <button type="button" class="iconBtn completeBtn" data-toggle-trickle="${item.id}">complete</button>
-        <button type="button" class="iconBtn" data-toggle-funded="${item.id}">${item.funded ? "remove pot" : "money in pot"}</button>
-        <button type="button" class="iconBtn" data-toggle-deliveroo="${item.id}">${item.deliveroo ? "remove Deliveroo" : "use Deliveroo"}</button>
-        <button type="button" class="iconBtn" data-edit-trickle="${item.id}">edit</button>
-      </div>
-    `;
-    els.hubPaymentList.appendChild(row);
+  getPayCyclePhaseGroups(rows.slice(0,7), "dueDate").forEach(group => {
+    els.hubPaymentList.insertAdjacentHTML("beforeend", renderPayPhaseHeader(group));
+
+    group.items.forEach(item => {
+      const due = compactDueLabel(item.dueDate);
+      const tag = hubTagForPayment(item);
+      const row = document.createElement("div");
+      row.className = "hubPayRow";
+      row.innerHTML = `
+        <div class="hubDateBox">${escapeHtml(due.top)}<small>${escapeHtml(due.bottom)}</small></div>
+        <div class="hubRowIcon">${escapeHtml(hubIconForPayment(item))}</div>
+        <div class="hubRowMain">
+          <strong>${escapeHtml(item.name)}</strong>
+          <small>${escapeHtml(friendlyDueText(item.dueDate))} · ${escapeHtml(payCyclePhaseText(item.dueDate))}</small>
+        </div>
+        <div class="hubAmount">${money(item.amount)}</div>
+        <div class="hubTag ${tag.className}">${escapeHtml(tag.label)}</div>
+        <div class="hubQuickActions">
+          ${renderTrickleStatusRail(item)}
+          <button type="button" class="iconBtn" data-edit-trickle="${item.id}">edit</button>
+        </div>
+      `;
+      els.hubPaymentList.appendChild(row);
+    });
   });
 }
 
@@ -6569,7 +6799,7 @@ function renderHubActions(snapshot){
           <small>${escapeHtml(action.note)}</small>
         </div>
         <div class="hubAmount">${money(action.amount)}</div>
-        <button type="button" class="iconBtn completeBtn" data-toggle-trickle="${action.id}">complete</button>
+        <button type="button" class="iconBtn completeBtn" data-toggle-trickle="${action.id}">Paid</button>
       </div>
     `).join("")
     : `<div class="empty">No urgent action plan yet.</div>`;
@@ -6592,7 +6822,7 @@ function renderHubWeekPlan(snapshot){
         <div class="hubPlanRow">
           <div class="hubDayPill ${colors[index % colors.length]}">${escapeHtml(dayLabel)}</div>
           <div class="hubPlanEarn">${escapeHtml(earnText)}</div>
-          <div class="hubRowMain"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(friendlyDueText(item.dueDate))}</small></div>
+          <div class="hubRowMain"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(friendlyDueText(item.dueDate))} · ${escapeHtml(getPayCyclePhaseConfig(getPayCyclePhase(item.dueDate)).label)}</small></div>
           <div class="hubAmount">${money(item.amount)}</div>
         </div>
       `;
@@ -6613,11 +6843,11 @@ function renderHubSchedule(snapshot){
         <div class="hubRowIcon">K</div>
         <div class="hubRowMain">
           <strong>${escapeHtml(item.dueDate ? formatShortDate(item.dueDate) : item.name)}</strong>
-          <small>${escapeHtml(item.name)}</small>
+          <small>${escapeHtml(item.name)} · ${escapeHtml(getPayCyclePhaseConfig(getPayCyclePhase(item.dueDate)).label)}</small>
         </div>
         <div class="hubAmount">${money(item.amount)}</div>
         <div class="hubTag bnpl">Due</div>
-        <button type="button" class="iconBtn completeBtn" data-toggle-trickle="${item.id}">complete</button>
+        ${renderTrickleStatusRail(item)}
       </div>
     `).join("")
     : `<div class="empty">No BNPL items waiting this pay cycle.</div>`;
@@ -6646,7 +6876,7 @@ function renderFinanceHub(){
   const deliverooPercent = percentOf(snapshot.deliverooRemaining, snapshot.income);
   const monthName = formatMonthName(state.selectedMonth).split(" ")[0].toLowerCase();
 
-  els.hubMonthLabel.textContent = `${formatMonthLabel(state.selectedMonth)} · ${formatCycleRangeLabel(state.selectedMonth)}`;
+  els.hubMonthLabel.textContent = `${formatCycleRangeLabel(state.selectedMonth)} · ${formatMonthLabel(state.selectedMonth)}`;
   els.hubMonthInput.value = state.selectedMonth;
   els.clearMonthFullBtn.textContent = `clear ${monthName}`;
   els.clearMonthFullSetupBtn.textContent = `clear ${monthName}`;
@@ -6782,31 +7012,38 @@ function renderPayOrder(){
     return;
   }
 
-  ordered.forEach((item,index) => {
-    const status = getTrickleStatus(item);
-    const row = document.createElement("div");
-    row.className = `transaction ${status.className}`;
+  let visibleIndex = 0;
+  getPayCyclePhaseGroups(ordered, "dueDate").forEach(group => {
+    els.payOrderList.insertAdjacentHTML("beforeend", renderPayPhaseHeader(group));
 
-    row.innerHTML = `
-      <div class="transactionLeft">
-        <strong>${index + 1}. ${escapeHtml(item.name)}</strong>
-        <span>
-          ${escapeHtml(item.note || getPriorityLabel(item.priority))}${item.dueDate ? " • due " + escapeHtml(item.dueDate) : ""}
-          <span class="statusChip ${status.className}">${status.label}</span>
-        </span>
-        <div class="accountRoute">${escapeHtml(item.account || "Unassigned")} → ${escapeHtml(item.source || "Unassigned")}</div>
-      </div>
+    group.items.forEach(item => {
+      visibleIndex += 1;
+      const status = getTrickleStatus(item);
+      const row = document.createElement("div");
+      row.className = `transaction ${status.className}`;
 
-      <div class="transactionRight">
-        <div class="transactionAmount">${money(item.amount)}</div>
-        <button type="button" class="iconBtn" data-toggle-funded="${item.id}">${item.funded ? "remove from pot" : "money in pot"}</button>
-        <button type="button" class="iconBtn" data-toggle-deliveroo="${item.id}">${item.deliveroo ? "remove Deliveroo" : "use Deliveroo"}</button>
-        <button type="button" class="iconBtn" data-toggle-trickle="${item.id}">${item.paid ? "mark unpaid" : "mark paid"}</button>
-        <button type="button" class="iconBtn" data-edit-trickle="${item.id}">edit</button>
-      </div>
-    `;
+      row.innerHTML = `
+        <div class="transactionLeft">
+          <strong>${visibleIndex}. ${escapeHtml(item.name)}</strong>
+          <span>
+            ${escapeHtml(item.note || getPriorityLabel(item.priority))}${item.dueDate ? " • due " + escapeHtml(formatShortDate(item.dueDate)) : ""}
+            <span class="statusChip ${status.className}">${status.label}</span>
+          </span>
+          <span>${escapeHtml(payCyclePhaseText(item.dueDate))}</span>
+          <div class="accountRoute">${escapeHtml(item.account || "Unassigned")} → ${escapeHtml(item.source || "Unassigned")}</div>
+        </div>
 
-    els.payOrderList.appendChild(row);
+        <div class="transactionRight">
+          <div class="transactionAmount">${money(item.amount)}</div>
+          ${renderTrickleStatusRail(item)}
+          <div class="transactionTools">
+            <button type="button" class="iconBtn" data-edit-trickle="${item.id}">edit</button>
+          </div>
+        </div>
+      `;
+
+      els.payOrderList.appendChild(row);
+    });
   });
 }
 
@@ -6834,32 +7071,37 @@ function renderTrickles(){
     return;
   }
 
-  trickles.forEach(trickle => {
-    const status = getTrickleStatus(trickle);
-    const item = document.createElement("div");
-    item.className = `transaction ${status.className}`;
+  getPayCyclePhaseGroups(trickles, "dueDate").forEach(group => {
+    els.trickleList.insertAdjacentHTML("beforeend", renderPayPhaseHeader(group));
 
-    item.innerHTML = `
-      <div class="transactionLeft">
-        <strong>${escapeHtml(trickle.name)}</strong>
-        <span>
-          ${escapeHtml(getPriorityLabel(trickle.priority))}${trickle.dueDate ? " • due " + escapeHtml(trickle.dueDate) : ""}
-          <span class="statusChip ${status.className}">${status.label}</span>
-        </span>
-        <div class="accountRoute">${escapeHtml(trickle.account || "Unassigned")} → ${escapeHtml(trickle.source || "Unassigned")}</div>
-      </div>
+    group.items.forEach(trickle => {
+      const status = getTrickleStatus(trickle);
+      const item = document.createElement("div");
+      item.className = `transaction ${status.className}`;
 
-      <div class="transactionRight">
-        <div class="transactionAmount">${money(trickle.amount)}</div>
-        <button type="button" class="iconBtn" data-toggle-funded="${trickle.id}">${trickle.funded ? "remove from pot" : "money in pot"}</button>
-        <button type="button" class="iconBtn" data-toggle-deliveroo="${trickle.id}">${trickle.deliveroo ? "remove Deliveroo" : "use Deliveroo"}</button>
-        <button type="button" class="iconBtn" data-toggle-trickle="${trickle.id}">${trickle.paid ? "mark unpaid" : "mark paid"}</button>
-        <button type="button" class="iconBtn" data-edit-trickle="${trickle.id}">edit</button>
-        <button type="button" class="iconBtn danger" data-delete-trickle="${trickle.id}">delete</button>
-      </div>
-    `;
+      item.innerHTML = `
+        <div class="transactionLeft">
+          <strong>${escapeHtml(trickle.name)}</strong>
+          <span>
+            ${escapeHtml(getPriorityLabel(trickle.priority))}${trickle.dueDate ? " • due " + escapeHtml(formatShortDate(trickle.dueDate)) : ""}
+            <span class="statusChip ${status.className}">${status.label}</span>
+          </span>
+          <span>${escapeHtml(payCyclePhaseText(trickle.dueDate))}</span>
+          <div class="accountRoute">${escapeHtml(trickle.account || "Unassigned")} → ${escapeHtml(trickle.source || "Unassigned")}</div>
+        </div>
 
-    els.trickleList.appendChild(item);
+        <div class="transactionRight">
+          <div class="transactionAmount">${money(trickle.amount)}</div>
+          ${renderTrickleStatusRail(trickle)}
+          <div class="transactionTools">
+            <button type="button" class="iconBtn" data-edit-trickle="${trickle.id}">edit</button>
+            <button type="button" class="iconBtn danger" data-delete-trickle="${trickle.id}">delete</button>
+          </div>
+        </div>
+      `;
+
+      els.trickleList.appendChild(item);
+    });
   });
 }
 
@@ -7196,12 +7438,15 @@ document.addEventListener("click", event => {
   const deleteBillId = event.target.getAttribute("data-delete-bill");
   const toggleBillPaidId = event.target.getAttribute("data-toggle-bill-paid");
   const toggleBillFundedId = event.target.getAttribute("data-toggle-bill-funded");
+  const setBillStatusId = event.target.getAttribute("data-set-bill-status");
   const editSpendId = event.target.getAttribute("data-edit-spend");
   const deleteSpendId = event.target.getAttribute("data-delete-spend");
   const importEmailPaymentId = event.target.getAttribute("data-import-email-payment");
   const toggleTrickleId = event.target.getAttribute("data-toggle-trickle");
   const toggleFundedId = event.target.getAttribute("data-toggle-funded");
   const toggleDeliverooId = event.target.getAttribute("data-toggle-deliveroo");
+  const setTrickleStatusId = event.target.getAttribute("data-set-trickle-status");
+  const statusValue = event.target.getAttribute("data-status-value");
   const editTrickleId = event.target.getAttribute("data-edit-trickle");
   const deleteTrickleId = event.target.getAttribute("data-delete-trickle");
   const editClearedId = event.target.getAttribute("data-edit-cleared");
@@ -7221,6 +7466,10 @@ document.addEventListener("click", event => {
 
   if(toggleBillFundedId){
     toggleBillFunded(toggleBillFundedId);
+  }
+
+  if(setBillStatusId && statusValue){
+    setBillStatus(setBillStatusId, statusValue);
   }
 
   if(editSpendId){
@@ -7245,6 +7494,10 @@ document.addEventListener("click", event => {
 
   if(toggleDeliverooId){
     toggleTrickleDeliveroo(toggleDeliverooId);
+  }
+
+  if(setTrickleStatusId && statusValue){
+    setTrickleStatus(setTrickleStatusId, statusValue);
   }
 
   if(editTrickleId){
@@ -7399,6 +7652,14 @@ function financeReminderDueDate(monthValue, dueDay){
   return financeReminderDateKey(target);
 }
 
+function financeReminderPhaseLabel(dateValue){
+  const date = financeReminderParseDate(dateValue);
+
+  if(!date) return "no date";
+
+  return date.getDate() < 20 ? "1-19 before next payday" : "payday to month end";
+}
+
 async function reminderSourceId(key){
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)));
   digest[6] = (digest[6] & 0x0f) | 0x50;
@@ -7419,7 +7680,7 @@ async function buildPaymentReminderRows(userId, monthValue){
     trickleMatches.add(matchKey);
     rows.push({
       key:`finance-${monthValue}-trickle-${item.id || matchKey}`,
-      title:`${item.name || "Payment"} · ${financeReminderMoney(item.amount)} due`,
+      title:`${item.name || "Payment"} · ${financeReminderMoney(item.amount)} due · ${financeReminderPhaseLabel(item.dueDate)}`,
       reminder_date:item.dueDate
     });
   });
@@ -7434,7 +7695,7 @@ async function buildPaymentReminderRows(userId, monthValue){
 
     rows.push({
       key:`finance-${monthValue}-bill-${bill.id || matchKey}`,
-      title:`${bill.name || "Fixed payment"} · ${financeReminderMoney(bill.amount)} due`,
+      title:`${bill.name || "Fixed payment"} · ${financeReminderMoney(bill.amount)} due · ${financeReminderPhaseLabel(reminderDate)}`,
       reminder_date:reminderDate
     });
   });
