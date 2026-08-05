@@ -1,4 +1,4 @@
-const CACHE_NAME = "pace-app-v20260726-nav";
+const CACHE_NAME = "pace-app-v20260805-finance-plan";
 const CACHE_PREFIX = "pace-app-";
 const APP_SHELL = [
   "./",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "dashboard.html",
   "life-test.html",
   "finance-test.html",
+  "finance-before-20-august-plan.md",
   "move-test.html",
   "reminders-test.html",
   "purchases-test.html",

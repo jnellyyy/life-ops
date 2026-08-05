@@ -2081,6 +2081,7 @@ textarea{
           <a class="hubSoft" href="move-test.html">move page</a>
           <button type="button" class="hubSoft" id="hubSyncRemindersBtn">sync reminders</button>
           <button type="button" class="hubSoft" id="hubDownloadCalendarBtn">phone calendar</button>
+          <a class="hubSoft" href="finance-before-20-august-plan.md">before 20 plan</a>
           <button type="button" class="hubDanger" id="clearMonthFullBtn">clear month</button>
         </div>
 
@@ -3607,10 +3608,30 @@ const JULY_PLAN = {
   ]
 };
 
+const BEFORE_20_AUGUST_PLAN = {
+  month:"2026-07",
+  planVersion:1,
+  total:180.17,
+  note:"Before 20 Aug: clear water first, then the dated Klarna run. These are paid from the 20 Jul pay cycle, even though the due dates are in August.",
+  payments:[
+    { name:"Water - this place", amount:62.57, dueDate:"2026-08-08", source:"Bills pot", priority:"must", note:"Pay first before the Klarna run starts." },
+    { name:"Klarna · 9 Aug", amount:8.70, dueDate:"2026-08-09", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 10 Aug", amount:14.40, dueDate:"2026-08-10", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 11 Aug", amount:5.20, dueDate:"2026-08-11", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 12 Aug", amount:0.80, dueDate:"2026-08-12", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 13 Aug", amount:3.40, dueDate:"2026-08-13", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 14 Aug", amount:11.40, dueDate:"2026-08-14", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 15 Aug", amount:9.60, dueDate:"2026-08-15", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 16 Aug", amount:6.30, dueDate:"2026-08-16", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 17 Aug", amount:3.60, dueDate:"2026-08-17", source:"BNPL pot", priority:"must", note:"Before-payday Klarna instalment." },
+    { name:"Klarna · 19 Aug", amount:54.20, dueDate:"2026-08-19", source:"BNPL pot", priority:"must", note:"Biggest Klarna before payday. Protect this early if possible." }
+  ]
+};
+
 const AUGUST_PLAN = {
   month:"2026-08",
   income:1826.55,
-  planVersion:3,
+  planVersion:4,
   allocations:{
     bills:29.99,
     debt:94.18,
@@ -3627,9 +3648,10 @@ const AUGUST_PLAN = {
     transferBuffer:0,
     deliverooEarned:0,
     deliverooDays:31,
-    note:"August 20 workbook forecast: £860.52 conservative commitments due by 20 Aug; £966.03 left after personal costs; safer moving fund is £881.65 after reserving all August BNPL. CityRise and Zero Deposit are removed. Sheffield Credit Union is reduced to £100. E.ON and Rotherham are final-bill reserves only until confirmed."
+    note:"August 20 workbook forecast plus move protection: first month's rent is protected in HSBC, and sofa is capped at a £300 Furniture pot target. CityRise and Zero Deposit are removed. Sheffield Credit Union is reduced to £100. E.ON and Rotherham are final-bill reserves only until confirmed."
   },
   fixedBills:[
+    { name:"First month's rent - new place", amount:700, dueDay:20, type:"standingOrder", category:"home", account:"HSBC", pot:"Protected bills" },
     { name:"Sheffield Credit Union", amount:100, dueDay:20, type:"standingOrder", category:"debt", account:"HSBC", pot:"Protected bills" },
     { name:"Credit Spring", amount:90.61, dueDay:20, type:"directDebit", category:"debt", account:"HSBC", pot:"Protected bills" },
     { name:"E.ON Next final-bill reserve", amount:106.21, dueDay:20, type:"directDebit", category:"home", account:"HSBC", pot:"Protected bills" },
@@ -3656,7 +3678,7 @@ const AUGUST_PLAN = {
     { name:"Klarna · 30 Aug", amount:1.95, dueDate:"2026-08-30", account:"Revolut", source:"BNPL pot", priority:"soon", note:"Adjusted by 5p so the full Klarna reserve stays at £229.75." }
   ],
   placeholders:[
-    { name:"New-property rent balance TBC", source:"Protected bills", priority:"must", note:"Not included in the workbook until move-in cost is confirmed." },
+    { name:"Sofa fund", amount:300, source:"Furniture pot", priority:"must", note:"Sofa range is £200-£300. Aim for £300 so rent stays protected and sofa spend is capped." },
     { name:"Doncaster Council Tax TBC", source:"Protected bills", priority:"must", note:"Not included in the workbook until the new council bill is confirmed." },
     { name:"New energy bill TBC", source:"Protected bills", priority:"must", note:"Not included in the workbook until the new supplier/final bill is confirmed." },
     { name:"New water bill TBC", source:"Bills pot", priority:"soon", note:"Not included in the workbook until the new water amount is confirmed." },
@@ -3718,7 +3740,8 @@ let state = {
   },
   planVersion:0,
   julyPlanVersion:0,
-  augustPlanVersion:0
+  augustPlanVersion:0,
+  before20AugustPlanVersion:0
 };
 
 let editingBillId = null;
@@ -3902,7 +3925,8 @@ function load(){
       movePrivate: parsed.movePrivate || { items: [], bills: [], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 },
       planVersion:Number(parsed.planVersion) || 0,
       julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
-      augustPlanVersion:Number(parsed.augustPlanVersion) || 0
+      augustPlanVersion:Number(parsed.augustPlanVersion) || 0,
+      before20AugustPlanVersion:Number(parsed.before20AugustPlanVersion) || 0
     };
 
     state.fixedBills = state.fixedBills.map(bill => ({
@@ -4010,6 +4034,7 @@ function load(){
     state.planVersion = 0;
     state.julyPlanVersion = 0;
     state.augustPlanVersion = 0;
+    state.before20AugustPlanVersion = 0;
   }
 }
 
@@ -5071,6 +5096,56 @@ function shouldAutoLoadJulyPlan(){
   return state.julyPlanVersion !== JULY_PLAN.planVersion || !hasJulyBills || !hasJulyPayments;
 }
 
+function findPlanTrickle(planItem, kind){
+  return state.trickles.find(trickle =>
+    trickle.kind === kind
+    && normalizePaymentName(trickle.name) === normalizePaymentName(planItem.name)
+    && trickle.dueDate === planItem.dueDate
+  );
+}
+
+function seedBefore20AugustPlan(force = false){
+  if(!force && state.before20AugustPlanVersion >= BEFORE_20_AUGUST_PLAN.planVersion){
+    return false;
+  }
+
+  ensureMonthDataFor(BEFORE_20_AUGUST_PLAN.month);
+  ensureAllocationDataFor(BEFORE_20_AUGUST_PLAN.month);
+
+  BEFORE_20_AUGUST_PLAN.payments.forEach(planItem => {
+    const existing = findPlanTrickle(planItem, "before-20-aug");
+    const data = {
+      name:planItem.name,
+      amount:planItem.amount,
+      priority:planItem.priority || "must",
+      dueDate:planItem.dueDate,
+      account:"Revolut",
+      source:planItem.source,
+      month:payCycleKeyFromDate(planItem.dueDate, BEFORE_20_AUGUST_PLAN.month),
+      kind:"before-20-aug",
+      note:planItem.note || BEFORE_20_AUGUST_PLAN.note
+    };
+
+    if(existing){
+      Object.assign(existing, data);
+      return;
+    }
+
+    state.trickles.push({
+      id:uid(),
+      ...data,
+      paid:false,
+      funded:false,
+      deliveroo:false
+    });
+  });
+
+  const allocation = ensureAllocationDataFor(BEFORE_20_AUGUST_PLAN.month);
+  allocation.note = BEFORE_20_AUGUST_PLAN.note;
+  state.before20AugustPlanVersion = BEFORE_20_AUGUST_PLAN.planVersion;
+  return true;
+}
+
 function buildAugustTrickles(){
   const fixedItems = AUGUST_PLAN.fixedBills
     .filter(bill => numberValue(bill.amount) > 0)
@@ -5109,7 +5184,7 @@ function buildAugustTrickles(){
   const moveDate = getMoveForecastDate();
   const placeholderItems = AUGUST_PLAN.placeholders.map(item => ({
     name:item.name,
-    amount:0,
+    amount:numberValue(item.amount),
     priority:item.priority,
     dueDate:moveDate,
     account:item.source === "Protected bills" ? "HSBC" : "Revolut",
@@ -5289,6 +5364,7 @@ function clearSelectedMonth(){
 
   if(month === JULY_PLAN.month){
     state.julyPlanVersion = 0;
+    state.before20AugustPlanVersion = 0;
   }
 
   if(month === AUGUST_PLAN.month){
@@ -6860,13 +6936,16 @@ function renderForecastNotice(snapshot){
   }
 
   const needsReload = shouldAutoLoadAugustPlan();
+  const forecastBufferText = snapshot.buffer < 0
+    ? `Current pressure after rent, sofa, reserves and Revolut targets: ${money(Math.abs(snapshot.buffer))} gap.`
+    : `Buffer after rent, sofa, reserves and Revolut targets: ${money(snapshot.buffer)}.`;
   els.forecastNotice.hidden = false;
   els.forecastNoticeTitle.textContent = needsReload
     ? "Workbook forecast needs reload"
     : `August workbook forecast · ${formatCycleRangeLabel(AUGUST_PLAN.month)}`;
   els.forecastNoticeCopy.textContent = needsReload
     ? "Tap reload forecast to bring in the August 20 workbook numbers. This keeps custom August payments and spending history."
-    : `This uses the August 20 workbook: CityRise and Zero Deposit removed, Sheffield Credit Union reduced to £100, and old E.ON/Rotherham kept only as final-bill reserves. Safer moving fund after full-August BNPL reserve: ${money(snapshot.buffer)}. New-property costs stay TBC until confirmed.`;
+    : `This protects first month's rent at £700 and caps sofa at £300. ${forecastBufferText} If sofa lands at £200, £100 comes back into the plan.`;
 }
 
 function renderFinanceHub(){
@@ -6909,8 +6988,8 @@ function renderFinanceHub(){
   renderForecastNotice(snapshot);
 
   if(isMoveForecastMonth()){
-    els.hubProtectedText.textContent = `Workbook forecast leaves ${money(snapshot.buffer)} as the safer moving fund after reserving all August BNPL.`;
-    els.hubSafePill.textContent = snapshot.buffer < 0 ? `${money(Math.abs(snapshot.buffer))} gap` : `${money(snapshot.buffer)} move fund`;
+    els.hubProtectedText.textContent = "August protects rent first, then sofa in the Furniture pot. Old E.ON/Rotherham stay as reserves until confirmed closed.";
+    els.hubSafePill.textContent = snapshot.buffer < 0 ? `${money(Math.abs(snapshot.buffer))} gap after protection` : `${money(snapshot.buffer)} after protection`;
   }else{
     els.hubProtectedText.textContent = snapshot.protectedBills > 0
       ? `${money(snapshot.protectedBills)} fixed HSBC bills are protected first.`
@@ -7524,6 +7603,7 @@ if(!HAD_SAVED_FINANCE){
 }
 
 state.selectedMonth = getCurrentMonth();
+seedBefore20AugustPlan(false);
 save();
 
 loadEmailActions();
