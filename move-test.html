@@ -1228,31 +1228,114 @@ textarea{
 const STORAGE_KEY = "pace_finance_v3";
 const PAYDAY_DAY = 20;
 const MOVE_DATE = "2026-08-28";
-const MOVE_CHECKLIST_VERSION = 1;
-const MOVE_BOARD_VERSION = 1;
+const MOVE_CHECKLIST_VERSION = 2;
+const MOVE_BOARD_VERSION = 2;
 const DEFAULT_MOVE_BUCKETS = [
   { id:"oldPlace", name:"Old place", color:"#ff5ba7" },
-  { id:"tellPeople", name:"Tell people", color:"#a78bfa" },
+  { id:"tellPeople", name:"Admin & address", color:"#a78bfa" },
   { id:"utilities", name:"Utilities", color:"#60a5fa" },
+  { id:"furniture", name:"Furniture", color:"#fb7185" },
+  { id:"kitchen", name:"Kitchen", color:"#f59e0b" },
+  { id:"bedroom", name:"Bedroom", color:"#c084fc" },
+  { id:"bathroom", name:"Bathroom", color:"#38bdf8" },
+  { id:"cleanSafety", name:"Cleaning & safety", color:"#84cc16" },
   { id:"packing", name:"Packing", color:"#f59e0b" },
   { id:"moveDay", name:"Move day", color:"#2dd4bf" },
   { id:"newPlace", name:"New place", color:"#22c55e" }
 ];
 const DEFAULT_MOVE_CHECKLIST = [
-  { key:"confirm-move-out", text:"Confirm move-out date and key return with old place", category:"oldPlace", dueDate:"2026-08-01" },
-  { key:"final-rent-balance", text:"Check final rent/account balance for old place", category:"oldPlace", dueDate:"2026-08-01" },
-  { key:"book-clean", text:"Book or plan end-of-tenancy clean", category:"oldPlace", dueDate:"2026-08-21" },
-  { key:"meter-photos", text:"Take final meter readings and photos", category:"oldPlace", dueDate:"2026-08-28" },
-  { key:"return-keys", text:"Return keys and ask for closing confirmation", category:"oldPlace", dueDate:"2026-08-28" },
-  { key:"council-tax", text:"Tell council tax you are moving", category:"tellPeople", dueDate:"2026-08-20" },
-  { key:"energy", text:"Tell energy supplier the moving date", category:"utilities", dueDate:"2026-08-20" },
-  { key:"water", text:"Tell water supplier the moving date", category:"utilities", dueDate:"2026-08-20" },
-  { key:"broadband", text:"Arrange, cancel or move broadband", category:"utilities", dueDate:"2026-08-14" },
-  { key:"address-updates", text:"Update bank, credit accounts, BNPL and phone address", category:"tellPeople", dueDate:"2026-08-25" },
-  { key:"mail-redirect", text:"Set up Royal Mail redirect", category:"tellPeople", dueDate:"2026-08-14" },
-  { key:"essentials-box", text:"Pack essentials bag and first-night box", category:"packing", dueDate:"2026-08-27" },
-  { key:"transport-help", text:"Confirm transport or help for move day", category:"moveDay", dueDate:"2026-08-24" },
-  { key:"new-place-photos", text:"Check new place inventory/photos and report issues", category:"newPlace", dueDate:"2026-08-28" }
+  { key:"read-tenancy", text:"Read the new tenancy agreement and confirm what is included", category:"tellPeople", dueOffset:-28, priority:"urgent", notes:"Check deposit, first rent, move-in time, key collection, permitted decorating, repairs contact, parking and any restrictions." },
+  { key:"pay-deposit-rent", text:"Confirm deposit and first rent payment", category:"tellPeople", dueOffset:-21, priority:"urgent", notes:"Keep receipts and confirm the deposit protection details when provided." },
+  { key:"contents-insurance", text:"Arrange contents insurance from move-in day", category:"tellPeople", dueOffset:-7, priority:"important", notes:"Include accidental damage or tenant liability if your tenancy requires it." },
+  { key:"mail-redirect", text:"Set up Royal Mail redirect", category:"tellPeople", dueOffset:-14, priority:"important" },
+  { key:"address-updates", text:"Update important accounts with the new address", category:"tellPeople", dueOffset:1, priority:"important", notes:"Bank, credit cards, BNPL, employer, HMRC, DVLA, electoral register, GP, dentist, phone, subscriptions and deliveries." },
+  { key:"council-tax", text:"Tell both councils you are moving", category:"tellPeople", dueOffset:-7, priority:"urgent", notes:"Close the old council-tax account and open the new one from the correct dates." },
+  { key:"parking-permits", text:"Check parking, permits and move-day access", category:"tellPeople", dueOffset:-14, priority:"important" },
+  { key:"new-keys", text:"Confirm key collection and all access instructions", category:"tellPeople", dueOffset:-7, priority:"urgent", notes:"Include communal doors, fobs, alarms, gates, bin store and parking access." },
+
+  { key:"confirm-move-out", text:"Confirm move-out date and key return with old place", category:"oldPlace", dueOffset:-28, priority:"urgent" },
+  { key:"final-rent-balance", text:"Check final rent and account balance for the old home", category:"oldPlace", dueOffset:-21, priority:"important" },
+  { key:"old-inventory", text:"Review the old-home inventory and repair responsibilities", category:"oldPlace", dueOffset:-21, priority:"important" },
+  { key:"book-clean", text:"Book or plan the end-of-tenancy clean", category:"oldPlace", dueOffset:-14, priority:"important", notes:"Include oven, fridge, bathroom, floors, windows and any items listed in the check-out instructions." },
+  { key:"old-home-photos", text:"Photograph every old-home room after cleaning", category:"oldPlace", dueOffset:0, priority:"important" },
+  { key:"meter-photos", text:"Take final old-home meter readings and photos", category:"oldPlace", dueOffset:0, priority:"urgent" },
+  { key:"return-keys", text:"Return every old-home key and get confirmation", category:"oldPlace", dueOffset:0, priority:"urgent" },
+
+  { key:"energy", text:"Arrange energy at the new home", category:"utilities", dueOffset:-7, priority:"urgent", notes:"Find the current supplier, submit opening readings on move-in day and keep meter photos." },
+  { key:"water", text:"Open the water account for the new home", category:"utilities", dueOffset:-7, priority:"urgent" },
+  { key:"broadband", text:"Order or transfer broadband", category:"utilities", dueOffset:-21, priority:"important", notes:"Installation appointments can take time, so book early and confirm router delivery." },
+  { key:"mobile-signal", text:"Check mobile signal and a backup internet option", category:"utilities", dueOffset:-7, priority:"medium" },
+  { key:"heating-instructions", text:"Get heating, hot-water and thermostat instructions", category:"utilities", dueOffset:-3, priority:"important" },
+  { key:"appliance-instructions", text:"Confirm which appliances are supplied and working", category:"utilities", dueOffset:-21, priority:"urgent", notes:"Check cooker, hob, fridge/freezer, washing machine and dishwasher before buying replacements." },
+  { key:"waste-collection", text:"Check bin locations and collection days", category:"utilities", dueOffset:-3, priority:"medium" },
+
+  { key:"measure-new-home", text:"Measure rooms, doors, stairs and lift access", category:"furniture", dueOffset:-28, priority:"urgent", notes:"Record wall lengths and doorway widths before ordering large furniture." },
+  { key:"make-floor-plan", text:"Plan where the main furniture will go", category:"furniture", dueOffset:-21, priority:"important" },
+  { key:"buy-bed-frame", text:"Buy or order a bed frame", category:"furniture", dueOffset:-21, priority:"urgent", notes:"Check size, delivery time, assembly and whether tools are included." },
+  { key:"buy-mattress", text:"Buy or order a mattress", category:"furniture", dueOffset:-21, priority:"urgent", notes:"Prioritise this before non-essential furniture and arrange delivery for or before move-in." },
+  { key:"buy-seating", text:"Plan essential seating", category:"furniture", dueOffset:-14, priority:"important", notes:"Sofa, armchair or inexpensive temporary chairs. Recheck doors and stair access before ordering." },
+  { key:"buy-table-chairs", text:"Plan a table and chairs", category:"furniture", dueOffset:-7, priority:"medium", notes:"A folding table can work as a temporary dining or work surface." },
+  { key:"buy-clothes-storage", text:"Plan clothes storage", category:"furniture", dueOffset:-14, priority:"important", notes:"Wardrobe, clothes rail, chest of drawers, hangers and under-bed boxes as needed." },
+  { key:"buy-general-storage", text:"Plan general storage and shelving", category:"furniture", dueOffset:7, priority:"low", notes:"Avoid buying until you have measured and lived in the space for a few days." },
+  { key:"window-coverings", text:"Confirm curtains or blinds are supplied", category:"furniture", dueOffset:-14, priority:"important", notes:"Prioritise bedroom privacy. Measure drop and width before purchasing." },
+  { key:"lighting", text:"Check lighting and buy lamps if needed", category:"furniture", dueOffset:-7, priority:"important", notes:"Include bedside lamp, living-room lamp and the correct spare bulb types." },
+  { key:"furniture-deliveries", text:"Book and track furniture deliveries", category:"furniture", dueOffset:-7, priority:"urgent", notes:"Record delivery dates, access notes, order numbers and who will be present." },
+
+  { key:"kitchen-appliances", text:"Buy only the missing kitchen appliances", category:"kitchen", dueOffset:-14, priority:"important", notes:"Possible essentials: fridge/freezer, microwave, kettle and toaster. Confirm supplied appliances first." },
+  { key:"cookware", text:"Buy basic cookware", category:"kitchen", dueOffset:-7, priority:"important", notes:"Saucepan, frying pan, baking tray, oven dish, colander and lids." },
+  { key:"kitchen-tools", text:"Buy basic kitchen tools", category:"kitchen", dueOffset:-7, priority:"important", notes:"Chef knife, chopping board, wooden spoon, spatula, tongs, peeler, tin opener, scissors and measuring jug." },
+  { key:"tableware", text:"Buy everyday tableware", category:"kitchen", dueOffset:-7, priority:"important", notes:"Plates, bowls, mugs, glasses and cutlery for the number of people living there plus a spare set." },
+  { key:"food-storage", text:"Buy food-storage basics", category:"kitchen", dueOffset:1, priority:"medium", notes:"Reusable containers, foil, baking paper, food bags and clips." },
+  { key:"kitchen-textiles", text:"Buy kitchen textiles and heat protection", category:"kitchen", dueOffset:-3, priority:"important", notes:"Tea towels, oven gloves or mitts and trivets." },
+  { key:"kitchen-cleaning", text:"Buy washing-up supplies", category:"kitchen", dueOffset:-3, priority:"urgent", notes:"Washing-up liquid, sponges, dish brush, drying rack and dishwasher tablets if needed." },
+  { key:"kitchen-bin", text:"Buy a kitchen bin and bin bags", category:"kitchen", dueOffset:-3, priority:"important" },
+  { key:"starter-food", text:"Plan the first food shop", category:"kitchen", dueOffset:0, priority:"important", notes:"Drinks, breakfast, easy meals, cooking oil, salt, seasonings, tea or coffee and a few freezer options." },
+
+  { key:"bedding", text:"Buy complete bedding for the first night", category:"bedroom", dueOffset:-7, priority:"urgent", notes:"Duvet, pillows, duvet covers, fitted sheets, pillowcases and at least one spare set." },
+  { key:"mattress-protector", text:"Buy a mattress protector", category:"bedroom", dueOffset:-7, priority:"important" },
+  { key:"bedside-setup", text:"Plan a simple bedside setup", category:"bedroom", dueOffset:1, priority:"medium", notes:"Lamp, extension lead if safely required, charging cable and small surface or box." },
+  { key:"laundry", text:"Buy laundry essentials", category:"bedroom", dueOffset:-3, priority:"important", notes:"Laundry basket, detergent, drying rack, pegs and iron or steamer if needed." },
+  { key:"clothes-hangers", text:"Buy enough clothes hangers", category:"bedroom", dueOffset:-3, priority:"medium" },
+
+  { key:"bath-towels", text:"Buy bath and hand towels", category:"bathroom", dueOffset:-7, priority:"urgent" },
+  { key:"shower-curtain", text:"Check whether a shower curtain and rings are needed", category:"bathroom", dueOffset:-7, priority:"urgent" },
+  { key:"bathroom-basics", text:"Buy bathroom basics", category:"bathroom", dueOffset:-3, priority:"important", notes:"Bath mat, toilet brush, small bin, plunger and bathroom storage as needed." },
+  { key:"toiletries", text:"Pack first-night toiletries", category:"bathroom", dueOffset:-1, priority:"urgent", notes:"Toilet roll, soap, toothbrush, toothpaste, shower products, medication and sanitary products." },
+  { key:"bathroom-cleaning", text:"Buy bathroom cleaning supplies", category:"bathroom", dueOffset:-3, priority:"important", notes:"Toilet cleaner, limescale remover, disinfectant and cleaning cloths." },
+
+  { key:"vacuum", text:"Buy or borrow a vacuum cleaner", category:"cleanSafety", dueOffset:-3, priority:"important" },
+  { key:"floor-cleaning", text:"Buy floor-cleaning equipment", category:"cleanSafety", dueOffset:-3, priority:"important", notes:"Mop and bucket or floor cleaner, plus broom and dustpan if useful for the flooring." },
+  { key:"cleaning-kit", text:"Build a general cleaning kit", category:"cleanSafety", dueOffset:-3, priority:"important", notes:"All-purpose cleaner, disinfectant, glass cleaner, cloths, sponges, rubber gloves and paper towels." },
+  { key:"basic-tools", text:"Buy or borrow a basic tool kit", category:"cleanSafety", dueOffset:-3, priority:"important", notes:"Screwdrivers, hammer, tape measure, pliers, adjustable spanner, utility knife, picture hooks and strong tape." },
+  { key:"first-aid", text:"Buy a first-aid kit and organise medication", category:"cleanSafety", dueOffset:-3, priority:"urgent" },
+  { key:"alarms", text:"Test smoke and carbon-monoxide alarms", category:"cleanSafety", dueOffset:0, priority:"urgent", notes:"Report missing or faulty required alarms to the landlord immediately; do not remove or disable them." },
+  { key:"fire-safety", text:"Check kitchen fire safety", category:"cleanSafety", dueOffset:1, priority:"important", notes:"Know exit routes and consider a suitable fire blanket. Never use water on an oil fire." },
+  { key:"torch-bulbs", text:"Buy a torch, batteries and spare bulbs", category:"cleanSafety", dueOffset:1, priority:"medium" },
+
+  { key:"declutter", text:"Declutter before packing", category:"packing", dueOffset:-21, priority:"important", notes:"Donate, sell, recycle or dispose of things you do not want to pay to move." },
+  { key:"packing-supplies", text:"Get boxes and packing supplies", category:"packing", dueOffset:-21, priority:"important", notes:"Strong boxes, tape, marker pens, labels, bubble wrap or paper and mattress protection." },
+  { key:"pack-nonessentials", text:"Pack non-essential items room by room", category:"packing", dueOffset:-14, priority:"important" },
+  { key:"label-boxes", text:"Label every box with room and contents", category:"packing", dueOffset:-7, priority:"important", notes:"Mark fragile boxes and add OPEN FIRST to priority boxes." },
+  { key:"documents-valuables", text:"Pack documents, valuables and medication separately", category:"packing", dueOffset:-1, priority:"urgent", notes:"Keep these with you rather than loading them into the moving van." },
+  { key:"essentials-box", text:"Pack a first-night essentials box", category:"packing", dueOffset:-1, priority:"urgent", notes:"Bedding, towels, toilet roll, toiletries, chargers, medication, cleaning cloths, bin bags, mugs, kettle supplies, snacks, tools and a change of clothes." },
+
+  { key:"transport-help", text:"Book the van, movers or helpers", category:"moveDay", dueOffset:-21, priority:"urgent" },
+  { key:"confirm-deliveries", text:"Confirm move-day furniture and appliance deliveries", category:"moveDay", dueOffset:-3, priority:"urgent" },
+  { key:"move-day-plan", text:"Write the move-day order and contact list", category:"moveDay", dueOffset:-3, priority:"important", notes:"Include key collection, loading, travel, unloading, deliveries, parking and who is responsible for each part." },
+  { key:"charge-devices", text:"Charge phones and power banks", category:"moveDay", dueOffset:-1, priority:"important" },
+  { key:"protect-new-home", text:"Protect floors and walls while moving furniture", category:"moveDay", dueOffset:0, priority:"medium" },
+  { key:"assemble-bed", text:"Build the bed and make it first", category:"moveDay", dueOffset:0, priority:"urgent" },
+  { key:"unpack-essentials", text:"Unpack bathroom and kitchen essentials", category:"moveDay", dueOffset:0, priority:"urgent" },
+
+  { key:"new-place-photos", text:"Check the new-home inventory and photograph every room", category:"newPlace", dueOffset:0, priority:"urgent", notes:"Record existing damage, missing items, appliance condition and cleanliness before unpacking." },
+  { key:"opening-meters", text:"Photograph and submit opening meter readings", category:"newPlace", dueOffset:0, priority:"urgent" },
+  { key:"test-home", text:"Test water, heating, sockets, lights and appliances", category:"newPlace", dueOffset:0, priority:"urgent", notes:"Report leaks, loss of power, heating problems or unsafe items promptly." },
+  { key:"report-issues", text:"Report inventory differences and repairs in writing", category:"newPlace", dueOffset:1, priority:"urgent", notes:"Attach dated photos and keep a copy of the email or portal report." },
+  { key:"locate-controls", text:"Locate stopcock, fuse box, meters and heating controls", category:"newPlace", dueOffset:1, priority:"important" },
+  { key:"check-security", text:"Check every door, window, key and lock", category:"newPlace", dueOffset:1, priority:"urgent", notes:"Report broken locks or missing keys to the landlord or agent." },
+  { key:"unpack-priority", text:"Unpack priority rooms before decorative items", category:"newPlace", dueOffset:3, priority:"important", notes:"Bedroom, bathroom and kitchen first; live in the space before buying non-essential furniture." },
+  { key:"cardboard-waste", text:"Arrange cardboard and bulky-waste disposal", category:"newPlace", dueOffset:7, priority:"medium" },
+  { key:"emergency-list", text:"Save landlord, utility and local emergency contacts", category:"newPlace", dueOffset:1, priority:"important" }
 ];
 
 const AUGUST_MOVE_FUNDS_VERSION = 1;
@@ -1543,21 +1626,32 @@ function getAllocationData(){
 }
 
 function defaultChecklistItem(task){
+  const dueDate = task.dueDate || dateFromMoveOffset(task.dueOffset);
+  const startDate = task.startDate || dateFromMoveOffset(task.startOffset);
   return {
     id:`move-${task.key}`,
     key:task.key,
     text:task.text,
     category:task.category,
     bucketId:task.category,
-    status:"notStarted",
-    priority:"medium",
-    startDate:"",
-    dueDate:task.dueDate,
+    status:task.status || "notStarted",
+    priority:task.priority || "medium",
+    startDate,
+    dueDate,
     done:false,
-    note:"",
-    notes:"",
+    note:task.notes || "",
+    notes:task.notes || "",
     order:0
   };
+}
+
+function dateFromMoveOffset(offset){
+  if(!Number.isFinite(Number(offset))) return "";
+  const targetDate = state.movePrivate?.plan?.targetDate || MOVE_DATE;
+  const date = new Date(`${targetDate}T00:00:00`);
+  if(Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + Number(offset));
+  return dateKeyFromDate(date);
 }
 
 function seedMoveBoard(){
@@ -1609,6 +1703,11 @@ function seedMoveChecklist(){
   DEFAULT_MOVE_CHECKLIST.forEach(task => {
     if(existingKeys.has(task.key) || existingText.has(task.text.toLowerCase())){
       return;
+    }
+
+    if(!data.buckets.some(bucket => bucket.id === task.category)){
+      const template = DEFAULT_MOVE_BUCKETS.find(bucket => bucket.id === task.category);
+      data.buckets.push(template ? { ...template } : { id:task.category, name:checklistCategoryLabel(task.category, false), color:"#a78bfa" });
     }
 
     data.checklist.push(defaultChecklistItem(task));
