@@ -47,7 +47,8 @@ body{
 
 button,
 input,
-select{
+select,
+textarea{
   font:inherit;
 }
 
@@ -485,6 +486,312 @@ select{
   text-decoration-color:rgba(187,247,208,0.65);
 }
 
+.boardTools{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:end;
+  margin:12px 0 4px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+
+.boardHint{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.4;
+}
+
+.kanbanBoard{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(282px, 1fr);
+  gap:12px;
+  margin-top:14px;
+  padding:2px 2px 12px;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+  scroll-snap-type:x proximity;
+}
+
+.kanbanBucket{
+  --bucket-color:var(--pink);
+  min-height:260px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,0.10);
+  border-top:3px solid var(--bucket-color);
+  border-radius:20px;
+  background:rgba(255,255,255,0.035);
+  scroll-snap-align:start;
+}
+
+.bucketHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.bucketTitle{
+  display:flex;
+  align-items:center;
+  min-width:0;
+  gap:8px;
+}
+
+.bucketTitle h3{
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:15px;
+  letter-spacing:-.02em;
+}
+
+.bucketCount{
+  min-width:25px;
+  min-height:25px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+
+.bucketActions{ display:flex; gap:4px; }
+
+.iconBtn{
+  width:29px;
+  height:29px;
+  border:0;
+  border-radius:9px;
+  color:var(--muted);
+  background:transparent;
+  cursor:pointer;
+  font-weight:900;
+}
+
+.iconBtn:hover,
+.iconBtn:focus-visible{
+  color:var(--text);
+  background:rgba(255,255,255,0.09);
+}
+
+.bucketCards{
+  min-height:196px;
+  display:grid;
+  align-content:start;
+  gap:9px;
+  border-radius:14px;
+  transition:.16s ease;
+}
+
+.bucketCards.dragOver{
+  outline:2px dashed var(--bucket-color);
+  outline-offset:4px;
+  background:rgba(255,255,255,0.035);
+}
+
+.taskCard{
+  padding:11px;
+  border:1px solid rgba(255,255,255,0.11);
+  border-radius:15px;
+  background:rgba(17,19,25,0.94);
+  box-shadow:0 8px 22px rgba(0,0,0,0.18);
+  cursor:pointer;
+}
+
+.taskCard.dragging{ opacity:.42; cursor:grabbing; }
+
+.taskCard.checkDone{
+  opacity:.60;
+  border-color:rgba(34,197,94,0.28);
+}
+
+.taskCard.checkDone .taskName{
+  text-decoration:line-through;
+  text-decoration-thickness:2px;
+}
+
+.taskTop{ display:flex; align-items:flex-start; gap:9px; }
+
+.taskCheck{
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
+  border:1px solid var(--line2);
+  border-radius:7px;
+  background:rgba(255,255,255,0.06);
+  color:#fff;
+  cursor:pointer;
+  font-weight:950;
+}
+
+.taskCard.checkDone .taskCheck{
+  border-color:rgba(34,197,94,0.5);
+  background:rgba(34,197,94,0.3);
+}
+
+.taskName{
+  margin:1px 0 0;
+  font-size:14px;
+  line-height:1.35;
+  font-weight:850;
+}
+
+.taskDue{
+  display:inline-flex;
+  margin:9px 0 0 31px;
+  padding:5px 7px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.065);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+
+.taskDue.urgent{
+  background:rgba(245,158,11,0.13);
+  color:#fde7b0;
+}
+
+.taskActions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:5px;
+  margin-top:10px;
+}
+
+.taskBucketSelect{
+  width:100%;
+  min-width:0;
+  height:32px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(255,255,255,0.07);
+  color:var(--text);
+  padding:0 7px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.bucketEmpty{
+  min-height:78px;
+  display:grid;
+  place-items:center;
+  border:1px dashed rgba(255,255,255,0.11);
+  border-radius:13px;
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+}
+
+.taskBadges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin:9px 0 0 31px;
+}
+
+.taskBadge{
+  padding:4px 7px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  background:rgba(255,255,255,0.055);
+  font-size:10px;
+  font-weight:900;
+}
+
+.taskBadge.inProgress{ color:#bfdbfe; background:rgba(96,165,250,0.12); }
+.taskBadge.blocked{ color:#fecaca; background:rgba(251,113,133,0.12); }
+.taskBadge.completed{ color:#bbf7d0; background:rgba(34,197,94,0.12); }
+.taskBadge.priorityUrgent{ color:#fecaca; border-color:rgba(251,113,133,0.35); }
+.taskBadge.priorityImportant{ color:#fde7b0; border-color:rgba(245,158,11,0.35); }
+
+.taskDialog{
+  width:min(680px, calc(100vw - 24px));
+  max-height:calc(100vh - 32px);
+  padding:0;
+  overflow:auto;
+  border:1px solid var(--line2);
+  border-radius:24px;
+  color:var(--text);
+  background:#171920;
+  box-shadow:0 30px 90px rgba(0,0,0,0.60);
+}
+
+.taskDialog::backdrop{
+  background:rgba(4,6,10,0.72);
+  backdrop-filter:blur(7px);
+}
+
+.dialogHead{
+  position:sticky;
+  top:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  background:rgba(23,25,32,0.96);
+}
+
+.dialogHead h2{ margin:0; font-size:20px; letter-spacing:-.04em; }
+
+.dialogClose{
+  width:38px;
+  height:38px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--text);
+  background:rgba(255,255,255,0.07);
+  cursor:pointer;
+  font-size:20px;
+}
+
+.dialogBody{ display:grid; gap:14px; padding:18px; }
+
+.detailGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.dialogBody .field input,
+.dialogBody .field select,
+.dialogBody .field textarea{
+  width:100%;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:14px;
+  color:var(--text);
+  background:rgba(255,255,255,0.07);
+  padding:10px;
+  outline:0;
+}
+
+.dialogBody .field textarea{
+  min-height:132px;
+  resize:vertical;
+  line-height:1.45;
+}
+
+.dialogActions{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:9px;
+  padding-top:4px;
+}
+
 .empty{
   color:var(--muted);
   border:1px dashed rgba(255,255,255,0.13);
@@ -540,9 +847,14 @@ select{
 
   .formGrid,
   .row,
-  .checkSummary{
+  .checkSummary,
+  .boardTools{
     grid-template-columns:1fr;
   }
+
+  .kanbanBoard{ grid-auto-columns:minmax(86vw, 1fr); }
+
+  .detailGrid{ grid-template-columns:1fr; }
 
   .right{
     justify-items:start;
@@ -813,7 +1125,7 @@ select{
       <div class="cardHead">
         <div class="cardTitle">
           <div class="icon">✓</div>
-          <h2>Move checklist</h2>
+          <h2>Move board</h2>
         </div>
         <div class="pill" id="checklistPill">0 open</div>
       </div>
@@ -826,15 +1138,8 @@ select{
           <input id="checkTask" type="text" placeholder="Tell council tax, book clean, return keys">
         </div>
         <div class="field">
-          <label>area</label>
-          <select id="checkCategory">
-            <option value="oldPlace">Old place</option>
-            <option value="tellPeople">Tell people</option>
-            <option value="utilities">Utilities</option>
-            <option value="packing">Packing</option>
-            <option value="moveDay">Move day</option>
-            <option value="newPlace">New place</option>
-          </select>
+          <label>bucket</label>
+          <select id="checkCategory"></select>
         </div>
         <div class="field">
           <label>due</label>
@@ -847,10 +1152,75 @@ select{
         <button type="button" class="softBtn" id="clearCheckBtn">clear</button>
       </div>
 
-      <div class="list" id="checklistList"></div>
+      <div class="boardTools">
+        <div class="field">
+          <label>new bucket</label>
+          <input id="bucketName" type="text" placeholder="Waiting on, Move week, Done">
+        </div>
+        <button type="button" class="softBtn" id="addBucketBtn">+ add bucket</button>
+      </div>
+      <p class="boardHint">Drag cards between buckets on desktop, or use the bucket menu on any card.</p>
+
+      <div class="kanbanBoard" id="checklistBoard"></div>
     </section>
   </main>
 </div>
+
+<dialog class="taskDialog" id="taskDialog">
+  <div class="dialogHead">
+    <h2>Task details</h2>
+    <button type="button" class="dialogClose" id="closeTaskDialogBtn" aria-label="Close task details">×</button>
+  </div>
+  <div class="dialogBody">
+    <div class="field">
+      <label>task name</label>
+      <input id="detailTaskName" type="text" placeholder="What needs doing?">
+    </div>
+
+    <div class="detailGrid">
+      <div class="field">
+        <label>bucket</label>
+        <select id="detailTaskBucket"></select>
+      </div>
+      <div class="field">
+        <label>status</label>
+        <select id="detailTaskStatus">
+          <option value="notStarted">Not started</option>
+          <option value="inProgress">In progress</option>
+          <option value="blocked">Blocked</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>priority</label>
+        <select id="detailTaskPriority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="important">Important</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>start date</label>
+        <input id="detailTaskStart" type="date">
+      </div>
+      <div class="field">
+        <label>due date</label>
+        <input id="detailTaskDue" type="date">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>notes</label>
+      <textarea id="detailTaskNotes" placeholder="Add addresses, booking details, reminders or anything else you need..."></textarea>
+    </div>
+
+    <div class="dialogActions">
+      <button type="button" class="dangerBtn" id="deleteTaskDetailBtn">delete task</button>
+      <button type="button" class="primaryBtn" id="saveTaskDetailBtn">save changes</button>
+    </div>
+  </div>
+</dialog>
 
 <div class="toast" id="toast"></div>
 
@@ -859,6 +1229,15 @@ const STORAGE_KEY = "pace_finance_v3";
 const PAYDAY_DAY = 20;
 const MOVE_DATE = "2026-08-28";
 const MOVE_CHECKLIST_VERSION = 1;
+const MOVE_BOARD_VERSION = 1;
+const DEFAULT_MOVE_BUCKETS = [
+  { id:"oldPlace", name:"Old place", color:"#ff5ba7" },
+  { id:"tellPeople", name:"Tell people", color:"#a78bfa" },
+  { id:"utilities", name:"Utilities", color:"#60a5fa" },
+  { id:"packing", name:"Packing", color:"#f59e0b" },
+  { id:"moveDay", name:"Move day", color:"#2dd4bf" },
+  { id:"newPlace", name:"New place", color:"#22c55e" }
+];
 const DEFAULT_MOVE_CHECKLIST = [
   { key:"confirm-move-out", text:"Confirm move-out date and key return with old place", category:"oldPlace", dueDate:"2026-08-01" },
   { key:"final-rent-balance", text:"Check final rent/account balance for old place", category:"oldPlace", dueDate:"2026-08-01" },
@@ -949,7 +1328,20 @@ const els = {
   checkDue:document.getElementById("checkDue"),
   saveCheckBtn:document.getElementById("saveCheckBtn"),
   clearCheckBtn:document.getElementById("clearCheckBtn"),
-  checklistList:document.getElementById("checklistList"),
+  bucketName:document.getElementById("bucketName"),
+  addBucketBtn:document.getElementById("addBucketBtn"),
+  checklistBoard:document.getElementById("checklistBoard"),
+  taskDialog:document.getElementById("taskDialog"),
+  closeTaskDialogBtn:document.getElementById("closeTaskDialogBtn"),
+  detailTaskName:document.getElementById("detailTaskName"),
+  detailTaskBucket:document.getElementById("detailTaskBucket"),
+  detailTaskStatus:document.getElementById("detailTaskStatus"),
+  detailTaskPriority:document.getElementById("detailTaskPriority"),
+  detailTaskStart:document.getElementById("detailTaskStart"),
+  detailTaskDue:document.getElementById("detailTaskDue"),
+  detailTaskNotes:document.getElementById("detailTaskNotes"),
+  deleteTaskDetailBtn:document.getElementById("deleteTaskDetailBtn"),
+  saveTaskDetailBtn:document.getElementById("saveTaskDetailBtn"),
   toast:document.getElementById("toast")
 };
 
@@ -962,11 +1354,14 @@ let state = {
   billPaid:{},
   billFunded:{},
   allocations:{},
-  movePrivate:{ items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 }
+  movePrivate:{ items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], buckets:[], fundsVersion:0, checklistVersion:0, boardVersion:0 }
 };
 let editingItemId = null;
 let editingBillId = null;
 let editingCheckId = null;
+let draggedCheckId = null;
+let openTaskId = null;
+let suppressCardClick = false;
 
 function uid(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -1153,10 +1548,52 @@ function defaultChecklistItem(task){
     key:task.key,
     text:task.text,
     category:task.category,
+    bucketId:task.category,
+    status:"notStarted",
+    priority:"medium",
+    startDate:"",
     dueDate:task.dueDate,
     done:false,
-    note:""
+    note:"",
+    notes:"",
+    order:0
   };
+}
+
+function seedMoveBoard(){
+  const data = getMoveData();
+  const palette = ["#ff5ba7","#a78bfa","#60a5fa","#2dd4bf","#22c55e","#f59e0b","#fb7185"];
+
+  if(!data.buckets.length){
+    data.buckets = DEFAULT_MOVE_BUCKETS.map(bucket => ({ ...bucket }));
+  }
+
+  data.buckets = data.buckets
+    .filter(bucket => bucket && bucket.id && bucket.name)
+    .map((bucket,index) => ({
+      id:String(bucket.id),
+      name:String(bucket.name),
+      color:bucket.color || palette[index % palette.length]
+    }));
+
+  const knownIds = new Set(data.buckets.map(bucket => bucket.id));
+  data.checklist.forEach((task,index) => {
+    const bucketId = task.bucketId || task.category || data.buckets[0]?.id;
+    if(bucketId && !knownIds.has(bucketId)){
+      data.buckets.push({ id:bucketId, name:checklistCategoryLabel(bucketId, false), color:palette[data.buckets.length % palette.length] });
+      knownIds.add(bucketId);
+    }
+    task.bucketId = bucketId || data.buckets[0]?.id || "oldPlace";
+    task.category = task.bucketId;
+    task.status = task.status || (task.done ? "completed" : "notStarted");
+    task.priority = task.priority || "medium";
+    task.startDate = task.startDate || "";
+    task.notes = task.notes || task.note || "";
+    task.done = task.status === "completed";
+    task.order = Number.isFinite(Number(task.order)) ? Number(task.order) : index;
+  });
+
+  data.boardVersion = MOVE_BOARD_VERSION;
 }
 
 function seedMoveChecklist(){
@@ -1197,8 +1634,8 @@ function seedMoveFundsPlan(){
   data.fundsVersion = AUGUST_MOVE_FUNDS_VERSION;
 }
 
-function checklistCategoryLabel(category){
-  return {
+function checklistCategoryLabel(category, useBoard = true){
+  const fallback = {
     oldPlace:"Old place",
     tellPeople:"Tell people",
     utilities:"Utilities",
@@ -1206,6 +1643,10 @@ function checklistCategoryLabel(category){
     moveDay:"Move day",
     newPlace:"New place"
   }[category] || "Move";
+
+  if(!useBoard) return fallback;
+  const bucket = getMoveData().buckets.find(item => item.id === category);
+  return bucket?.name || fallback;
 }
 
 function checklistDueLabel(dueDate){
@@ -1221,6 +1662,24 @@ function checklistDueLabel(dueDate){
   return `${formatShortDate(dueDate)} · ${days} days left`;
 }
 
+function taskStatusLabel(status){
+  return {
+    notStarted:"Not started",
+    inProgress:"In progress",
+    blocked:"Blocked",
+    completed:"Completed"
+  }[status] || "Not started";
+}
+
+function taskPriorityLabel(priority){
+  return {
+    low:"Low",
+    medium:"Medium",
+    important:"Important",
+    urgent:"Urgent"
+  }[priority] || "Medium";
+}
+
 function defaultState(parsed = {}){
   return {
     selectedMonth:parsed.selectedMonth || getCurrentMonth(),
@@ -1232,7 +1691,7 @@ function defaultState(parsed = {}){
     billFunded:parsed.billFunded || {},
     allocations:parsed.allocations || {},
     cleared:parsed.cleared || {},
-    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 },
+    movePrivate:parsed.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], buckets:[], fundsVersion:0, checklistVersion:0, boardVersion:0 },
     planVersion:Number(parsed.planVersion) || 0,
     julyPlanVersion:Number(parsed.julyPlanVersion) || 0,
     augustPlanVersion:Number(parsed.augustPlanVersion) || 0
@@ -1246,7 +1705,7 @@ function load(){
     state = defaultState();
   }
 
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], buckets:[], fundsVersion:0, checklistVersion:0, boardVersion:0 };
   state.movePrivate.items = (state.movePrivate.items || []).map(item => ({
     id:item.id || uid(),
     name:item.name || "Move item",
@@ -1281,15 +1740,24 @@ function load(){
   };
   state.movePrivate.fundsVersion = Number(state.movePrivate.fundsVersion) || 0;
   state.movePrivate.checklistVersion = Number(state.movePrivate.checklistVersion) || 0;
+  state.movePrivate.boardVersion = Number(state.movePrivate.boardVersion) || 0;
+  state.movePrivate.buckets = Array.isArray(state.movePrivate.buckets) ? state.movePrivate.buckets : [];
   state.movePrivate.checklist = (state.movePrivate.checklist || []).map(item => ({
     id:item.id || uid(),
     key:item.key || "",
     text:item.text || item.name || "Move task",
     category:item.category || "oldPlace",
+    bucketId:item.bucketId || item.category || "oldPlace",
+    status:item.status || (item.done ? "completed" : "notStarted"),
+    priority:item.priority || "medium",
+    startDate:item.startDate || "",
     dueDate:item.dueDate || "",
     done:Boolean(item.done),
-    note:item.note || ""
+    note:item.note || "",
+    notes:item.notes || item.note || "",
+    order:Number.isFinite(Number(item.order)) ? Number(item.order) : 0
   }));
+  seedMoveBoard();
   seedMoveChecklist();
   seedMoveFundsPlan();
 }
@@ -1306,13 +1774,15 @@ function getMonthData(){
 }
 
 function getMoveData(){
-  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], fundsVersion:0, checklistVersion:0 };
+  state.movePrivate = state.movePrivate || { items:[], bills:[], plan:{ fundsForecast:null }, checklist:[], buckets:[], fundsVersion:0, checklistVersion:0, boardVersion:0 };
   state.movePrivate.items = state.movePrivate.items || [];
   state.movePrivate.bills = state.movePrivate.bills || [];
   state.movePrivate.plan = state.movePrivate.plan || {};
   state.movePrivate.checklist = state.movePrivate.checklist || [];
+  state.movePrivate.buckets = state.movePrivate.buckets || [];
   state.movePrivate.fundsVersion = Number(state.movePrivate.fundsVersion) || 0;
   state.movePrivate.checklistVersion = Number(state.movePrivate.checklistVersion) || 0;
+  state.movePrivate.boardVersion = Number(state.movePrivate.boardVersion) || 0;
   return state.movePrivate;
 }
 
@@ -1470,9 +1940,166 @@ function clearBillForm(){
 function clearCheckForm(){
   editingCheckId = null;
   els.checkTask.value = "";
-  els.checkCategory.value = "oldPlace";
+  els.checkCategory.value = getMoveData().buckets[0]?.id || "";
   els.checkDue.value = "";
   els.saveCheckBtn.textContent = "save task";
+}
+
+function renderBucketOptions(selectedId){
+  const buckets = getMoveData().buckets;
+  const current = selectedId || els.checkCategory.value || buckets[0]?.id || "";
+  els.checkCategory.innerHTML = buckets.map(bucket =>
+    `<option value="${escapeHtml(bucket.id)}">${escapeHtml(bucket.name)}</option>`
+  ).join("");
+  if(buckets.some(bucket => bucket.id === current)){
+    els.checkCategory.value = current;
+  }
+}
+
+function addBucket(){
+  const data = getMoveData();
+  const name = els.bucketName.value.trim();
+
+  if(!name){
+    showToast("Add a bucket name.");
+    return;
+  }
+
+  if(data.buckets.some(bucket => bucket.name.toLowerCase() === name.toLowerCase())){
+    showToast("That bucket already exists.");
+    return;
+  }
+
+  const colors = ["#ff5ba7","#a78bfa","#60a5fa","#2dd4bf","#22c55e","#f59e0b","#fb7185"];
+  const bucket = { id:`bucket-${uid()}`, name, color:colors[data.buckets.length % colors.length] };
+  data.buckets.push(bucket);
+  els.bucketName.value = "";
+  save();
+  render();
+  els.checkCategory.value = bucket.id;
+  showToast("Bucket added.");
+}
+
+function renameBucket(id){
+  const bucket = getMoveData().buckets.find(item => item.id === id);
+  if(!bucket) return;
+  const nextName = window.prompt("Rename this bucket", bucket.name)?.trim();
+  if(!nextName || nextName === bucket.name) return;
+  bucket.name = nextName;
+  save();
+  render();
+  showToast("Bucket renamed.");
+}
+
+function deleteBucket(id){
+  const data = getMoveData();
+  if(data.buckets.length <= 1){
+    showToast("Keep at least one bucket.");
+    return;
+  }
+
+  const bucket = data.buckets.find(item => item.id === id);
+  const fallback = data.buckets.find(item => item.id !== id);
+  data.checklist.forEach(task => {
+    if(task.bucketId === id){
+      task.bucketId = fallback.id;
+      task.category = fallback.id;
+    }
+  });
+  data.buckets = data.buckets.filter(item => item.id !== id);
+  save();
+  render();
+  showToast(`${bucket?.name || "Bucket"} removed; its tasks were moved to ${fallback.name}.`);
+}
+
+function moveBucket(id, direction){
+  const buckets = getMoveData().buckets;
+  const from = buckets.findIndex(bucket => bucket.id === id);
+  const to = from + direction;
+  if(from < 0 || to < 0 || to >= buckets.length) return;
+  [buckets[from], buckets[to]] = [buckets[to], buckets[from]];
+  save();
+  render();
+}
+
+function moveCheckToBucket(id, bucketId, notify = true){
+  const data = getMoveData();
+  const task = data.checklist.find(item => item.id === id);
+  const bucket = data.buckets.find(item => item.id === bucketId);
+  if(!task || !bucket || task.bucketId === bucketId) return;
+  const maxOrder = Math.max(-1, ...data.checklist.filter(item => item.bucketId === bucketId).map(item => numberValue(item.order)));
+  task.bucketId = bucketId;
+  task.category = bucketId;
+  task.order = maxOrder + 1;
+  save();
+  render();
+  if(notify) showToast(`Moved to ${bucket.name}.`);
+}
+
+function openTaskDetails(id){
+  const data = getMoveData();
+  const task = data.checklist.find(item => item.id === id);
+  if(!task) return;
+
+  openTaskId = id;
+  els.detailTaskBucket.innerHTML = data.buckets.map(bucket =>
+    `<option value="${escapeHtml(bucket.id)}">${escapeHtml(bucket.name)}</option>`
+  ).join("");
+  els.detailTaskName.value = task.text || "";
+  els.detailTaskBucket.value = task.bucketId || task.category || data.buckets[0]?.id || "";
+  els.detailTaskStatus.value = task.status || (task.done ? "completed" : "notStarted");
+  els.detailTaskPriority.value = task.priority || "medium";
+  els.detailTaskStart.value = task.startDate || "";
+  els.detailTaskDue.value = task.dueDate || "";
+  els.detailTaskNotes.value = task.notes || task.note || "";
+
+  if(!els.taskDialog.open) els.taskDialog.showModal();
+  requestAnimationFrame(() => els.detailTaskName.focus());
+}
+
+function closeTaskDetails(){
+  if(els.taskDialog.open) els.taskDialog.close();
+  openTaskId = null;
+}
+
+function saveTaskDetails(){
+  const data = getMoveData();
+  const task = data.checklist.find(item => item.id === openTaskId);
+  const name = els.detailTaskName.value.trim();
+  if(!task) return;
+  if(!name){
+    showToast("Add the task name.");
+    return;
+  }
+
+  const previousBucket = task.bucketId;
+  task.text = name;
+  task.bucketId = els.detailTaskBucket.value;
+  task.category = task.bucketId;
+  task.status = els.detailTaskStatus.value;
+  task.done = task.status === "completed";
+  task.priority = els.detailTaskPriority.value;
+  task.startDate = els.detailTaskStart.value;
+  task.dueDate = els.detailTaskDue.value;
+  task.notes = els.detailTaskNotes.value.trim();
+  task.note = task.notes;
+
+  if(previousBucket !== task.bucketId){
+    const maxOrder = Math.max(-1, ...data.checklist.filter(item => item.id !== task.id && item.bucketId === task.bucketId).map(item => numberValue(item.order)));
+    task.order = maxOrder + 1;
+  }
+
+  save();
+  closeTaskDetails();
+  render();
+  showToast("Task details saved.");
+}
+
+function deleteOpenTask(){
+  if(!openTaskId) return;
+  const id = openTaskId;
+  closeTaskDetails();
+  deleteCheck(id);
 }
 
 function saveItem(){
@@ -1748,6 +2375,7 @@ function saveCheck(){
   const task = {
     text,
     category:els.checkCategory.value,
+    bucketId:els.checkCategory.value,
     dueDate:els.checkDue.value
   };
 
@@ -1755,7 +2383,19 @@ function saveCheck(){
     const existing = data.checklist.find(item => item.id === editingCheckId);
     if(existing) Object.assign(existing, task);
   }else{
-    data.checklist.push({ id:uid(), key:"", done:false, note:"", ...task });
+    const bucketTasks = data.checklist.filter(item => item.bucketId === task.bucketId);
+    data.checklist.push({
+      id:uid(),
+      key:"",
+      done:false,
+      status:"notStarted",
+      priority:"medium",
+      startDate:"",
+      note:"",
+      notes:"",
+      order:bucketTasks.length,
+      ...task
+    });
   }
 
   save();
@@ -1767,13 +2407,7 @@ function saveCheck(){
 function editCheck(id){
   const task = getMoveData().checklist.find(item => item.id === id);
   if(!task) return;
-
-  editingCheckId = id;
-  els.checkTask.value = task.text || "";
-  els.checkCategory.value = task.category || "oldPlace";
-  els.checkDue.value = task.dueDate || "";
-  els.saveCheckBtn.textContent = "update task";
-  els.checkTask.focus();
+  openTaskDetails(id);
 }
 
 function deleteCheck(id){
@@ -1789,6 +2423,7 @@ function toggleCheck(id){
   if(!task) return;
 
   task.done = !task.done;
+  task.status = task.done ? "completed" : "notStarted";
   save();
   render();
   showToast(task.done ? "Checklist task done." : "Checklist task reopened.");
@@ -1981,6 +2616,7 @@ function render(){
   renderWeeklyPlan(snap);
   renderItems(snap.data.items);
   renderBills(snap.data.bills);
+  renderBucketOptions(editingCheckId ? els.checkCategory.value : undefined);
   renderChecklist(snap.data.checklist);
 }
 
@@ -2140,6 +2776,7 @@ function renderBills(bills){
 
 function renderChecklist(checklist){
   const tasks = checklist || [];
+  const buckets = getMoveData().buckets;
   const openTasks = tasks.filter(task => !task.done);
   const doneTasks = tasks.filter(task => task.done);
   const nextTask = openTasks
@@ -2153,52 +2790,66 @@ function renderChecklist(checklist){
       <strong>${formatShortDate(getMovePlan().targetDate || MOVE_DATE)}</strong>
     </div>
     <div class="checkStat">
-      <span>Checklist progress</span>
+      <span>Board progress</span>
       <strong>${doneTasks.length}/${tasks.length} done</strong>
     </div>
     <div class="checkStat">
-      <span>Next admin thing</span>
+      <span>Next move task</span>
       <strong>${nextTask ? escapeHtml(nextTask.text) : "Nothing open"}</strong>
     </div>
   `;
-  els.checklistList.innerHTML = "";
+  els.checklistBoard.innerHTML = buckets.map((bucket,bucketIndex) => {
+    const bucketTasks = tasks
+      .filter(task => (task.bucketId || task.category) === bucket.id)
+      .sort((a,b) => numberValue(a.order) - numberValue(b.order));
+    const safeColor = /^#[0-9a-f]{6}$/i.test(bucket.color) ? bucket.color : "#ff5ba7";
+    const cards = bucketTasks.length ? bucketTasks.map(task => {
+      const bucketOptions = buckets.map(option =>
+        `<option value="${escapeHtml(option.id)}" ${option.id === bucket.id ? "selected" : ""}>${escapeHtml(option.name)}</option>`
+      ).join("");
+      const urgent = !task.done && task.dueDate && daysUntilDate(task.dueDate) <= 3;
+      const status = ["notStarted","inProgress","blocked","completed"].includes(task.status) ? task.status : "notStarted";
+      const priority = ["low","medium","important","urgent"].includes(task.priority) ? task.priority : "medium";
+      return `
+        <article class="taskCard ${task.done ? "checkDone" : ""}" draggable="true" tabindex="0" data-task-card="${escapeHtml(task.id)}" aria-label="Open ${escapeHtml(task.text)} details">
+          <div class="taskTop">
+            <button type="button" class="taskCheck" data-toggle-check="${escapeHtml(task.id)}" aria-label="${task.done ? "Reopen" : "Complete"} ${escapeHtml(task.text)}">${task.done ? "✓" : ""}</button>
+            <p class="taskName">${escapeHtml(task.text)}</p>
+          </div>
+          <div class="taskBadges">
+            <span class="taskBadge ${status}">${escapeHtml(taskStatusLabel(status))}</span>
+            <span class="taskBadge priority${priority[0].toUpperCase() + priority.slice(1)}">${escapeHtml(taskPriorityLabel(priority))}</span>
+            ${task.notes ? `<span class="taskBadge">Notes</span>` : ""}
+            ${task.startDate ? `<span class="taskBadge">Starts ${escapeHtml(formatShortDate(task.startDate))}</span>` : ""}
+          </div>
+          <span class="taskDue ${urgent ? "urgent" : ""}">${task.done ? "Done" : escapeHtml(checklistDueLabel(task.dueDate))}</span>
+          <div class="taskActions">
+            <select class="taskBucketSelect" data-move-check-select="${escapeHtml(task.id)}" aria-label="Move ${escapeHtml(task.text)} to another bucket">${bucketOptions}</select>
+            <button type="button" class="miniBtn" data-edit-check="${escapeHtml(task.id)}">edit</button>
+            <button type="button" class="miniBtn danger" data-delete-check="${escapeHtml(task.id)}" aria-label="Delete ${escapeHtml(task.text)}">×</button>
+          </div>
+        </article>
+      `;
+    }).join("") : `<div class="bucketEmpty">Drop a task here</div>`;
 
-  if(!tasks.length){
-    els.checklistList.innerHTML = `<div class="empty">No move checklist tasks yet.</div>`;
-    return;
-  }
-
-  tasks
-    .slice()
-    .sort((a,b) => {
-      if(Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
-      const dateCompare = String(a.dueDate || "9999").localeCompare(String(b.dueDate || "9999"));
-      if(dateCompare !== 0) return dateCompare;
-      return String(a.text).localeCompare(String(b.text));
-    })
-    .forEach(task => {
-      const row = document.createElement("div");
-      row.className = task.done ? "row checkDone" : "row";
-      row.innerHTML = `
-        <div>
-          <strong>${escapeHtml(task.text)}</strong>
-          <small>
-            ${escapeHtml(checklistCategoryLabel(task.category))}
-            <span class="statusText">• ${task.done ? "done" : checklistDueLabel(task.dueDate)}</span>
-          </small>
-        </div>
-        <div class="right">
-          <div class="amount">${task.done ? "Done" : escapeHtml(formatShortDate(task.dueDate || MOVE_DATE))}</div>
-          <small>${task.done ? "Closed out" : "Tap done when sorted"}</small>
-          <div class="rowActions">
-            <button type="button" class="miniBtn" data-toggle-check="${task.id}">${task.done ? "undo" : "done"}</button>
-            <button type="button" class="miniBtn" data-edit-check="${task.id}">edit</button>
-            <button type="button" class="miniBtn danger" data-delete-check="${task.id}">delete</button>
+    return `
+      <section class="kanbanBucket" style="--bucket-color:${safeColor};">
+        <div class="bucketHead">
+          <div class="bucketTitle">
+            <h3>${escapeHtml(bucket.name)}</h3>
+            <span class="bucketCount">${bucketTasks.length}</span>
+          </div>
+          <div class="bucketActions">
+            <button type="button" class="iconBtn" data-move-bucket-left="${escapeHtml(bucket.id)}" aria-label="Move ${escapeHtml(bucket.name)} left" ${bucketIndex === 0 ? "disabled" : ""}>←</button>
+            <button type="button" class="iconBtn" data-move-bucket-right="${escapeHtml(bucket.id)}" aria-label="Move ${escapeHtml(bucket.name)} right" ${bucketIndex === buckets.length - 1 ? "disabled" : ""}>→</button>
+            <button type="button" class="iconBtn" data-rename-bucket="${escapeHtml(bucket.id)}" aria-label="Rename ${escapeHtml(bucket.name)}">✎</button>
+            <button type="button" class="iconBtn" data-delete-bucket="${escapeHtml(bucket.id)}" aria-label="Delete ${escapeHtml(bucket.name)}">×</button>
           </div>
         </div>
-      `;
-      els.checklistList.appendChild(row);
-    });
+        <div class="bucketCards" data-bucket-drop="${escapeHtml(bucket.id)}">${cards}</div>
+      </section>
+    `;
+  }).join("");
 }
 
 function showToast(message){
@@ -2228,8 +2879,68 @@ els.clearBillBtn.addEventListener("click", clearBillForm);
 els.applyBillsBtn.addEventListener("click", applyBills);
 els.saveCheckBtn.addEventListener("click", saveCheck);
 els.clearCheckBtn.addEventListener("click", clearCheckForm);
+els.addBucketBtn.addEventListener("click", addBucket);
+els.closeTaskDialogBtn.addEventListener("click", closeTaskDetails);
+els.saveTaskDetailBtn.addEventListener("click", saveTaskDetails);
+els.deleteTaskDetailBtn.addEventListener("click", deleteOpenTask);
+els.taskDialog.addEventListener("close", () => { openTaskId = null; });
+els.taskDialog.addEventListener("click", event => {
+  if(event.target === els.taskDialog) closeTaskDetails();
+});
+els.bucketName.addEventListener("keydown", event => {
+  if(event.key === "Enter") addBucket();
+});
+
+document.addEventListener("change", event => {
+  const checkId = event.target.getAttribute("data-move-check-select");
+  if(checkId) moveCheckToBucket(checkId, event.target.value);
+});
+
+document.addEventListener("keydown", event => {
+  const card = event.target.closest("[data-task-card]");
+  if(!card || event.target !== card || !["Enter"," "].includes(event.key)) return;
+  event.preventDefault();
+  openTaskDetails(card.getAttribute("data-task-card"));
+});
+
+document.addEventListener("dragstart", event => {
+  const card = event.target.closest("[data-task-card]");
+  if(!card) return;
+  suppressCardClick = true;
+  draggedCheckId = card.getAttribute("data-task-card");
+  card.classList.add("dragging");
+  if(event.dataTransfer){
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", draggedCheckId);
+  }
+});
+
+document.addEventListener("dragover", event => {
+  const dropzone = event.target.closest("[data-bucket-drop]");
+  if(!dropzone || !draggedCheckId) return;
+  event.preventDefault();
+  document.querySelectorAll(".bucketCards.dragOver").forEach(item => item.classList.remove("dragOver"));
+  dropzone.classList.add("dragOver");
+});
+
+document.addEventListener("drop", event => {
+  const dropzone = event.target.closest("[data-bucket-drop]");
+  if(!dropzone || !draggedCheckId) return;
+  event.preventDefault();
+  const bucketId = dropzone.getAttribute("data-bucket-drop");
+  moveCheckToBucket(draggedCheckId, bucketId);
+  draggedCheckId = null;
+});
+
+document.addEventListener("dragend", event => {
+  event.target.closest("[data-task-card]")?.classList.remove("dragging");
+  document.querySelectorAll(".bucketCards.dragOver").forEach(item => item.classList.remove("dragOver"));
+  draggedCheckId = null;
+  setTimeout(() => { suppressCardClick = false; }, 80);
+});
 
 document.addEventListener("click", event => {
+  const taskCard = event.target.closest("[data-task-card]");
   const editItemId = event.target.getAttribute("data-edit-item");
   const deleteItemId = event.target.getAttribute("data-delete-item");
   const itemInPotId = event.target.getAttribute("data-item-in-pot");
@@ -2241,6 +2952,14 @@ document.addEventListener("click", event => {
   const toggleCheckId = event.target.getAttribute("data-toggle-check");
   const editCheckId = event.target.getAttribute("data-edit-check");
   const deleteCheckId = event.target.getAttribute("data-delete-check");
+  const renameBucketId = event.target.getAttribute("data-rename-bucket");
+  const deleteBucketId = event.target.getAttribute("data-delete-bucket");
+  const moveBucketLeftId = event.target.getAttribute("data-move-bucket-left");
+  const moveBucketRightId = event.target.getAttribute("data-move-bucket-right");
+
+  if(taskCard && !event.target.closest("button, select, input, textarea") && !suppressCardClick){
+    openTaskDetails(taskCard.getAttribute("data-task-card"));
+  }
 
   if(editItemId) editItem(editItemId);
   if(deleteItemId) deleteItem(deleteItemId);
@@ -2253,6 +2972,10 @@ document.addEventListener("click", event => {
   if(toggleCheckId) toggleCheck(toggleCheckId);
   if(editCheckId) editCheck(editCheckId);
   if(deleteCheckId) deleteCheck(deleteCheckId);
+  if(renameBucketId) renameBucket(renameBucketId);
+  if(deleteBucketId) deleteBucket(deleteBucketId);
+  if(moveBucketLeftId) moveBucket(moveBucketLeftId, -1);
+  if(moveBucketRightId) moveBucket(moveBucketRightId, 1);
 });
 
 load();
